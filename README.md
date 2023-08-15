@@ -10,7 +10,11 @@ CF_ACCOUNT_ID take from Account ID https://dash.cloudflare.com/workers-and-pages
 
 CF_TOKEN take from https://dash.cloudflare.com/profile/api-tokens
 
-Generate token like [this](https://github.com/slashtechno/cloudflare-gateway-adblocking/issues/8#issuecomment-1676480638)
+Secret Github Action like:
+</img>https://github.com/slashtechno/cloudflare-gateway-adblocking/issues/8#issuecomment-1679287545<img>
+
+Generate CF_TOKEN like:
+</img>https://github.com/slashtechno/cloudflare-gateway-adblocking/issues/8#issuecomment-1676480638<img>
 
 # Credit
 This repository make run code by Github Action from [slashtechno/cloudflare-gateway-adblocking](https://github.com/slashtechno/cloudflare-gateway-adblocking)
