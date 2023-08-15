@@ -17,4 +17,4 @@ Generate CF_TOKEN like:
 </img>https://github.com/slashtechno/cloudflare-gateway-adblocking/issues/8#issuecomment-1676480638<img>
 
 # Credit
-This repository make run code by Github Action from [slashtechno/cloudflare-gateway-adblocking](https://github.com/slashtechno/cloudflare-gateway-adblocking)
+This repository run Github Action from source [slashtechno/cloudflare-gateway-adblocking](https://github.com/slashtechno/cloudflare-gateway-adblocking)
