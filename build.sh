@@ -15,4 +15,4 @@ rm "$tempfile"
 pip install cloudflare-gateway-adblocking
 cloudflare-gateway-adblocking --account-id "$CF_ACCOUNT_ID" --token "$CF_TOKEN" delete
 cloudflare-gateway-adblocking --account-id "$CF_ACCOUNT_ID" --token "$CF_TOKEN" upload --blocklists "$outfile"
-rm hosts.txt
+rm "$outfile"
