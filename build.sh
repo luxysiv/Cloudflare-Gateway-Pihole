@@ -7,7 +7,7 @@ urls=(
 outfile="hosts.txt"
 for url in "${urls[@]}"
 do
-    curl -s "$url" >> "$outfile"
+    curl -s "$url" | awk '!seen[$0]++' >> "$outfile"
     echo >> "$outfile"
 done
 pip install cloudflare-gateway-adblocking
