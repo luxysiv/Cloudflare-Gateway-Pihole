@@ -6,7 +6,7 @@ Add variable secrets to
 `https://github.com/your-user/your-repository/settings/secrets/actions`
 with
 
-CF_ACCOUNT_ID take from Account ID https://dash.cloudflare.com/workers-and-pages
+CF_ACCOUNT_ID take from Account ID https://dash.cloudflare.com/?to=/:account/workers
 
 CF_TOKEN take from https://dash.cloudflare.com/profile/api-tokens
 
