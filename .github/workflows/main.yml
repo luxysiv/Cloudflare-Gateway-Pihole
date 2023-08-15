@@ -6,6 +6,8 @@ on:
   workflow_dispatch:
 jobs:
   run:
+    name: Creat rules 
+    permissions: write-all
     runs-on: ubuntu-latest
     steps:
     
