@@ -1,4 +1,5 @@
 #!/bin/bash
+#source .env
 urls=(
     https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/hosts-VN
     https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
