@@ -5,14 +5,10 @@ urls=(
     "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
 )
 outfile="hosts.txt"
-tempfile="temp.txt"
 for url in "${urls[@]}"
 do
-    curl -s "$url" >> "$tempfile"
-    echo >> "$tempfile"
+    curl -s "$url" | grep '^0\.0\.0\.0' | sort -u >> "$outfile"
 done
-awk '!seen[$0]++' "$tempfile" > "$outfile"
-rm "$tempfile"
 pip install cloudflare-gateway-adblocking
 cloudflare-gateway-adblocking --account-id "$CF_ACCOUNT_ID" --token "$CF_TOKEN" delete
 cloudflare-gateway-adblocking --account-id "$CF_ACCOUNT_ID" --token "$CF_TOKEN" upload --blocklists "$outfile"
