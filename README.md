@@ -1,6 +1,9 @@
 # Cloudflare-Gateway-Pihole
 Create your block ad-lists to Cloudflare Gateway
 
+# Note
+Script only support hosts file `0.0.0.0`
+
 # Introduce
 Add variable secrets to 
 `https://github.com/your-user/your-repository/settings/secrets/actions`
