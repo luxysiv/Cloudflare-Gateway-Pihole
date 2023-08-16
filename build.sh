@@ -12,7 +12,7 @@ do
     curl -s "$url" >> "$tempfile"
     echo >> "$tempfile"
 done
-grep "^0\.0\.0\.0" "$tempfile" | awk '!seen[$0]++' | awk '!a[$0]++' | sed '/0\.0\.0\.0 0\.0\.0\.0/d' > "$outfile"
+grep "^0\.0\.0\.0" "$tempfile" | awk '!seen[$0]++' | sed '/0\.0\.0\.0 0\.0\.0\.0/d' > "$outfile"
 rm "$tempfile"
 pip install cloudflare-gateway-adblocking
 cloudflare-gateway-adblocking --account-id "$CF_ACCOUNT_ID" --token "$CF_TOKEN" delete
