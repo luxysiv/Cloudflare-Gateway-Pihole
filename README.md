@@ -24,7 +24,8 @@ This repository run Github Action from source [slashtechno/cloudflare-gateway-ad
 
 # Run on Termux 
 
-```yes | pkg upgrade -y
+```
+yes | pkg upgrade -y
 yes | pkg install python-pip -y
 export CF_ACCOUNT_ID=""
 export CF_TOKEN="
