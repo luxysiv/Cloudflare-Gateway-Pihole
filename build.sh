@@ -11,7 +11,7 @@ for url in "${urls[@]}"
 do  
     curl -s "$url" >> "$outfile"
     #curl -s "$url" >> "$tempfile"
-    echo >> "$outfile"
+    #echo >> "$outfile"
     #echo >> "$tempfile"
 done
 #grep "^0\.0\.0\.0" "$tempfile" | awk '!seen[$0]++' | sed '/0\.0\.0\.0 0\.0\.0\.0/d' > "$outfile"
