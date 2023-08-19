@@ -6,17 +6,11 @@ urls=(
     https://raw.githubusercontent.com/luxysiv/hosts/main/hosts.txt
 )
 outfile="hosts.txt"
-#tempfile="temp.txt"
 for url in "${urls[@]}"
 do  
     curl -s "$url" >> "$outfile"
-    #curl -s "$url" >> "$tempfile"
-    #echo >> "$outfile"
-    #echo >> "$tempfile"
 done
-#grep "^0\.0\.0\.0" "$tempfile" | awk '!seen[$0]++' | sed '/0\.0\.0\.0 0\.0\.0\.0/d' > "$outfile"
-#rm "$tempfile"
 pip install cloudflare-gateway-adblocking
 cloudflare-gateway-adblocking --account-id "$CF_ACCOUNT_ID" --token "$CF_TOKEN" delete
-cloudflare-gateway-adblocking --account-id "$CF_ACCOUNT_ID" --token "$CF_TOKEN" upload --blocklists "$outfile"
+#cloudflare-gateway-adblocking --account-id "$CF_ACCOUNT_ID" --token "$CF_TOKEN" upload --blocklists "$outfile"
 rm "$outfile"
