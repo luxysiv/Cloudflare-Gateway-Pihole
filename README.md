@@ -55,4 +55,8 @@ rm "$outfile"
 # One line Termux 
 ```
 curl -s https://raw.githubusercontent.com/luxysiv/Cloudflare-Gateway-Pihole/main/termux.sh | bash
+nano .env
+nano hosts-urls.ini
+python -m src delete
+python -m src --timeout 600 upload 
 ```
