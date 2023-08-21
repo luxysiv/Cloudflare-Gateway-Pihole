@@ -25,13 +25,10 @@ This repository run Github Action from source [slashtechno/cloudflare-gateway-ad
 # Run on Termux 
 
 ```
-yes | pkg upgrade -y
-yes | pkg install python-pip -y
+yes | pkg upgrade && pkg install python-pip -y
 export CF_ACCOUNT_ID=""
-export CF_TOKEN="
-"
-#!/bin/bash
-#source .env
+export CF_TOKEN=""
+
 urls=(
     https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/hosts-VN
     https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
