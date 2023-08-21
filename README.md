@@ -54,5 +54,5 @@ rm "$outfile"
 
 # One line Termux 
 ```
-curl -s https://github.com/luxysiv/Cloudflare-Gateway-Pihole/blob/main/termux.sh | bash
+curl -s https://github.com/luxysiv/Cloudflare-Gateway-Pihole/main/termux.sh | bash
 ```
