@@ -1,7 +1,7 @@
 yes | pkg upgrade -y
 yes | pkg install python-pip -y
 yes | pkg install git -y
-git clone | https://github.com/manhduonghn/cloudflare-gateway-adblocking
+git clone https://github.com/manhduonghn/cloudflare-gateway-adblocking
 cd cloudflare-gateway-adblocking
 nano .env
 nano hosts-urls.ini
