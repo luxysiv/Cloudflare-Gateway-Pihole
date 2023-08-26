@@ -1,24 +1,34 @@
 name: Add Rules to Cloudflare Gateway 
 on:
-  #push:
   #schedule:
-    #- cron: "0 0 * * *"
+  #  - cron: "10 19 * * *"
   workflow_dispatch:
 jobs:
   run:
-    name: Creat rules 
+    name: Cloudflare Gateway 
     permissions: write-all
     runs-on: ubuntu-latest
     steps:
     
-      - uses: actions/checkout@v3
-      
-      - name: Cloudflare Gateway 
-        run: bash build.sh
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11.3
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+          
+      - name: Cloudflare Gateway Zero Trust 
+        run: python main.py
         env:
-          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
-          CF_TOKEN: ${{ secrets.CF_TOKEN }}
-        
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_IDENTIFIER: ${{ secrets.CF_IDENTIFIER }}
+
       - name: Delete workflow runs
         uses: Mattraks/delete-workflow-runs@v2
         with:
