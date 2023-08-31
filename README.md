@@ -14,10 +14,12 @@ CF_IDENTIFIER take from Account ID https://dash.cloudflare.com/?to=/:account/wor
 CF_API_TOKEN take from https://dash.cloudflare.com/profile/api-tokens
 
 Secret Github Action like:
-</img>https://github.com/slashtechno/cloudflare-gateway-adblocking/issues/8#issuecomment-1679287545<img>
+![1000015325](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/403a1174-cd4e-4854-9911-d03722bbb91b)
+
 
 Generate CF_API_TOKEN like:
-[1000015325](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/91e6d793-573c-4e03-91f3-f265d9bd1cdb)
+![CF_API_TOKEN](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/a5b90438-26cc-49ae-9a55-5409a90b683f)
+
 
 # Credit
 This repository modified from source [IanDesuyo/CloudflareGatewayAdBlock](https://github.com/IanDesuyo/CloudflareGatewayAdBlock)
@@ -29,5 +31,7 @@ This repository modified from source [IanDesuyo/CloudflareGatewayAdBlock](https:
 * Giới hạn của Cloudflare Gateway Zero Trust free là 300k domains nên các bạn nhớ chú ý log, nếu quá script sẽ stop
 
 * Các bạn đã up lists bằng script khác thì nên xoá đi bằng tính năng xoá của script đã up hoặc xoá tay
+
+* Nếu không biết thêm vào Secret Github Action thì có thể điền giá trị vào file .env và xoá phần dưới của dòng `python main.py` của file yml action
 
 👌 Chúc các bạn thành công 
