@@ -52,3 +52,5 @@ This repository modified from source [IanDesuyo/CloudflareGatewayAdBlock](https:
 
 
 👌 Chúc các bạn thành công 
+
+👌 Mọi thắc mắc về script các bạn có thể mở issue
