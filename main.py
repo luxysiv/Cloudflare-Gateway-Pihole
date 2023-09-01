@@ -158,5 +158,5 @@ if __name__ == "__main__":
     ]
     adlist_name = "ManhDuong"
     app = App(adlist_name, adlist_urls)
-    #app.delele
-    app.run()
+    app.delele
+    #app.run()
