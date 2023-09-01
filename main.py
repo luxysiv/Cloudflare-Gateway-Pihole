@@ -150,12 +150,9 @@ class App:
         logging.info("Deletion completed")
 
 if __name__ == "__main__":
-    adlist_urls = [
-        "https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/hosts-VN",
-        "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts",
-        "https://raw.githubusercontent.com/luxysiv/hosts/main/hosts.txt",
-        "https://raw.githubusercontent.com/Yhonay/antipopads/master/hosts"
-    ]
+    adlist_urls = []
+    with open("lists.ini", "r") as file:
+        adlist_urls = [url.strip() for url in file if url.strip()]
     adlist_name = "ManhDuong"
     app = App(adlist_name, adlist_urls)
     #app.delete() # Leave script 
