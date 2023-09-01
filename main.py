@@ -1,9 +1,9 @@
 import logging
 import requests
-import cloudflare
 
 from typing import List
-from colorlogs import ColoredLevelFormatter
+from src.colorlogs import ColoredLevelFormatter
+from src import cloudflare
 
 logging.getLogger().setLevel(logging.INFO)
 formatter = ColoredLevelFormatter("%(levelname)s: %(message)s")
