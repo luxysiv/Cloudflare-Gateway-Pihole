@@ -17,7 +17,7 @@ or add to  [env](.env)
 
 # Use .env
 
-If you add `CF_IDENTIFIER` and `CF_API_TOKEN` to [env](.env) , you must edit [main.yml](.github/workflows/main.yml) like this 
+If you add `CF_IDENTIFIER` and `CF_API_TOKEN` to [.env](.env) , you must edit [main.yml](.github/workflows/main.yml) like this 
 ![1000015344](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/57bbaf33-daa7-46e5-acdd-4d5f64a69d5f)
 
 # more informations about Secret Github Action and API TOKEN 
