@@ -51,7 +51,7 @@ This repository modified from source [IanDesuyo/CloudflareGatewayAdBlock](https:
 
 * Bạn có thể thay tên ManhDuong bằng các tên bạn thích 
 
-
+* Thêm danh sách của bạn vào [lists.ini](lists.ini)
 
 👌 Chúc các bạn thành công 
 
