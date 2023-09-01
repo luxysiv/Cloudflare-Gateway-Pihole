@@ -136,6 +136,20 @@ class App:
         for i in range(0, len(_list), n):
             yield _list[i : i + n]
 
+    def delete(self):
+        # Delete gateway policy
+        policy_prefix = f"{self.name_prefix} Block Ads"
+        deleted_policies = cloudflare.delete_gateway_policy(policy_prefix)
+        logging.info(f"Deleted {deleted_policies} gateway policies")
+
+        # Delete lists
+        cf_lists = cloudflare.get_lists(self.name_prefix)
+        for l in cf_lists:
+            logging.info(f"Deleting list {l['name']} - ID:{l['id']} ")
+            cloudflare.delete_list(l["name"], l["id"])
+
+        logging.info("Deletion completed")
+
 if __name__ == "__main__":
     adlist_urls = [
         "https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/hosts-VN",
@@ -144,4 +158,5 @@ if __name__ == "__main__":
     ]
     adlist_name = "ManhDuong"
     app = App(adlist_name, adlist_urls)
+    #app.delele
     app.run()
