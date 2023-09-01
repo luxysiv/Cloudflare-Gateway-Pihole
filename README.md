@@ -33,6 +33,9 @@ This repository modified from source [IanDesuyo/CloudflareGatewayAdBlock](https:
 * Các bạn đã up lists bằng script khác thì nên xoá đi bằng tính năng xoá của script đã up hoặc xoá tay
 
 * Nếu không biết thêm vào Secret Github Action thì có thể điền giá trị vào file [.env](.env) và xoá phần dưới của dòng `python main.py` của file [main.yml](.github/workflows/main.yml) như sau
-  
+![1000015344](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/57bbaf33-daa7-46e5-acdd-4d5f64a69d5f)
+
+* Mình đã update thêm tính năng xoá lists khi các bạn không cần sử dụng script nữa. Vào [main.py](main.py) để như sau
+
 
 👌 Chúc các bạn thành công 
