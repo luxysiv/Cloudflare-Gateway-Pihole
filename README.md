@@ -32,6 +32,7 @@ This repository modified from source [IanDesuyo/CloudflareGatewayAdBlock](https:
 
 * Các bạn đã up lists bằng script khác thì nên xoá đi bằng tính năng xoá của script đã up hoặc xoá tay
 
-* Nếu không biết thêm vào Secret Github Action thì có thể điền giá trị vào file .env và xoá phần dưới của dòng `python main.py` của file yml action
+* Nếu không biết thêm vào Secret Github Action thì có thể điền giá trị vào file [.env](.env) và xoá phần dưới của dòng `python main.py` của file [main.yml](.github/workflows/main.yml) như sau
+  
 
 👌 Chúc các bạn thành công 
