@@ -2,7 +2,9 @@
 Create your block ad-lists to Cloudflare Gateway
 
 # Note
-Script only support same urls hosts file or same urls domains,not mix
+* Script only support same urls hosts file or same urls domains,not mix
+
+* Add your lists to [lists.ini](lists.ini)
 
 # Introduce
 Add variables secrets to 
@@ -20,7 +22,7 @@ or add to  [env](.env)
 If you add `CF_IDENTIFIER` and `CF_API_TOKEN` to [.env](.env) , you must edit [main.yml](.github/workflows/main.yml) like this 
 ![1000015344](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/57bbaf33-daa7-46e5-acdd-4d5f64a69d5f)
 
-# more informations about Secret Github Action and API TOKEN 
+# More informations about Secret Github Action and API TOKEN 
 
 Secret Github Action like:
 ![1000015325](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/403a1174-cd4e-4854-9911-d03722bbb91b)
