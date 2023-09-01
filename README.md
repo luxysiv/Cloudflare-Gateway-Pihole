@@ -1,3 +1,6 @@
+# Credit
+This repository modified from source [IanDesuyo/CloudflareGatewayAdBlock](https://github.com/IanDesuyo/CloudflareGatewayAdBlock)
+
 # Cloudflare-Gateway-Pihole
 Create your block ad-lists to Cloudflare Gateway
 
@@ -30,10 +33,6 @@ Secret Github Action like:
 
 Generate `CF_API_TOKEN` like:
 ![CF_API_TOKEN](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/a5b90438-26cc-49ae-9a55-5409a90b683f)
-
-
-# Credit
-This repository modified from source [IanDesuyo/CloudflareGatewayAdBlock](https://github.com/IanDesuyo/CloudflareGatewayAdBlock)
 
 # Chú ý 
 
