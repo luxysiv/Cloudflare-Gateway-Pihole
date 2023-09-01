@@ -1,5 +1,4 @@
 import logging
-import pathlib
 import requests
 import cloudflare
 
@@ -154,7 +153,8 @@ if __name__ == "__main__":
     adlist_urls = [
         "https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/hosts-VN",
         "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts",
-        "https://raw.githubusercontent.com/luxysiv/hosts/main/hosts.txt"
+        "https://raw.githubusercontent.com/luxysiv/hosts/main/hosts.txt",
+        "https://raw.githubusercontent.com/Yhonay/antipopads/master/hosts"
     ]
     adlist_name = "ManhDuong"
     app = App(adlist_name, adlist_urls)
