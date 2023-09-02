@@ -9,6 +9,14 @@ Create your block ad-lists to Cloudflare Gateway
 
 * Add your lists to [lists.ini](lists.ini)
 
+* Supported 2 kind of [lists.ini](lists.ini)
+
+![1000015362](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/ce7d552a-aa4b-4fcf-9b69-f0d8287fd2a1)
+
+or
+![1000015364](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/373467b5-1798-4dc5-b49e-a9fdf64a3ad7)
+
+
 # Introduce
 Add variables secrets to 
 `https://github.com/your-user/your-repository/settings/secrets/actions`
@@ -51,6 +59,13 @@ Generate `CF_API_TOKEN` like:
 * Bạn có thể thay tên ManhDuong bằng các tên bạn thích 
 
 * Thêm danh sách của bạn vào [lists.ini](lists.ini)
+
+* Đã hỗ trợ 2 loại [lists.ini](lists.ini)
+
+![1000015362](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/ce7d552a-aa4b-4fcf-9b69-f0d8287fd2a1)
+
+hoặc
+![1000015364](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/373467b5-1798-4dc5-b49e-a9fdf64a3ad7)
 
 👌 Chúc các bạn thành công 
 
