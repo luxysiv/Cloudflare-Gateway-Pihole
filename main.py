@@ -14,15 +14,22 @@ console.setFormatter(ColoredLevelFormatter("%(levelname)s: %(message)s"))
 logger = logging.getLogger()
 logger.addHandler(console)
 
-if __name__ == "__main__":
-    config = ConfigParser()
-    config.read("lists.ini")
-    logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+def read_lists_ini():
     adlist_urls = []
-    for section in config.sections():
+    config = ConfigParser()
+
+    try:
+        config.read("lists.ini")
+        for section in config.sections():
             for key in config.options(section):
                 adlist_urls.append(config.get(section, key))
+    except: 
+        with open("lists.ini", "r") as file:
+            adlist_urls = [url.strip() for url in file if url.strip()]
+    
+    return adlist_urls
+
+if __name__ == "__main__":
+    adlist_urls = read_lists_ini()
     adlist_name = "ManhDuong"
     app = App(adlist_name, adlist_urls)
-    #app.delete() # Leave script 
-    app.run()     # Use script 
