@@ -24,7 +24,7 @@ jobs:
         run: pip install -r requirements.txt
           
       - name: Cloudflare Gateway Zero Trust 
-        run: python main.py
+        run: python -m src 
         env:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CF_IDENTIFIER: ${{ secrets.CF_IDENTIFIER }}
