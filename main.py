@@ -14,7 +14,7 @@ console.setFormatter(ColoredLevelFormatter("%(levelname)s: %(message)s"))
 logger = logging.getLogger()
 logger.addHandler(console)
 
-def read_lists_ini():
+def read_lists():
     adlist_urls = []
     config = ConfigParser()
 
@@ -30,6 +30,6 @@ def read_lists_ini():
     return adlist_urls
 
 if __name__ == "__main__":
-    adlist_urls = read_lists_ini()
+    adlist_urls = read_lists()
     adlist_name = "ManhDuong"
     app = App(adlist_name, adlist_urls)
