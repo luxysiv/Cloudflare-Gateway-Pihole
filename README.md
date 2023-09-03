@@ -26,7 +26,7 @@ with
 
 `CF_API_TOKEN` take from https://dash.cloudflare.com/profile/api-tokens
 
-or add to  [env](.env)
+or add to  [.env](.env)
 
 # Use .env
 
