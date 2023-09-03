@@ -33,3 +33,5 @@ if __name__ == "__main__":
     adlist_urls = read_lists()
     adlist_name = "ManhDuong"
     app = App(adlist_name, adlist_urls)
+    #app.delete()  # Leave script
+    app.run()  # Use script
