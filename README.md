@@ -31,7 +31,8 @@ or add to  [.env](.env)
 # Use .env
 
 If you add `CF_IDENTIFIER` and `CF_API_TOKEN` to [.env](.env) , you must edit [main.yml](.github/workflows/main.yml) like this 
-![1000015344](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/57bbaf33-daa7-46e5-acdd-4d5f64a69d5f)
+![1000015392](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/e645b001-9302-4cbf-93ed-22029368f4d8)
+
 
 # More informations about Secret Github Action and API TOKEN 
 
@@ -51,9 +52,9 @@ Generate `CF_API_TOKEN` like:
 * Các bạn đã up lists bằng script khác thì nên xoá đi bằng tính năng xoá của script đã up hoặc xoá tay
 
 * Nếu không biết thêm vào Secret Github Action thì có thể điền giá trị vào file [.env](.env) và sửa file [main.yml](.github/workflows/main.yml) như sau
-![1000015344](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/57bbaf33-daa7-46e5-acdd-4d5f64a69d5f)
+![1000015392](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/e645b001-9302-4cbf-93ed-22029368f4d8)
 
-* Mình đã update thêm tính năng xoá lists khi các bạn không cần sử dụng script nữa. Vào [main.py](main.py) để như sau
+* Mình đã update thêm tính năng xoá lists khi các bạn không cần sử dụng script nữa. Vào [__main__.py](__main__.py) để như sau
 ![1000015349](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/2cfe6b02-09b5-4d92-888e-73ae92a90c59)
 
 * Bạn có thể thay tên ManhDuong bằng các tên bạn thích 
