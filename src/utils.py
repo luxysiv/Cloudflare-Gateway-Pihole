@@ -5,16 +5,21 @@ from typing import List
 from src import cloudflare
 
 class App:
-    def __init__(self, adlist_name: str, adlist_urls: List[str]):
+    def __init__(self, adlist_name: str, adlist_urls: List[str],whitelist_urls: List[str]):
         self.adlist_name = adlist_name
         self.adlist_urls = adlist_urls
+        self.whitelist_urls = whitelist_urls
         self.name_prefix = f"[AdBlock-{adlist_name}]"
 
     def run(self):
         file_content = ""
+        white_content = ""
         for url in self.adlist_urls:
             file_content += self.download_file(url) 
-        domains = self.convert_to_domain_list(file_content) 
+        for url in self.whitelist_urls:
+            white_content += self.download_file(url)
+        white_domains = self.whitelist_handing(white_content)
+        domains = self.convert_to_domain_list(file_content, white_domains)
         
         # check if the list is already in Cloudflare
         cf_lists = cloudflare.get_lists(self.name_prefix)
@@ -75,7 +80,7 @@ class App:
         logging.info(f"File size: {len(r.content)}")
         return r.content.decode("utf-8")
 
-    def convert_to_domain_list(self, file_content: str):
+    def convert_to_domain_list(self, file_content: str, white_domains: List[str]):
         
         # check if the file is a hosts file or a list of domain
         is_hosts_file = False
@@ -97,7 +102,8 @@ class App:
             ]
             if line in skip_lines:
                 continue
-        
+              
+              
             # skip comments and empty lines
             if line.startswith("#") or line == "":
                 continue
@@ -118,10 +124,30 @@ class App:
     
         # remove duplicate line
         domains = sorted(list(set(domains)))
-    
-        logging.info(f"Number of domains: {len(domains)}")
+        logging.info(f"Number of block domains: {len(domains)}")
+
+        # white domains 
+        for white_domain in white_domains:
+            if white_domain in domains:
+                domains.remove(white_domain)
+        logging.info(f"Number of final domains: {len(domains)}")
     
         return domains
+        
+    def whitelist_handing(self,white_content:str):
+        white_domains = []
+        for line in white_content.splitlines():
+            if line.startswith("#") or line == "":
+                continue
+            white_domain = line.rstrip()
+
+            white_domains.append(white_domain)
+
+        # remove duplicate line
+        white_domains = sorted(list(set(white_domains)))
+        logging.info(f"Number of white domains: {len(white_domains)}")
+
+        return white_domains
 
     def chunk_list(self, _list: List[str], n: int):
         for i in range(0, len(_list), n):
