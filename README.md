@@ -16,6 +16,7 @@ Create your block ad-lists to Cloudflare Gateway
 or
 ![1000015364](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/373467b5-1798-4dc5-b49e-a9fdf64a3ad7)
 
+* Supported white list ( only domains list supported)
 
 # Introduce
 Add variables secrets to 
@@ -56,6 +57,8 @@ Generate `CF_API_TOKEN` like:
 
 * Mình đã update thêm tính năng xoá lists khi các bạn không cần sử dụng script nữa. Vào [__main__.py](src/__main__.py) để như sau
 ![1000015349](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/2cfe6b02-09b5-4d92-888e-73ae92a90c59)
+
+* Đã thêm tính năng white lists ( chỉ dùng lists domains)
 
 * Bạn có thể thay tên ManhDuong bằng các tên bạn thích 
 
