@@ -95,17 +95,18 @@ class App:
 
             # convert to domains 
             line = line.strip()
-            domain = line.replace('\r', '') \
-                         .replace('0.0.0.0 ', '') \
-                         .replace('127.0.0.1 ', '') \
-                         .replace('::1 ', '') \
-                         .replace(':: ', '') \
-                         .replace('^', '') \
-                         .replace('||', '') \
-                         .replace('@@||', '') \
-                         .replace('^$$important', '') \
-                         .replace('*.', '') \
-                         .replace('^', '')
+            linex = line.split("#")[0]
+            domain = linex.replace('\r', '') \
+                          .replace('0.0.0.0 ', '') \
+                          .replace('127.0.0.1 ', '') \
+                          .replace('::1 ', '') \
+                          .replace(':: ', '') \
+                          .replace('^', '') \
+                          .replace('||', '') \
+                          .replace('@@||', '') \
+                          .replace('^$$important', '') \
+                          .replace('*.', '') \
+                          .replace('^', '')
 
             # remove not domains 
             if not domain_pattern.match(domain) or ip_pattern.match(domain):
@@ -135,17 +136,18 @@ class App:
               
             # convert to domains 
             line = line.strip()
-            white_domain = line.replace('\r', '') \
-                         .replace('0.0.0.0 ', '') \
-                         .replace('127.0.0.1 ', '') \
-                         .replace('::1 ', '') \
-                         .replace(':: ', '') \
-                         .replace('^', '') \
-                         .replace('||', '') \
-                         .replace('@@||', '') \
-                         .replace('^$$important', '') \
-                         .replace('*.', '') \
-                         .replace('^', '')
+            linex = line.split("#")[0]
+            white_domain = linex.replace('\r', '') \
+                                .replace('0.0.0.0 ', '') \
+                                .replace('127.0.0.1 ', '') \
+                                .replace('::1 ', '') \
+                                .replace(':: ', '') \
+                                .replace('^', '') \
+                                .replace('||', '') \
+                                .replace('@@||', '') \
+                                .replace('^$$important', '') \
+                                .replace('*.', '') \
+                                .replace('^', '')
 
             # remove not domains 
             if not domain_pattern.match(white_domain) or ip_pattern.match(white_domain):
