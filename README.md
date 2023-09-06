@@ -5,7 +5,7 @@ This repository modified from source [IanDesuyo/CloudflareGatewayAdBlock](https:
 Create your block ad-lists to Cloudflare Gateway
 
 # Note
-* Script only support same urls hosts file or same urls domains,not mix
+* Script only support same urls hosts file
 
 * Add your lists to [lists.ini](lists.ini)
 
