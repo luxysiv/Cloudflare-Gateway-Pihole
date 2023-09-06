@@ -117,7 +117,8 @@ class App:
                 # skip the localhost entry
                 if domain == "localhost":
                     continue
-            else:
+                    
+            if not is_hosts_file:          
                 domain = line.rstrip()
 
             domains.append(domain)
