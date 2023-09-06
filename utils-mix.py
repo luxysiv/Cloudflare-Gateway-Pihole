@@ -2,7 +2,7 @@ import re
 import logging
 import requests
 
-from typing import List
+from typing import List, Set
 from src import cloudflare
 
 domain_pattern = re.compile(r'^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])'
@@ -85,8 +85,8 @@ class App:
         logging.info(f"File size: {len(r.content)}")
         return r.content.decode("utf-8")
 
-    def convert_to_domain_list(self, file_content: str, white_domains: List[str]):
-        domains = []
+    def convert_to_domain_list(self, file_content: str, white_domains: Set[str]):
+        domains = set()
         for line in file_content.splitlines():
             
             # skip comments and empty lines
@@ -112,22 +112,19 @@ class App:
             if not domain_pattern.match(domain) or ip_pattern.match(domain):
                 continue
     
-            domains.append(domain)
+            domains.add(domain.encode('idna').decode())
     
-        # remove duplicate line
-        domains = sorted(list(set(domains)))
         logging.info(f"Number of block domains: {len(domains)}")
 
         # remove white domains
-        for white_domain in white_domains:
-            if white_domain in domains:
-                domains.remove(white_domain)
+        domains = sorted(list(domains - white_domains))
+        
         logging.info(f"Number of final domains: {len(domains)}")
     
         return domains
         
-    def whitelist_handing(self,white_content:str):
-        white_domains = []
+    def whitelist_handing(self, white_content:str):
+        white_domains = set()
       
         # remove comments line
         for line in white_content.splitlines():
@@ -153,10 +150,9 @@ class App:
             if not domain_pattern.match(white_domain) or ip_pattern.match(white_domain):
                 continue
     
-            white_domains.append(white_domain)
+            white_domains.add(white_domain.encode('idna').decode())
         
       # remove duplicate line
-        white_domains = sorted(list(set(white_domains)))
         logging.info(f"Number of white domains: {len(white_domains)}")
 
         return white_domains
