@@ -101,8 +101,8 @@ class App:
                     "127.0.0.1 localhost.localdomain",
                     "127.0.0.1 local"
                     ]
-                 if line in skip_lines:
-                     continue
+                if line in skip_lines:
+                    continue
                 
                 # skip comments and empty lines
                 if line.startswith("#") or line == "":
