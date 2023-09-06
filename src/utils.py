@@ -101,12 +101,12 @@ class App:
                     "127.0.0.1 localhost.localdomain",
                     "127.0.0.1 local"
                     ]
-             if line in skip_lines:
-                 continue
+                 if line in skip_lines:
+                     continue
                 
-            # skip comments and empty lines
-            if line.startswith("#") or line == "":
-                continue
+                # skip comments and empty lines
+                if line.startswith("#") or line == "":
+                    continue
                 
                 # remove the ip address and the trailing newline
                 parts = line.split()
@@ -120,6 +120,7 @@ class App:
                 # skip comments and empty lines
                 if line.startswith("#") or line == "":
                     continue
+                    
                 domain = line.rstrip()
 
             domains.append(domain)
