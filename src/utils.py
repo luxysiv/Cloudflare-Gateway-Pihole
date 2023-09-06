@@ -90,25 +90,24 @@ class App:
                 break
     
         domains = []
-    
+        
         for line in file_content.splitlines():
-            
-            # Fix StevenBlack hosts
-            skip_lines = [
-                "0.0.0.0 0.0.0.0",
-                "127.0.0.1 localhost",
-                "127.0.0.1 localhost.localdomain",
-                "127.0.0.1 local"
-            ]
-            if line in skip_lines:
-                continue
-              
-              
+
+            if is_hosts_file:
+                # Fix StevenBlack hosts
+                skip_lines = [
+                    "0.0.0.0 0.0.0.0",
+                    "127.0.0.1 localhost",
+                    "127.0.0.1 localhost.localdomain",
+                    "127.0.0.1 local"
+                    ]
+             if line in skip_lines:
+                 continue
+                
             # skip comments and empty lines
             if line.startswith("#") or line == "":
                 continue
-
-            if is_hosts_file:
+                
                 # remove the ip address and the trailing newline
                 parts = line.split()
                 if len(parts) < 2:
@@ -118,6 +117,9 @@ class App:
                 if domain == "localhost":
                     continue
             else:
+                # skip comments and empty lines
+                if line.startswith("#") or line == "":
+                    continue
                 domain = line.rstrip()
 
             domains.append(domain)
