@@ -1,7 +1,7 @@
 import logging
 import requests
 
-from typing import List
+from typing import List, Set
 from src import cloudflare
 
 class App:
@@ -80,7 +80,7 @@ class App:
         logging.info(f"File size: {len(r.content)}")
         return r.content.decode("utf-8")
 
-    def convert_to_domain_list(self, file_content: str, white_domains: List[str]):
+    def convert_to_domain_list(self, file_content: str, white_domains: Set[str]):
         
         # check if the file is a hosts file or a list of domain
         is_hosts_file = False
@@ -89,7 +89,7 @@ class App:
                 is_hosts_file = True
                 break
     
-        domains = []
+        domains = set()
     
         for line in file_content.splitlines():
             
@@ -120,31 +120,26 @@ class App:
             else:
                 domain = line.rstrip()
 
-            domains.append(domain)
+            domains.add(domain.encode('idna').decode())
     
         # remove duplicate line
-        domains = sorted(list(set(domains)))
         logging.info(f"Number of block domains: {len(domains)}")
 
         # white domains 
-        for white_domain in white_domains:
-            if white_domain in domains:
-                domains.remove(white_domain)
+        domains = sorted(list(domains - white_domains))
         logging.info(f"Number of final domains: {len(domains)}")
     
         return domains
         
-    def whitelist_handing(self,white_content:str):
-        white_domains = []
+    def whitelist_handing(self, white_content:str):
+        white_domains = set()
         for line in white_content.splitlines():
             if line.startswith("#") or line == "":
                 continue
             white_domain = line.rstrip()
 
-            white_domains.append(white_domain)
+            white_domains.add(white_domain.encode('idna').decode())
 
-        # remove duplicate line
-        white_domains = sorted(list(set(white_domains)))
         logging.info(f"Number of white domains: {len(white_domains)}")
 
         return white_domains
