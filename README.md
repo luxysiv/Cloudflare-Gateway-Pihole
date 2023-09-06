@@ -6,6 +6,8 @@ Create your block ad-lists to Cloudflare Gateway
 
 # Note
 
+* If you wanna use mix lists you can copy code from [utils-mix.py](utils-mix.py) and paste to [utils.py](src/utils.py)
+
 * Add your lists to [lists.ini](lists.ini)
 
 * Supported 2 kind of [lists.ini](lists.ini)
@@ -44,6 +46,8 @@ Generate `CF_API_TOKEN` like:
 ![CF_API_TOKEN](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/a5b90438-26cc-49ae-9a55-5409a90b683f)
 
 # Chú ý 
+
+* Hiện mình đang để xài nguyên urls dạng hosts cho blocklists và dạng domains cho white lists. Cái bạn muốn xài lists gì cũng được thì copy từ [utils-mix.py](utils-mix.py) và dán vào [utils.py](src/utils.py) 
 
 * Giới hạn của Cloudflare Gateway Zero Trust free là 300k domains nên các bạn nhớ chú ý log, nếu quá script sẽ stop
 
