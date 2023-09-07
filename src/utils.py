@@ -1,8 +1,13 @@
+import re
 import logging
 import requests
 
 from typing import List, Set
 from src import cloudflare
+
+domain_pattern = re.compile(r'^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])'
+                                r'(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9]))*$')
+ip_pattern = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
 
 class App:
     def __init__(self, adlist_name: str, adlist_urls: List[str],whitelist_urls: List[str]):
@@ -81,52 +86,38 @@ class App:
         return r.content.decode("utf-8")
 
     def convert_to_domain_list(self, file_content: str, white_domains: Set[str]):
-        
-        # check if the file is a hosts file or a list of domain
-        is_hosts_file = False
-        for ip in ["localhost", "127.0.0.1", "::1", "0.0.0.0"]:
-            if ip in file_content:
-                is_hosts_file = True
-                break
-    
         domains = set()
-    
         for line in file_content.splitlines():
             
-            # Fix StevenBlack hosts
-            skip_lines = [
-                "0.0.0.0 0.0.0.0",
-                "127.0.0.1 localhost",
-                "127.0.0.1 localhost.localdomain",
-                "127.0.0.1 local"
-            ]
-            if line in skip_lines:
-                continue
-              
-              
             # skip comments and empty lines
-            if line.startswith("#") or line == "":
+            if line.startswith(("#", "!")) or line == "":
                 continue
 
-            if is_hosts_file:
-                # remove the ip address and the trailing newline
-                parts = line.split()
-                if len(parts) < 2:
-                    continue
-                domain = parts[1].rstrip()
-                # skip the localhost entry
-                if domain == "localhost":
-                    continue
-            else:
-                domain = line.rstrip()
+            # convert to domains 
+            line = line.strip()
+            linex = line.split("#")[0]
+            domain = linex.replace('\r', '') \
+                          .replace('0.0.0.0 ', '') \
+                          .replace('127.0.0.1 ', '') \
+                          .replace('::1 ', '') \
+                          .replace(':: ', '') \
+                          .replace('||', '') \
+                          .replace('@@||', '') \
+                          .replace('^$important', '') \
+                          .replace('*.', '') \
+                          .replace('^', ''); 
 
+            # remove not domains 
+            if not domain_pattern.match(domain) or ip_pattern.match(domain):
+                continue
+    
             domains.add(domain.encode('idna').decode())
     
-        # remove duplicate line
         logging.info(f"Number of block domains: {len(domains)}")
 
-        # white domains 
+        # remove white domains
         domains = sorted(list(domains - white_domains))
+        
         logging.info(f"Number of final domains: {len(domains)}")
     
         return domains
@@ -134,12 +125,32 @@ class App:
     def whitelist_handing(self, white_content:str):
         white_domains = set()
         for line in white_content.splitlines():
-            if line.startswith("#") or line == "":
+            
+            # remove comments line
+            if line.startswith(("#", "!")) or line == "":
                 continue
-            white_domain = line.rstrip()
+              
+            # convert to domains 
+            line = line.strip()
+            linex = line.split("#")[0]
+            white_domain = linex.replace('\r', '') \
+                                .replace('0.0.0.0 ', '') \
+                                .replace('127.0.0.1 ', '') \
+                                .replace('::1 ', '') \
+                                .replace(':: ', '') \
+                                .replace('||', '') \
+                                .replace('@@||', '') \
+                                .replace('^$important', '') \
+                                .replace('*.', '') \
+                                .replace('^', ''); 
 
+            # remove not domains 
+            if not domain_pattern.match(white_domain) or ip_pattern.match(white_domain):
+                continue
+    
             white_domains.add(white_domain.encode('idna').decode())
-
+        
+      # remove duplicate line
         logging.info(f"Number of white domains: {len(white_domains)}")
 
         return white_domains
