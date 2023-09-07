@@ -90,23 +90,22 @@ class App:
         for line in file_content.splitlines():
             
             # skip comments and empty lines
-            if line.startswith("#") or line == "":
+            if line.startswith(("#", "!")) or line == "":
                 continue
 
             # convert to domains 
             line = line.strip()
             linex = line.split("#")[0]
-            domain = linex.replace('\r', '') \
-                          .replace('0.0.0.0 ', '') \
-                          .replace('127.0.0.1 ', '') \
-                          .replace('::1 ', '') \
-                          .replace(':: ', '') \
-                          .replace('^', '') \
-                          .replace('||', '') \
-                          .replace('@@||', '') \
-                          .replace('^$$important', '') \
-                          .replace('*.', '') \
-                          .replace('^', '')
+            domain = linex.replace('\r', '')
+                          .replace('0.0.0.0 ', '')
+                          .replace('127.0.0.1 ', '')
+                          .replace('::1 ', '')
+                          .replace(':: ', '')
+                          .replace('||', '')
+                          .replace('@@||', '')
+                          .replace('^$important', '')
+                          .replace('*.', '')
+                          .replace('^', '');
 
             # remove not domains 
             if not domain_pattern.match(domain) or ip_pattern.match(domain):
@@ -126,25 +125,25 @@ class App:
     def whitelist_handing(self, white_content:str):
         white_domains = set()
       
-        # remove comments line
         for line in white_content.splitlines():
-            if line.startswith("#") or line == "":
+            
+            # remove comments line
+            if line.startswith(("#", "!")) or line == "":
                 continue
               
             # convert to domains 
             line = line.strip()
             linex = line.split("#")[0]
-            white_domain = linex.replace('\r', '') \
-                                .replace('0.0.0.0 ', '') \
-                                .replace('127.0.0.1 ', '') \
-                                .replace('::1 ', '') \
-                                .replace(':: ', '') \
-                                .replace('^', '') \
-                                .replace('||', '') \
-                                .replace('@@||', '') \
-                                .replace('^$$important', '') \
-                                .replace('*.', '') \
-                                .replace('^', '')
+            white_domain = linex.replace('\r', '')
+                                .replace('0.0.0.0 ', '')
+                                .replace('127.0.0.1 ', '')
+                                .replace('::1 ', '')
+                                .replace(':: ', '')
+                                .replace('||', '')
+                                .replace('@@||', '')
+                                .replace('^$important', '')
+                                .replace('*.', '')
+                                .replace('^', '');
 
             # remove not domains 
             if not domain_pattern.match(white_domain) or ip_pattern.match(white_domain):
