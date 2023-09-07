@@ -1,3 +1,7 @@
+# Dành cho các bạn Việt Nam
+
+Các bạn cần phân biệt bộ lọc DNS và bộ lọc browser. Mình thấy nhiều bạn đem bộ lọc browser lên chạy -> lỗi lướt web
+
 # Credit
 This repository modified from source [IanDesuyo/CloudflareGatewayAdBlock](https://github.com/IanDesuyo/CloudflareGatewayAdBlock)
 
@@ -71,6 +75,7 @@ Generate `CF_API_TOKEN` like:
 
 hoặc
 ![1000015364](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/373467b5-1798-4dc5-b49e-a9fdf64a3ad7)
+
 
 👌 Chúc các bạn thành công 
 
