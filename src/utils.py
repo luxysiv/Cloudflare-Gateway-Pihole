@@ -90,28 +90,30 @@ class App:
         for line in file_content.splitlines():
             
             # skip comments and empty lines
-            if line.startswith(("#", "!")) or line == "":
+            if line.startswith(("#", "!", "/")) or line == "":
+                continue
+            # skip ip line
+            if not any(char.isalpha() for char in line):
                 continue
 
             # convert to domains 
             line = line.strip()
-            linex = line.split("#")[0]
-            domain = linex.replace('\r', '') \
-                          .replace('0.0.0.0 ', '') \
-                          .replace('127.0.0.1 ', '') \
-                          .replace('::1 ', '') \
-                          .replace(':: ', '') \
-                          .replace('||', '') \
-                          .replace('@@||', '') \
-                          .replace('^$important', '') \
-                          .replace('*.', '') \
-                          .replace('^', ''); 
+            linex = line.split("#")[0].split("^")[0].replace('\r', '')
+            domain = linex.replace('\r', '',1) \
+                          .replace('0.0.0.0 ', '',1) \
+                          .replace('127.0.0.1 ', '',1) \
+                          .replace('::1 ', '',1) \
+                          .replace(':: ', '',1) \
+                          .replace('||', '',1) \
+                          .replace('@@||', '',1) \
+                          .replace('*.', '',1) \
+                          .replace('*', '',1)
 
             # remove not domains 
             if not domain_pattern.match(domain) or ip_pattern.match(domain):
                 continue
     
-            domains.add(domain.encode('idna').decode())
+            domains.add(domain.encode('idna').decode("utf-8"))
     
         logging.info(f"Number of block domains: {len(domains)}")
 
@@ -126,29 +128,31 @@ class App:
         white_domains = set()
         for line in white_content.splitlines():
             
-            # remove comments line
-            if line.startswith(("#", "!")) or line == "":
+            # skip comments and empty lines
+            if line.startswith(("#", "!", "/")) or line == "":
+                continue
+            # skip ip line
+            if not any(char.isalpha() for char in line):
                 continue
               
             # convert to domains 
             line = line.strip()
-            linex = line.split("#")[0]
-            white_domain = linex.replace('\r', '') \
-                                .replace('0.0.0.0 ', '') \
-                                .replace('127.0.0.1 ', '') \
-                                .replace('::1 ', '') \
-                                .replace(':: ', '') \
-                                .replace('||', '') \
-                                .replace('@@||', '') \
-                                .replace('^$important', '') \
-                                .replace('*.', '') \
-                                .replace('^', ''); 
+            linex = line.split("#")[0].split("^")[0].replace('\r', '')
+            white_domain = linex.replace('\r', '',1) \
+                          .replace('0.0.0.0 ', '',1) \
+                          .replace('127.0.0.1 ', '',1) \
+                          .replace('::1 ', '',1) \
+                          .replace(':: ', '',1) \
+                          .replace('||', '',1) \
+                          .replace('@@||', '',1) \
+                          .replace('*.', '',1) \
+                          .replace('*', '',1) 
 
             # remove not domains 
             if not domain_pattern.match(white_domain) or ip_pattern.match(white_domain):
                 continue
     
-            white_domains.add(white_domain.encode('idna').decode())
+            white_domains.add(white_domain.encode('idna').decode("utf-8"))
         
       # remove duplicate line
         logging.info(f"Number of white domains: {len(white_domains)}")
@@ -172,3 +176,4 @@ class App:
             cloudflare.delete_list(l["name"], l["id"])
 
         logging.info("Deletion completed")
+                          
