@@ -20,7 +20,7 @@ class App:
         self.adlist_name = adlist_name
         self.adlist_urls = adlist_urls
         self.whitelist_urls = whitelist_urls
-        self.name_prefix = f"[AdBlock-{adlist_name}]"
+        self.name_prefix = f"{adlist_name}"
 
     async def run(self):
         async with aiohttp.ClientSession() as session:
