@@ -6,12 +6,12 @@ import aiohttp
 
 from src import cloudflare
 
+replace_pattern = re.compile(r"(^([0-9.]+|[0-9a-fA-F:.]+)\s+|^(\|\||@@\|\|))")
 domain_pattern = re.compile(
     r"^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])"
     r"(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9]))*$"
 )
 ip_pattern = re.compile(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$")
-
 
 class App:
     def __init__(
@@ -105,7 +105,8 @@ class App:
     async def download_file_async(self, session: aiohttp.ClientSession, url: str):
         async with session.get(url) as response:
             text = await response.text("utf-8")
-            logging.info(f"Downloaded file from {url}. File size: {len(text)}")
+            logging.info(f"Downloaded file from {url}")
+            logging.info(f"File size: {len(text)}")
             return text
 
     def convert_to_domain_list(self, file_content: str, white_domains: set[str]):
@@ -121,18 +122,8 @@ class App:
             # convert to domains
             line = line.strip()
             linex = line.split("#")[0].split("^")[0].replace("\r", "")
-            domain = (
-                linex.replace("\r", "", 1)
-                .replace("0.0.0.0 ", "", 1)
-                .replace("127.0.0.1 ", "", 1)
-                .replace("::1 ", "", 1)
-                .replace(":: ", "", 1)
-                .replace("||", "", 1)
-                .replace("@@||", "", 1)
-                .replace("*.", "", 1)
-                .replace("*", "", 1)
-            )
-
+            domain = replace_pattern.sub("", linex, count=1)
+            
             # remove not domains
             if not domain_pattern.match(domain) or ip_pattern.match(domain):
                 continue
@@ -161,17 +152,7 @@ class App:
             # convert to domains
             line = line.strip()
             linex = line.split("#")[0].split("^")[0].replace("\r", "")
-            white_domain = (
-                linex.replace("\r", "", 1)
-                .replace("0.0.0.0 ", "", 1)
-                .replace("127.0.0.1 ", "", 1)
-                .replace("::1 ", "", 1)
-                .replace(":: ", "", 1)
-                .replace("||", "", 1)
-                .replace("@@||", "", 1)
-                .replace("*.", "", 1)
-                .replace("*", "", 1)
-            )
+            white_domain = replace_pattern.sub("", linex, count=1)
 
             # remove not domains
             if not domain_pattern.match(white_domain) or ip_pattern.match(white_domain):
