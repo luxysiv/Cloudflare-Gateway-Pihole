@@ -106,8 +106,7 @@ class App:
     async def download_file_async(self, session: aiohttp.ClientSession, url: str):
         async with session.get(url) as response:
             text = await response.text("utf-8")
-            logging.info(f"Downloaded file from {url}")
-            logging.info(f"File size: {len(text)}")
+            logging.info(f"Downloaded file from {url} File size: {len(text)}")
             return text
 
     def convert_to_domain_list(self, file_content: str, white_domains: set[str]):
