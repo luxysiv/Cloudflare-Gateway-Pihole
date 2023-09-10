@@ -51,7 +51,7 @@ def white_lists():
 async def main():
     adlist_urls = read_lists()
     whitelist_urls = white_lists()
-    adlist_name = "DNS Filters"
+    adlist_name = "DNS-Filters"
     app = App(adlist_name, adlist_urls, whitelist_urls)
     await app.delete()  # Leave script
     # await app.run()
