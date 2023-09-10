@@ -53,8 +53,8 @@ async def main():
     whitelist_urls = white_lists()
     adlist_name = "ManhDuong"
     app = App(adlist_name, adlist_urls, whitelist_urls)
-    # await app.delete()  # Leave script
-    await app.run()
+    app.delete()  # Leave script
+    #app.run()
 
 
 if __name__ == "__main__":
