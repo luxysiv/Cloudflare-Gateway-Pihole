@@ -16,15 +16,17 @@ logger.addHandler(console)
 def read_lists():
     adlist_urls = []
     config = ConfigParser()
-
+    
     try:
         config.read("lists.ini")
         for section in config.sections():
             for key in config.options(section):
-                adlist_urls.append(config.get(section, key))
+
+                if not key.startswith("#"):
+                    adlist_urls.append(config.get(section, key))
     except Exception:
         with open("lists.ini", "r") as file:
-            adlist_urls = [url.strip() for url in file if url.strip()]
+            adlist_urls = [url.strip() for url in file if not url.startswith("#") and url.strip()]
 
     return adlist_urls
 
@@ -32,18 +34,19 @@ def read_lists():
 def white_lists():
     whitelist_urls = []
     config = ConfigParser()
-
+    
     try:
         config.read("whitelists.ini")
         for section in config.sections():
             for key in config.options(section):
-                whitelist_urls.append(config.get(section, key))
+
+                if not key.startswith("#"):
+                    whitelist_urls.append(config.get(section, key))
     except Exception:
         with open("whitelists.ini", "r") as file:
-            whitelist_urls = [url.strip() for url in file if url.strip()]
+            whitelist_urls = [url.strip() for url in file if not url.startswith("#") and url.strip()]
 
     return whitelist_urls
-
 
 async def main():
     adlist_urls = read_lists()
