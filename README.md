@@ -6,7 +6,7 @@ Các bạn cần phân biệt bộ lọc DNS và bộ lọc browser. Mình thấ
 
 * This repository modified from source [IanDesuyo/CloudflareGatewayAdBlock](https://github.com/IanDesuyo/CloudflareGatewayAdBlock)
 
-* Thanks alot [@nhubaotruong](https://github.com/nhubaotruong] for his contribute 
+* Thanks alot [@nhubaotruong](https://github.com/nhubaotruong) for his contribute 
 
 # Cloudflare-Gateway-Pihole
 Create your block ad-lists to Cloudflare Gateway
