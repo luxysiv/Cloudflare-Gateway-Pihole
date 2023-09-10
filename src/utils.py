@@ -7,6 +7,7 @@ import aiohttp
 from src import cloudflare
 
 replace_pattern = re.compile(r"(^([0-9.]+|[0-9a-fA-F:.]+)\s+|^(\|\||@@\|\||\*\.|\*))")
+#replace_pattern = re.compile(r"(\r|0\.0\.0\.0 |127\.0\.0\.1 |::1 |:: |\|\||@@\|\||\*\.|\*)", re.MULTILINE)
 domain_pattern = re.compile(
     r"^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])"
     r"(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9]))*$"
