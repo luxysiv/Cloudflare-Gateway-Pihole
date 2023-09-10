@@ -116,9 +116,6 @@ class App:
             # skip comments and empty lines
             if line.startswith(("#", "!", "/")) or line == "":
                 continue
-            # skip ip line
-            if not any(char.isalpha() for char in line):
-                continue
 
             # convert to domains
             line = line.strip()
@@ -145,9 +142,6 @@ class App:
         for line in white_content.splitlines():
             # skip comments and empty lines
             if line.startswith(("#", "!", "/")) or line == "":
-                continue
-            # skip ip line
-            if not any(char.isalpha() for char in line):
                 continue
 
             # convert to domains
