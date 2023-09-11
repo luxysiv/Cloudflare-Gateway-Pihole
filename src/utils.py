@@ -40,7 +40,7 @@ class App:
                     ]
                 )
             )
-        white_domains = self.whitelist_handing(white_content)
+        white_domains = self.convert_white_domains(white_content)
         domains = self.convert_to_domain_list(file_content, white_domains)
 
         # check if the list is already in Cloudflare
@@ -135,7 +135,7 @@ class App:
 
         return domains
 
-    def whitelist_handing(self, white_content: str):
+    def convert_white_domains(self, white_content: str):
         white_domains = set()
         for line in white_content.splitlines():
             # skip comments and empty lines
