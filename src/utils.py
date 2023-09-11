@@ -7,7 +7,6 @@ import aiohttp
 from src import cloudflare
 
 replace_pattern = re.compile(r"(^([0-9.]+|[0-9a-fA-F:.]+)\s+|^(\|\||@@\|\||\*\.|\*))")
-#replace_pattern = re.compile(r"(\r|0\.0\.0\.0 |127\.0\.0\.1 |::1 |:: |\|\||@@\|\||\*\.|\*)", re.MULTILINE)
 domain_pattern = re.compile(
     r"^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])"
     r"(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9]))*$"
@@ -106,8 +105,7 @@ class App:
     async def download_file_async(self, session: aiohttp.ClientSession, url: str):
         async with session.get(url) as response:
             text = await response.text("utf-8")
-            logging.info(f"Downloaded file from {url}")
-            logging.info(f"File size: {len(text)}")
+            logging.info(f"Downloaded file from {url} File size: {len(text)}")
             return text
 
     def convert_to_domain_list(self, file_content: str, white_domains: set[str]):
