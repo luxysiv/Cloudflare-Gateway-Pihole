@@ -126,15 +126,17 @@ class App:
                 continue
 
             # convert to domains
-            line = line.strip()
-            linex = line.split("#")[0].split("^")[0].replace("\r", "")
+            linex = line.lower().strip().split("#")[0].split("^")[0].replace("\r", "")
             domain = replace_pattern.sub("", linex, count=1)
-            
+            try:
+                domain = domain.encode("idna").decode("utf-8", "replace")
+            except Exception:
+                continue
             # remove not domains
             if not domain_pattern.match(domain) or ip_pattern.match(domain):
                 continue
 
-            domains.add(domain.encode("idna").decode("utf-8"))
+            domains.add(domain)
 
         logging.info(f"Number of block domains: {len(domains)}")
 
@@ -153,16 +155,17 @@ class App:
                 continue
 
             # convert to domains
-            line = line.strip()
-            linex = line.split("#")[0].split("^")[0].replace("\r", "")
+            linex = line.lower().strip().split("#")[0].split("^")[0].replace("\r", "")
             white_domain = replace_pattern.sub("", linex, count=1)
-
+            try:
+                white_domain = white_domain.encode("idna").decode("utf-8", "replace")
+            except Exception:
+                continue
             # remove not domains
             if not domain_pattern.match(white_domain) or ip_pattern.match(white_domain):
                 continue
 
-            white_domains.add(white_domain.encode("idna").decode("utf-8"))
-
+            white_domains.add(white_domain)
         # remove duplicate line
         logging.info(f"Number of white domains: {len(white_domains)}")
 
