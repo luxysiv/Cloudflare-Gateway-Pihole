@@ -43,6 +43,16 @@ class App:
         white_domains = self.convert_white_domains(white_content)
         domains = self.convert_to_domain_list(file_content, white_domains)
 
+        # check if number of domains exceeds the limit
+        if len(domains) == 0:
+            logging.warning("No domains found in the adlist file. Exiting script.")
+            return 
+        
+        # stop script if the number of final domains exceeds the limit
+        if len(domains) > 300000:
+            logging.warning("The number of final domains exceeds the limit. Exiting script.")
+            return
+
         # check if the list is already in Cloudflare
         cf_lists = await cloudflare.get_lists(self.name_prefix)
 
