@@ -14,32 +14,25 @@ domain_pattern = re.compile(
 ip_pattern = re.compile(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$")
 
 class App:
-    def __init__(
-        self, adlist_name: str, adlist_urls: list[str], whitelist_urls: list[str]
-    ):
+    def __init__(self, adlist_name: str, adlist_urls: list[str], whitelist_urls: list[str]):
         self.adlist_name = adlist_name
         self.adlist_urls = adlist_urls
         self.whitelist_urls = whitelist_urls
         self.name_prefix = f"[AdBlock-{adlist_name}]"
 
     async def run(self):
-        async with aiohttp.ClientSession() as session:
-            file_content = "".join(
-                await asyncio.gather(
-                    *[
-                        self.download_file_async(session, url)
-                        for url in self.adlist_urls
-                    ]
-                )
-            )
-            white_content = "".join(
-                await asyncio.gather(
-                    *[
-                        self.download_file_async(session, url)
-                        for url in self.whitelist_urls
-                    ]
-                )
-            )
+        connector = aiohttp.TCPConnector(limit=10)  # Set the maximum number of connections (adjust as needed)
+        
+        async with aiohttp.ClientSession(connector=connector) as session:
+            adlist_tasks = [self.download_file_async(session, url) for url in self.adlist_urls]
+            whitelist_tasks = [self.download_file_async(session, url) for url in self.whitelist_urls]
+
+            adlist_responses = await asyncio.gather(*adlist_tasks)
+            whitelist_responses = await asyncio.gather(*whitelist_tasks)
+
+            file_content = "".join(adlist_responses)
+            white_content = "".join(whitelist_responses)
+            
         white_domains = self.convert_white_domains(white_content)
         domains = self.convert_to_domain_list(file_content, white_domains)
 
