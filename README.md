@@ -88,7 +88,8 @@ Generate `CF_API_TOKEN` like:
 ```python
 for _ in range(3):
         try:
-            await app.run()
+            await app.delete()  # Leave script
+            # await app.run()
             success = True
             break  
         except Exception:
