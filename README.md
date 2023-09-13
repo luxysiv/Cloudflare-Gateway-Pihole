@@ -19,30 +19,42 @@ Create your block ad-lists to Cloudflare Gateway
 
 * Supported 2 kind of [lists.ini](lists.ini)
 
-![1000015362](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/ce7d552a-aa4b-4fcf-9b69-f0d8287fd2a1)
-
+```ini
+https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/hosts-VN
+https://raw.githubusercontent.com/Yhonay/antipopads/master/hosts
+https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt
+```
 or
-![1000015364](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/373467b5-1798-4dc5-b49e-a9fdf64a3ad7)
+```ini
+[Hosts-Urls]
+hostsVN = https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/hosts-VN
+Antipopup = https://raw.githubusercontent.com/Yhonay/antipopads/master/hosts
+Hagezi = https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt
+```
 
 * Supported white list 
 
 # Introduce
 Add variables secrets to 
-`https://github.com/your-user/your-repository/settings/secrets/actions`
-with
+`https://github.com/your-user/your-repository/settings/secrets/actions`:
 
-`CF_IDENTIFIER` take from Account ID https://dash.cloudflare.com/?to=/:account/workers
+* `CF_IDENTIFIER` from your Account ID from : https://dash.cloudflare.com/?to=/:account/workers
 
-`CF_API_TOKEN` take from https://dash.cloudflare.com/profile/api-tokens
+* `CF_API_TOKEN` take from : https://dash.cloudflare.com/profile/api-tokens with 3 permissions `Account.Zero Trust : Edit` `Account.Account Firewall Access Rules : Edit` `Account.Access: Apps and Policies : Edit`
 
 or add to  [.env](.env)
 
 # Use .env
 
-If you add `CF_IDENTIFIER` and `CF_API_TOKEN` to [.env](.env) , you must edit [main.yml](.github/workflows/main.yml) like this 
-![1000015673](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/d7f5663b-0d47-4958-acbc-0d8efb7cc0e9)
+If you add `CF_IDENTIFIER` and `CF_API_TOKEN` to [.env](.env) , you must edit [main.yml](.github/workflows/main.yml) like this, remove secret env:
 
-
+```yml
+- name: Install Dependencies
+  run: pip install -r requirements.txt
+          
+- name: Cloudflare Gateway Zero Trust 
+  run: python -m src 
+```
 
 # More informations about Secret Github Action and API TOKEN 
 
@@ -62,11 +74,27 @@ Generate `CF_API_TOKEN` like:
 
 * Các bạn đã up lists bằng script khác thì nên xoá đi bằng tính năng xoá của script đã up hoặc xoá tay
 
-* Nếu không biết thêm vào Secret Github Action thì có thể điền giá trị vào file [.env](.env) và sửa file [main.yml](.github/workflows/main.yml) như sau
-![1000015673](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/d7f5663b-0d47-4958-acbc-0d8efb7cc0e9)
+* Nếu không biết thêm vào Secret Github Action thì có thể điền giá trị vào file [.env](.env) và sửa file [main.yml](.github/workflows/main.yml) như sau, loại bỏ các dòng secret env
+```yml
+- name: Install Dependencies
+  run: pip install -r requirements.txt
+          
+- name: Cloudflare Gateway Zero Trust 
+  run: python -m src 
+```
 
-* Mình đã update thêm tính năng xoá lists khi các bạn không cần sử dụng script nữa. Vào [__main__.py](src/__main__.py) để tương tự như sau
-![1000015676](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/1fd1b1ad-5644-419a-9d30-43f0ab0784af)
+* Mình đã update thêm tính năng xoá lists khi các bạn không cần sử dụng script nữa. Vào [__main__.py](src/__main__.py) để như sau:
+
+```python
+for _ in range(3):
+        try:
+            await app.run()
+            success = True
+            break  
+        except Exception:
+            await asyncio.sleep(60)
+    return 0 if success else 1
+```
 
 
 * Đã thêm tính năng white lists
@@ -77,10 +105,18 @@ Generate `CF_API_TOKEN` like:
 
 * Đã hỗ trợ 2 loại [lists.ini](lists.ini)
 
-![1000015362](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/ce7d552a-aa4b-4fcf-9b69-f0d8287fd2a1)
-
+```ini
+https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/hosts-VN
+https://raw.githubusercontent.com/Yhonay/antipopads/master/hosts
+https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt
+```
 hoặc
-![1000015364](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/373467b5-1798-4dc5-b49e-a9fdf64a3ad7)
+```ini
+[Hosts-Urls]
+hostsVN = https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/hosts-VN
+Antipopup = https://raw.githubusercontent.com/Yhonay/antipopads/master/hosts
+Hagezi = https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt
+```
 
 
 👌 Chúc các bạn thành công 
