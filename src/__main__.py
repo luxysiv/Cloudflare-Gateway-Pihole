@@ -53,8 +53,16 @@ async def main():
     whitelist_urls = white_lists()
     adlist_name = "DNS-Filters"
     app = App(adlist_name, adlist_urls, whitelist_urls)
-    # await app.delete()  # Leave script
-    await app.run()
+    success = False  
+    for _ in range(3):
+        try:
+            # await app.delete()  # Leave script
+            await app.run()
+            success = True
+            break  
+        except Exception:
+            await asyncio.sleep(60)
+    return 0 if success else 1
 
 
 if __name__ == "__main__":
