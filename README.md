@@ -65,13 +65,13 @@ Generate `CF_API_TOKEN` like:
 * Nếu không biết thêm vào Secret Github Action thì có thể điền giá trị vào file [.env](.env) và sửa file [main.yml](.github/workflows/main.yml) như sau
 ![1000015673](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/d7f5663b-0d47-4958-acbc-0d8efb7cc0e9)
 
-* Mình đã update thêm tính năng xoá lists khi các bạn không cần sử dụng script nữa. Vào [__main__.py](src/__main__.py) để như sau
+* Mình đã update thêm tính năng xoá lists khi các bạn không cần sử dụng script nữa. Vào [__main__.py](src/__main__.py) để tương tự như sau
 ![1000015676](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/1fd1b1ad-5644-419a-9d30-43f0ab0784af)
 
 
 * Đã thêm tính năng white lists
 
-* Bạn có thể thay tên ManhDuong bằng các tên bạn thích 
+* Bạn có thể thay tên `DNS-Filters` bằng các tên bạn thích 
 
 * Thêm danh sách của bạn vào [lists.ini](lists.ini)
 
