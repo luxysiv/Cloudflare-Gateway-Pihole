@@ -1,2 +1,3 @@
 python-dotenv
 aiohttp[speedups]
+uvloop
