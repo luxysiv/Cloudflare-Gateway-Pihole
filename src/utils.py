@@ -60,8 +60,19 @@ class App:
 
         # compare the lists size
         if len(domains) == sum([l["count"] for l in cf_lists]):
-            logging.warning("Lists are the same size, skipping")
-            return
+            logging.warning("Lists are the same size, checking policy")
+            cf_policies = await cloudflare.get_firewall_policies(self.name_prefix)
+
+            if len(cf_policies) == 0:
+                logging.info("No firewall policy found, creating new policy")
+                cf_policies = await cloudflare.create_gateway_policy(
+                    f"{self.name_prefix} Block Ads", [l["id"] for l in cf_lists]
+                )
+            else:
+                logging.warning("Firewall policy already exists, exiting script")
+                return
+
+            return 
 
         # Delete existing policy created by script
         policy_prefix = f"{self.name_prefix} Block Ads"
@@ -79,36 +90,34 @@ class App:
             delete_list_tasks.append(cloudflare.delete_list(l["name"], l["id"]))
         await asyncio.gather(*delete_list_tasks)
 
+        # Start creating new lists and firewall policy concurrently
         create_list_tasks = []
         for i, chunk in enumerate(self.chunk_list(domains, 1000)):
             list_name = f"{self.name_prefix} {i + 1}"
             logging.info(f"Creating list {list_name}")
             create_list_tasks.append(cloudflare.create_list(list_name, chunk))
+    
         cf_lists = await asyncio.gather(*create_list_tasks)
 
-        # get the gateway policies
         cf_policies = await cloudflare.get_firewall_policies(self.name_prefix)
-
         logging.info(f"Number of policies in Cloudflare: {len(cf_policies)}")
 
-        # setup the gateway policy
         if len(cf_policies) == 0:
             logging.info("Creating firewall policy")
             cf_policies = await cloudflare.create_gateway_policy(
-                f"{self.name_prefix} Block Ads", [l["id"] for l in cf_lists]
+                policy_prefix, [l["id"] for l in cf_lists]
             )
-
         elif len(cf_policies) != 1:
             logging.error("More than one firewall policy found")
             raise Exception("More than one firewall policy found")
-
         else:
             logging.info("Updating firewall policy")
-            await cloudflare.update_gateway_policy(
-                f"{self.name_prefix} Block Ads",
-                cf_policies[0]["id"],
-                [l["id"] for l in cf_lists],
+            update_policy_task = asyncio.create_task(
+                cloudflare.update_gateway_policy(
+                    policy_prefix, cf_policies[0]["id"], [l["id"] for l in cf_lists],
+                )
             )
+            await update_policy_task
 
         logging.info("Done")
 
