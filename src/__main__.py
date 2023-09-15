@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import uvloop
 from configparser import ConfigParser
 
 from src.colorlogs import ColoredLevelFormatter
@@ -26,7 +27,9 @@ def read_lists():
                     adlist_urls.append(config.get(section, key))
     except Exception:
         with open("lists.ini", "r") as file:
-            adlist_urls = [url.strip() for url in file if not url.startswith("#") and url.strip()]
+            adlist_urls = [
+                url.strip() for url in file if not url.startswith("#") and url.strip()
+            ]
 
     return adlist_urls
 
@@ -44,7 +47,9 @@ def white_lists():
                     whitelist_urls.append(config.get(section, key))
     except Exception:
         with open("whitelists.ini", "r") as file:
-            whitelist_urls = [url.strip() for url in file if not url.startswith("#") and url.strip()]
+            whitelist_urls = [
+                url.strip() for url in file if not url.startswith("#") and url.strip()
+            ]
 
     return whitelist_urls
 
@@ -53,9 +58,18 @@ async def main():
     whitelist_urls = white_lists()
     adlist_name = "DNS-Filters"
     app = App(adlist_name, adlist_urls, whitelist_urls)
-    # await app.delete()  # Leave script
-    await app.run()
+    success = False  
+    for _ in range(3):
+        try:
+            # await app.delete()  # Leave script
+            await app.run()
+            success = True
+            break  
+        except Exception:
+            await asyncio.sleep(60)
+    return 0 if success else 1
 
 
 if __name__ == "__main__":
+    uvloop.install()
     asyncio.run(main())
