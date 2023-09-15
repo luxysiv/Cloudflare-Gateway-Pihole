@@ -86,15 +86,13 @@ Generate `CF_API_TOKEN` like:
 * Mình đã update thêm tính năng xoá lists khi các bạn không cần sử dụng script nữa. Vào [__main__.py](src/__main__.py) để như sau:
 
 ```python
-for _ in range(3):
-        try:
-            await app.delete()  # Leave script
-            # await app.run()
-            success = True
-            break  
-        except Exception:
-            await asyncio.sleep(60)
-    return 0 if success else 1
+async def main():
+    adlist_urls = read_lists()
+    whitelist_urls = white_lists()
+    adlist_name = "DNS-Filters"
+    app = App(adlist_name, adlist_urls, whitelist_urls)
+    await app.delete()  # Leave script
+    # await app.run()
 ```
 
 
