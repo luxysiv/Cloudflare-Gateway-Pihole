@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import uvloop
 from configparser import ConfigParser
 
 from src.colorlogs import ColoredLevelFormatter
@@ -70,4 +71,5 @@ async def main():
 
 
 if __name__ == "__main__":
+    uvloop.install()
     asyncio.run(main())
