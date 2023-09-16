@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import re
+from collections import defaultdict
 
 import aiohttp
 
@@ -14,6 +15,7 @@ domain_pattern = re.compile(
 )
 ip_pattern = re.compile(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$")
 
+
 class App:
     def __init__(
         self, adlist_name: str, adlist_urls: list[str], whitelist_urls: list[str]
@@ -24,7 +26,9 @@ class App:
         self.name_prefix = f"[AdBlock-{adlist_name}]"
 
     async def run(self):
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(
+            timeout=aiohttp.ClientTimeout(total=10)
+        ) as session:
             file_content = "".join(
                 await asyncio.gather(
                     *[
@@ -44,14 +48,21 @@ class App:
         white_domains = self.convert_white_domains(white_content)
         domains = self.convert_to_domain_list(file_content, white_domains)
 
+        with open("test.txt", "w") as f:
+            f.write("\n".join(domains))
+
+        return
+
         # check if number of domains exceeds the limit
         if len(domains) == 0:
             logging.warning("No domains found in the adlist file. Exiting script.")
-            return 
-        
+            return
+
         # stop script if the number of final domains exceeds the limit
         if len(domains) > 300000:
-            logging.warning("The number of final domains exceeds the limit. Exiting script.")
+            logging.warning(
+                "The number of final domains exceeds the limit. Exiting script."
+            )
             return
 
         # check if the list is already in Cloudflare
@@ -73,7 +84,7 @@ class App:
                 logging.warning("Firewall policy already exists, exiting script")
                 return
 
-            return 
+            return
 
         # Delete existing policy created by script
         policy_prefix = f"{self.name_prefix} Block Ads"
@@ -97,7 +108,7 @@ class App:
             list_name = f"{self.name_prefix} {i + 1}"
             logging.info(f"Creating list {list_name}")
             create_list_tasks.append(cloudflare.create_list(list_name, chunk))
-    
+
         cf_lists = await asyncio.gather(*create_list_tasks)
 
         cf_policies = await cloudflare.get_firewall_policies(self.name_prefix)
@@ -115,7 +126,9 @@ class App:
             logging.info("Updating firewall policy")
             update_policy_task = asyncio.create_task(
                 cloudflare.update_gateway_policy(
-                    policy_prefix, cf_policies[0]["id"], [l["id"] for l in cf_lists],
+                    policy_prefix,
+                    cf_policies[0]["id"],
+                    [l["id"] for l in cf_lists],
                 )
             )
             await update_policy_task
@@ -132,7 +145,6 @@ class App:
         domains = set()
         trie = Trie()
         for line in file_content.splitlines():
-            
             # skip comments and empty lines
             if line.startswith(("#", "!", "/")) or line == "":
                 continue
@@ -144,15 +156,18 @@ class App:
                 domain = domain.encode("idna").decode("utf-8", "replace")
             except Exception:
                 continue
-                
+
             # remove not domains
             if not domain_pattern.match(domain) or ip_pattern.match(domain):
                 continue
 
-            # remove subdomains 
-            if not trie.is_subdomain(domain):
-                trie.insert(domain)
-                domains.add(domain)
+            domains.add(domain)
+            # # remove subdomains
+            # if not trie.is_subdomain(domain):
+            #     trie.insert(domain)
+            #     domains.add(domain)
+
+        domains = set(self.get_least_specific_subdomains(list(domains)))
 
         logging.info(f"Number of block domains: {len(domains)}")
 
@@ -166,7 +181,6 @@ class App:
     def convert_white_domains(self, white_content: str):
         white_domains = set()
         for line in white_content.splitlines():
-            
             # skip comments and empty lines
             if line.startswith(("#", "!", "/")) or line == "":
                 continue
@@ -178,13 +192,13 @@ class App:
                 white_domain = white_domain.encode("idna").decode("utf-8", "replace")
             except Exception:
                 continue
-                
+
             # remove not domains
             if not domain_pattern.match(white_domain) or ip_pattern.match(white_domain):
                 continue
 
             white_domains.add(white_domain)
-            
+
         # remove duplicate line
         logging.info(f"Number of white domains: {len(white_domains)}")
 
@@ -208,3 +222,30 @@ class App:
             delete_list_tasks.append(cloudflare.delete_list(l["name"], l["id"]))
         await asyncio.gather(*delete_list_tasks)
         logging.info("Deletion completed")
+
+    def get_least_specific_subdomains(self, domains: list[str]):
+        # Create a dictionary where the keys are the base domains and the values are lists of subdomains
+        domain_dict = defaultdict(list)
+        for domain in domains:
+            # Split the domain into its constituent parts
+            split_domain = domain.split(".")
+            # The base domain is the last two parts of the domain (e.g., 'example.com')
+            base_domain = ".".join(split_domain[-2:])
+            # Add the domain to the dictionary
+            domain_dict[base_domain].append(split_domain)
+        least_specific_domains = []
+        # For each base domain, find the least specific subdomain(s)
+        for base_domain, subdomains in domain_dict.items():
+            # Sort the subdomains by length (number of parts)
+            sorted_subdomains = sorted(subdomains, key=len)
+            # Get the length of the shortest subdomain
+            min_length = len(sorted_subdomains[0])
+            # Filter out the subdomains that are not the least specific
+            least_specific_subdomains = [
+                ".".join(subdomain)
+                for subdomain in sorted_subdomains
+                if len(subdomain) == min_length
+            ]
+            # Add the least specific subdomains to the result list
+            least_specific_domains.extend(least_specific_subdomains)
+        return least_specific_domains
