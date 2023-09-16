@@ -5,6 +5,7 @@ import re
 import aiohttp
 
 from src import cloudflare
+from src.trie import Trie, filter_subdomains
 
 replace_pattern = re.compile(r"(^([0-9.]+|[0-9a-fA-F:.]+)\s+|^(\|\||@@\|\||\*\.|\*))")
 domain_pattern = re.compile(
@@ -60,8 +61,19 @@ class App:
 
         # compare the lists size
         if len(domains) == sum([l["count"] for l in cf_lists]):
-            logging.warning("Lists are the same size, skipping")
-            return
+            logging.warning("Lists are the same size, checking policy")
+            cf_policies = await cloudflare.get_firewall_policies(self.name_prefix)
+
+            if len(cf_policies) == 0:
+                logging.info("No firewall policy found, creating new policy")
+                cf_policies = await cloudflare.create_gateway_policy(
+                    f"{self.name_prefix} Block Ads", [l["id"] for l in cf_lists]
+                )
+            else:
+                logging.warning("Firewall policy already exists, exiting script")
+                return
+
+            return 
 
         # Delete existing policy created by script
         policy_prefix = f"{self.name_prefix} Block Ads"
@@ -79,36 +91,34 @@ class App:
             delete_list_tasks.append(cloudflare.delete_list(l["name"], l["id"]))
         await asyncio.gather(*delete_list_tasks)
 
+        # Start creating new lists and firewall policy concurrently
         create_list_tasks = []
         for i, chunk in enumerate(self.chunk_list(domains, 1000)):
             list_name = f"{self.name_prefix} {i + 1}"
             logging.info(f"Creating list {list_name}")
             create_list_tasks.append(cloudflare.create_list(list_name, chunk))
+    
         cf_lists = await asyncio.gather(*create_list_tasks)
 
-        # get the gateway policies
         cf_policies = await cloudflare.get_firewall_policies(self.name_prefix)
-
         logging.info(f"Number of policies in Cloudflare: {len(cf_policies)}")
 
-        # setup the gateway policy
         if len(cf_policies) == 0:
             logging.info("Creating firewall policy")
             cf_policies = await cloudflare.create_gateway_policy(
-                f"{self.name_prefix} Block Ads", [l["id"] for l in cf_lists]
+                policy_prefix, [l["id"] for l in cf_lists]
             )
-
         elif len(cf_policies) != 1:
             logging.error("More than one firewall policy found")
             raise Exception("More than one firewall policy found")
-
         else:
             logging.info("Updating firewall policy")
-            await cloudflare.update_gateway_policy(
-                f"{self.name_prefix} Block Ads",
-                cf_policies[0]["id"],
-                [l["id"] for l in cf_lists],
+            update_policy_task = asyncio.create_task(
+                cloudflare.update_gateway_policy(
+                    policy_prefix, cf_policies[0]["id"], [l["id"] for l in cf_lists],
+                )
             )
+            await update_policy_task
 
         logging.info("Done")
 
@@ -120,7 +130,9 @@ class App:
 
     def convert_to_domain_list(self, file_content: str, white_domains: set[str]):
         domains = set()
+        trie = Trie()
         for line in file_content.splitlines():
+            
             # skip comments and empty lines
             if line.startswith(("#", "!", "/")) or line == "":
                 continue
@@ -132,11 +144,15 @@ class App:
                 domain = domain.encode("idna").decode("utf-8", "replace")
             except Exception:
                 continue
+                
             # remove not domains
             if not domain_pattern.match(domain) or ip_pattern.match(domain):
                 continue
 
-            domains.add(domain)
+            # remove subdomains 
+            if not trie.is_subdomain(domain):
+                trie.insert(domain)
+                domains.add(domain)
 
         logging.info(f"Number of block domains: {len(domains)}")
 
@@ -150,6 +166,7 @@ class App:
     def convert_white_domains(self, white_content: str):
         white_domains = set()
         for line in white_content.splitlines():
+            
             # skip comments and empty lines
             if line.startswith(("#", "!", "/")) or line == "":
                 continue
@@ -161,11 +178,13 @@ class App:
                 white_domain = white_domain.encode("idna").decode("utf-8", "replace")
             except Exception:
                 continue
+                
             # remove not domains
             if not domain_pattern.match(white_domain) or ip_pattern.match(white_domain):
                 continue
 
             white_domains.add(white_domain)
+            
         # remove duplicate line
         logging.info(f"Number of white domains: {len(white_domains)}")
 
