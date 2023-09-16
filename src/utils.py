@@ -48,11 +48,6 @@ class App:
         white_domains = self.convert_white_domains(white_content)
         domains = self.convert_to_domain_list(file_content, white_domains)
 
-        with open("test.txt", "w") as f:
-            f.write("\n".join(domains))
-
-        return
-
         # check if number of domains exceeds the limit
         if len(domains) == 0:
             logging.warning("No domains found in the adlist file. Exiting script.")
