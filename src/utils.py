@@ -6,7 +6,7 @@ from collections import defaultdict
 import aiohttp
 
 from src import cloudflare
-from src.trie import Trie, filter_subdomains
+#from src.trie import Trie, filter_subdomains
 
 replace_pattern = re.compile(r"(^([0-9.]+|[0-9a-fA-F:.]+)\s+|^(\|\||@@\|\||\*\.|\*))")
 domain_pattern = re.compile(
@@ -143,7 +143,7 @@ class App:
 
     def convert_to_domain_list(self, file_content: str, white_domains: set[str]):
         domains = set()
-        trie = Trie()
+        #trie = Trie()
         for line in file_content.splitlines():
             # skip comments and empty lines
             if line.startswith(("#", "!", "/")) or line == "":
