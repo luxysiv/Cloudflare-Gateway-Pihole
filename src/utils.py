@@ -5,6 +5,7 @@ import re
 import aiohttp
 
 from src import cloudflare
+from src.trie import Trie, filter_subdomains
 
 replace_pattern = re.compile(r"(^([0-9.]+|[0-9a-fA-F:.]+)\s+|^(\|\||@@\|\||\*\.|\*))")
 domain_pattern = re.compile(
@@ -129,7 +130,9 @@ class App:
 
     def convert_to_domain_list(self, file_content: str, white_domains: set[str]):
         domains = set()
+        trie = Trie()
         for line in file_content.splitlines():
+            
             # skip comments and empty lines
             if line.startswith(("#", "!", "/")) or line == "":
                 continue
@@ -141,11 +144,15 @@ class App:
                 domain = domain.encode("idna").decode("utf-8", "replace")
             except Exception:
                 continue
+                
             # remove not domains
             if not domain_pattern.match(domain) or ip_pattern.match(domain):
                 continue
 
-            domains.add(domain)
+            # remove subdomains 
+            if not trie.is_subdomain(domain):
+                trie.insert(domain)
+                domains.add(domain)
 
         logging.info(f"Number of block domains: {len(domains)}")
 
@@ -159,6 +166,7 @@ class App:
     def convert_white_domains(self, white_content: str):
         white_domains = set()
         for line in white_content.splitlines():
+            
             # skip comments and empty lines
             if line.startswith(("#", "!", "/")) or line == "":
                 continue
@@ -170,11 +178,13 @@ class App:
                 white_domain = white_domain.encode("idna").decode("utf-8", "replace")
             except Exception:
                 continue
+                
             # remove not domains
             if not domain_pattern.match(white_domain) or ip_pattern.match(white_domain):
                 continue
 
             white_domains.add(white_domain)
+            
         # remove duplicate line
         logging.info(f"Number of white domains: {len(white_domains)}")
 
