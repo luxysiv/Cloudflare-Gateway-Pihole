@@ -5,7 +5,6 @@ import re
 import aiohttp
 
 from src import cloudflare
-from src.trie import Trie, filter_subdomains
 
 replace_pattern = re.compile(r"(^([0-9.]+|[0-9a-fA-F:.]+)\s+|^(\|\||@@\|\||\*\.|\*))")
 domain_pattern = re.compile(
@@ -22,6 +21,7 @@ class App:
         self.adlist_urls = adlist_urls
         self.whitelist_urls = whitelist_urls
         self.name_prefix = f"[AdBlock-{adlist_name}]"
+        self.higher_level_domains = set()
 
     async def run(self):
         async with aiohttp.ClientSession() as session:
@@ -80,11 +80,6 @@ class App:
         deleted_policies = await cloudflare.delete_gateway_policy(policy_prefix)
         logging.info(f"Deleted {deleted_policies} gateway policies")
 
-        # delete the lists
-        # for l in cf_lists:
-        #     logging.info(f"Deleting list {l['name']} - ID:{l['id']} ")
-        #     cloudflare.delete_list(l["name"], l["id"])
-
         delete_list_tasks = []
         for l in cf_lists:
             logging.info(f"Deleting list {l['name']} - ID:{l['id']} ")
@@ -130,9 +125,8 @@ class App:
 
     def convert_to_domain_list(self, file_content: str, white_domains: set[str]):
         domains = set()
-        trie = Trie()
         for line in file_content.splitlines():
-            
+
             # skip comments and empty lines
             if line.startswith(("#", "!", "/")) or line == "":
                 continue
@@ -144,15 +138,27 @@ class App:
                 domain = domain.encode("idna").decode("utf-8", "replace")
             except Exception:
                 continue
-                
+
             # remove not domains
             if not domain_pattern.match(domain) or ip_pattern.match(domain):
                 continue
 
-            # remove subdomains 
-            if not trie.is_subdomain(domain):
-                trie.insert(domain)
+            # Check if the domain is a subdomain of an existing higher-level domain
+            parts = domain.split(".")
+            is_subdomain = any(
+                ".".join(
+                    parts[i:]
+                ) in self.higher_level_domains for i in range(
+                    len(parts) - 1, 0, -1
+                )
+            )
+
+            if not is_subdomain:
+                # If it's not a subdomain, add it to the final list
                 domains.add(domain)
+
+            # Add the domain to the set of higher-level domains
+            self.higher_level_domains.add(domain)
 
         logging.info(f"Number of block domains: {len(domains)}")
 
@@ -162,7 +168,7 @@ class App:
         logging.info(f"Number of final domains: {len(domains)}")
 
         return domains
-
+    
     def convert_white_domains(self, white_content: str):
         white_domains = set()
         for line in white_content.splitlines():
