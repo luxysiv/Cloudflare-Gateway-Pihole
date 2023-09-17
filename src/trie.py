@@ -26,26 +26,18 @@ class Trie:
 
     def is_subdomain(self, domain):
         parts = domain.split('.')
-        for i in range(len(parts) - 1, 0, -1):
-            subdomain = '.'.join(parts[i:])
-            if self.search(subdomain):
-                return True
-        return False
-
-def process_domain(domain, trie):
-    if not trie.is_subdomain(domain):
-        return domain
+        return any(self.search('.'.join(parts[i:])) for i in range(len(parts) - 1, 0, -1))
 
 def filter_subdomains(domains):
     trie = Trie()
-    unique_domains = set()
+
+    def process_domain(domain):
+        if not trie.is_subdomain(domain):
+            return domain
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        results = [executor.submit(process_domain, domain, trie) for domain in domains]
-        for future in concurrent.futures.as_completed(results):
-            result = future.result()
-            if result:
-                unique_domains.add(result)
-                trie.insert(result)
+        results = list(executor.map(process_domain, domains))
+    
+    unique_domains = [d for d in results if d is not None]
 
-    return list(unique_domains)
+    return unique_domains
