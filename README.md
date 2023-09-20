@@ -15,9 +15,9 @@ Create your block ad-list to Cloudflare Gateway
 
 * Supported mix list
 
-* Add your list to [adlist.ini](lists.ini)
+* Add your list to [adlist.ini](adlist.ini)
 
-* Supported 2 kinds of [list.ini](list.ini)
+* Supported 2 kinds of [adlist.ini](adlist.ini)
 
 ```ini
 https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/hosts-VN
