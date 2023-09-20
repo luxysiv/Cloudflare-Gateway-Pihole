@@ -9,15 +9,15 @@ Các bạn cần phân biệt bộ lọc DNS và bộ lọc browser. Mình thấ
 * Thanks alot [@nhubaotruong](https://github.com/nhubaotruong) for his contribute 
 
 # Cloudflare-Gateway-Pihole
-Create your block ad-lists to Cloudflare Gateway
+Create your block ad-list to Cloudflare Gateway
 
 # Note
 
 * Supported mix list
 
-* Add your lists to [lists.ini](lists.ini)
+* Add your list to [adlist.ini](lists.ini)
 
-* Supported 2 kind of [lists.ini](lists.ini)
+* Supported 2 kinds of [list.ini](list.ini)
 
 ```ini
 https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/hosts-VN
@@ -87,8 +87,8 @@ Generate `CF_API_TOKEN` like:
 
 ```python
 async def main():
-    adlist_urls = read_lists()
-    whitelist_urls = white_lists()
+    adlist_urls = ad_list()
+    whitelist_urls = white_list()
     adlist_name = "DNS-Filters"
     app = App(adlist_name, adlist_urls, whitelist_urls)
     await app.delete()  # Leave script
@@ -100,9 +100,9 @@ async def main():
 
 * Bạn có thể thay tên `DNS-Filters` bằng các tên bạn thích 
 
-* Thêm danh sách của bạn vào [lists.ini](lists.ini)
+* Thêm danh sách của bạn vào [adlist.ini](adlist.ini)
 
-* Đã hỗ trợ 2 loại [lists.ini](lists.ini)
+* Đã hỗ trợ 2 loại [adlist.ini](adlist.ini)
 
 ```ini
 https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/hosts-VN
