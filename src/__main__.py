@@ -13,12 +13,12 @@ logger = logging.getLogger()
 logger.addHandler(console)
 
 
-def read_lists():
+def ad_lists():
     adlist_urls = []
     config = ConfigParser()
     
     try:
-        config.read("lists.ini")
+        config.read("adlist.ini")
         for section in config.sections():
             for key in config.options(section):
 
@@ -31,12 +31,12 @@ def read_lists():
     return adlist_urls
 
 
-def white_lists():
+def white_list():
     whitelist_urls = []
     config = ConfigParser()
     
     try:
-        config.read("whitelists.ini")
+        config.read("whitelist.ini")
         for section in config.sections():
             for key in config.options(section):
 
@@ -49,8 +49,8 @@ def white_lists():
     return whitelist_urls
 
 async def main():
-    adlist_urls = read_lists()
-    whitelist_urls = white_lists()
+    adlist_urls = ad_list()
+    whitelist_urls = white_list()
     adlist_name = "DNS-Filters"
     app = App(adlist_name, adlist_urls, whitelist_urls)
     # await app.delete()  # Leave script
