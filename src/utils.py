@@ -13,6 +13,20 @@ domain_pattern = re.compile(
 )
 ip_pattern = re.compile(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$")
 
+def convert_domains(line):
+    if line.startswith(("#", "!", "/")) or line == "":
+        return None
+
+    linex = line.lower().strip().split("#")[0].split("^")[0].replace("\r", "")
+    domain = replace_pattern.sub("", linex, count=1)
+    try:
+        domain = domain.encode("idna").decode("utf-8", "replace")
+        if domain_pattern.match(domain) and not ip_pattern.match(domain):
+            return domain
+    except Exception:
+        pass
+    return None
+    
 class App:
     def __init__(
         self, adlist_name: str, adlist_urls: list[str], whitelist_urls: list[str]
@@ -21,11 +35,10 @@ class App:
         self.adlist_urls = adlist_urls
         self.whitelist_urls = whitelist_urls
         self.name_prefix = f"[AdBlock-{adlist_name}]"
-        self.higher_level_domains = set()
 
     async def run(self):
         async with aiohttp.ClientSession() as session:
-            file_content = "".join(
+            block_content = "".join(
                 await asyncio.gather(
                     *[
                         self.download_file_async(session, url)
@@ -41,8 +54,7 @@ class App:
                     ]
                 )
             )
-        white_domains = self.convert_white_domains(white_content)
-        domains = self.convert_to_domain_list(file_content, white_domains)
+        domains = self.convert_to_domain_list(block_content, white_content)
 
         # check if number of domains exceeds the limit
         if len(domains) == 0:
@@ -124,72 +136,36 @@ class App:
             logging.info(f"Downloaded file from {url} File size: {len(text)}")
             return text
 
-    def convert_to_domain_list(self, file_content: str, white_domains: set[str]):
+    def convert_to_domain_list(self, block_content: str, white_content: str):
         domains = set()
-        for line in file_content.splitlines():
+        filters_subdomains = set()
+        white_domains = set()
+        
+        # Process white_content
+        for line in white_content.splitlines():
+            white_domain = convert_domains(line)
+            if white_domain:
+                white_domains.add(white_domain)
 
-            # skip comments and empty lines
-            if line.startswith(("#", "!", "/")) or line == "":
-                continue
+        # Process block_content
+        for line in block_content.splitlines():
+            domain = convert_domains(line)
+            if domain:
+                parts = domain.split(".")
+                is_subdomain = any(".".join(parts[i:]) in filters_subdomains for i in range(len(parts) - 1, 0, -1))
+                if not is_subdomain:
+                    domains.add(domain)
+                    filters_subdomains.add(domain)
 
-            # convert to domains
-            linex = line.lower().strip().split("#")[0].split("^")[0].replace("\r", "")
-            domain = replace_pattern.sub("", linex, count=1)
-            try:
-                domain = domain.encode("idna").decode("utf-8", "replace")
-            except Exception:
-                continue
-
-            # remove not domains
-            if not domain_pattern.match(domain) or ip_pattern.match(domain):
-                continue
-
-            # Check if the domain is a subdomain of an existing higher-level domain
-            parts = domain.split(".")
-            is_subdomain = any(".".join(parts[i:]) in self.higher_level_domains for i in range(len(parts) - 1, 0, -1))
-
-            # If it's not a subdomain, add it to the final list
-            if not is_subdomain:
-                domains.add(domain)
-
-            # Add the domain to the set of higher-level domains
-            self.higher_level_domains.add(domain)
-
+        logging.info(f"Number of white domains: {len(white_domains)}")
         logging.info(f"Number of block domains: {len(domains)}")
 
-        # remove white domains
-        domains = sorted(list(domains - white_domains))
+        # Remove white domains
+        domains = sorted(list(set(domains - white_domains)))
 
         logging.info(f"Number of final domains: {len(domains)}")
 
         return domains
-    
-    def convert_white_domains(self, white_content: str):
-        white_domains = set()
-        for line in white_content.splitlines():
-            
-            # skip comments and empty lines
-            if line.startswith(("#", "!", "/")) or line == "":
-                continue
-
-            # convert to domains
-            linex = line.lower().strip().split("#")[0].split("^")[0].replace("\r", "")
-            white_domain = replace_pattern.sub("", linex, count=1)
-            try:
-                white_domain = white_domain.encode("idna").decode("utf-8", "replace")
-            except Exception:
-                continue
-                
-            # remove not domains
-            if not domain_pattern.match(white_domain) or ip_pattern.match(white_domain):
-                continue
-
-            white_domains.add(white_domain)
-            
-        # remove duplicate line
-        logging.info(f"Number of white domains: {len(white_domains)}")
-
-        return white_domains
 
     def chunk_list(self, _list: list[str], n: int):
         for i in range(0, len(_list), n):
