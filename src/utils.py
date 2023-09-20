@@ -147,6 +147,8 @@ class App:
             if white_domain:
                 white_domains.add(white_domain)
 
+        logging.info(f"Number of white domains: {len(white_domains)}")
+
         # Process block_content
         for line in block_content.splitlines():
             domain = convert_domains(line)
@@ -157,7 +159,6 @@ class App:
                     domains.add(domain)
                     filters_subdomains.add(domain)
 
-        logging.info(f"Number of white domains: {len(white_domains)}")
         logging.info(f"Number of block domains: {len(domains)}")
 
         # Remove white domains
