@@ -13,7 +13,7 @@ logger = logging.getLogger()
 logger.addHandler(console)
 
 
-def ad_lists():
+def ad_list():
     adlist_urls = []
     config = ConfigParser()
     
