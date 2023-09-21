@@ -1,6 +1,5 @@
 name: Add Rules to Cloudflare Gateway
 on:
-  push:
   schedule:
     - cron: "10 19 * * *"
   workflow_dispatch:
@@ -9,29 +8,104 @@ jobs:
     name: Cloudflare Gateway
     permissions: write-all
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          
+
       - name: Install Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.11
-          
+
       - name: Install Dependencies
         run: pip install -r requirements.txt
-        
-      - name: Cloudflare Gateway Zero Trust
-        run: python -m src
+          
+      - name: Cloudflare Gateway Zero Trust 
+        run: python -m src 
         env:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CF_IDENTIFIER: ${{ secrets.CF_IDENTIFIER }}
           PYTHONDONTWRITEBYTECODE: 1
           
-        
+      - name: Delete workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          retain_days: 0
+          keep_minimum_runs: 1
+
+  retry1:
+    name: Retry Matrix 1
+    needs: run
+    if: ${{ failure() }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Delay for 60 seconds
+        run: sleep 60
+
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+          
+      - name: Cloudflare Gateway Zero Trust 
+        run: python -m src 
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_IDENTIFIER: ${{ secrets.CF_IDENTIFIER }}
+          PYTHONDONTWRITEBYTECODE: 1
+          
+      - name: Delete workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          retain_days: 0
+          keep_minimum_runs: 1
+
+  retry2:
+    name: Retry Matrix 2
+    needs: retry1
+    if: ${{ failure() }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Delay for 60 seconds
+        run: sleep 60
+
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+          
+      - name: Cloudflare Gateway Zero Trust 
+        run: python -m src 
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_IDENTIFIER: ${{ secrets.CF_IDENTIFIER }}
+          PYTHONDONTWRITEBYTECODE: 1
+          
       - name: Delete workflow runs
         uses: Mattraks/delete-workflow-runs@v2
         with:
