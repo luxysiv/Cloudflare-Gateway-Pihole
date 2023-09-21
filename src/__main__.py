@@ -25,7 +25,7 @@ def ad_list():
                 if not key.startswith("#"):
                     adlist_urls.append(config.get(section, key))
     except Exception:
-        with open("adlist.ini", "r") as file:
+        with open("list.ini", "r") as file:
             adlist_urls = [url.strip() for url in file if not url.startswith("#") and url.strip()]
 
     return adlist_urls
@@ -43,7 +43,7 @@ def white_list():
                 if not key.startswith("#"):
                     whitelist_urls.append(config.get(section, key))
     except Exception:
-        with open("whitelists.ini", "r") as file:
+        with open("whitelist.ini", "r") as file:
             whitelist_urls = [url.strip() for url in file if not url.startswith("#") and url.strip()]
 
     return whitelist_urls
