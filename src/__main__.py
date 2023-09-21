@@ -25,7 +25,7 @@ def ad_list():
                 if not key.startswith("#"):
                     adlist_urls.append(config.get(section, key))
     except Exception:
-        with open("lists.ini", "r") as file:
+        with open("adlist.ini", "r") as file:
             adlist_urls = [url.strip() for url in file if not url.startswith("#") and url.strip()]
 
     return adlist_urls
