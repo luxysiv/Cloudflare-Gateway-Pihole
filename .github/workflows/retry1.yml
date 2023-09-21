@@ -1,15 +1,17 @@
-name: Add Rules to Cloudflare Gateway
+name: Retry Matrix 1
 on:
-  push:
-  schedule:
-    - cron: "10 19 * * *"
-  workflow_dispatch:
+  workflow_run:
+    workflows: ["Add Rules to Cloudflare Gateway"]
+    types:
+      - completed
 jobs:
-  run:
-    name: Cloudflare Gateway
-    permissions: write-all
+  retry1:
+    name: Retry Matrix 1
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
     runs-on: ubuntu-latest
     steps:
+      - name: Delay for 60 seconds
+        run: sleep 60
       - name: Checkout Repository
         uses: actions/checkout@v3
         with:
@@ -29,3 +31,4 @@ jobs:
           repository: ${{ github.repository }}
           retain_days: 0
           keep_minimum_runs: 1
+          
