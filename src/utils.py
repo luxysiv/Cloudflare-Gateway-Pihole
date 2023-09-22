@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import re
-
 import aiohttp
 
 from src import cloudflare
@@ -38,24 +37,16 @@ class App:
 
     async def run(self):
         async with aiohttp.ClientSession() as session:
-            block_content = "".join(
-                await asyncio.gather(
-                    *[
-                        self.download_file_async(session, url)
-                        for url in self.adlist_urls
-                    ]
-                )
-            )
-            white_content = "".join(
-                await asyncio.gather(
-                    *[
-                        self.download_file_async(session, url)
-                        for url in self.whitelist_urls
-                    ]
-                )
-            )
+            all_urls = self.adlist_urls + self.whitelist_urls
+            download_tasks = [
+                self.download_file_async(session, url) for url in all_urls
+            ]
+            results = await asyncio.gather(*download_tasks)
+            block_content = "".join(results[:len(self.adlist_urls)])
+            white_content = "".join(results[len(self.adlist_urls):])
+                        
         domains = self.convert_to_domain_list(block_content, white_content)
-
+        
         # check if number of domains exceeds the limit
         if len(domains) == 0:
             logging.warning("No domains found in the adlist file. Exiting script.")
@@ -139,17 +130,10 @@ class App:
     def convert_to_domain_list(self, block_content: str, white_content: str):
         domains = set()
         filters_subdomains = set()
-        white_domains = set()
-        
-        # Process white_content
-        for line in white_content.splitlines():
-            white_domain = convert_domains(line)
-            if white_domain:
-                white_domains.add(white_domain)
-
+        white_domains = {convert_domains(line) for line in white_content.splitlines() if convert_domains(line)}
+    
         logging.info(f"Number of white domains: {len(white_domains)}")
 
-        # Process block_content
         for line in block_content.splitlines():
             domain = convert_domains(line)
             if domain:
@@ -161,8 +145,7 @@ class App:
 
         logging.info(f"Number of block domains: {len(domains)}")
 
-        # Remove white domains
-        domains = sorted(list(set(domains - white_domains)))
+        domains = sorted(list(domains - white_domains))
 
         logging.info(f"Number of final domains: {len(domains)}")
 
