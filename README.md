@@ -87,8 +87,8 @@ Generate `CF_API_TOKEN` like:
 
 ```python
 async def main():
-    adlist_urls = ad_list()
-    whitelist_urls = white_list()
+    adlist_urls = read_urls_from_file("adlist.ini")
+    whitelist_urls = read_urls_from_file("whitelist.ini")
     adlist_name = "DNS-Filters"
     app = App(adlist_name, adlist_urls, whitelist_urls)
     await app.delete()  # Leave script
