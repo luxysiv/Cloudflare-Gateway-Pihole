@@ -145,12 +145,12 @@ class App:
 
         logging.info(f"Number of block domains: {len(domains)}")
 
-        domains = sorted(list(domains - white_domains))
+        domains -= white_domains
 
         logging.info(f"Number of final domains: {len(domains)}")
 
-        return domains
-
+        return sorted(list(domains))
+        
     def chunk_list(self, _list: list[str], n: int):
         for i in range(0, len(_list), n):
             yield _list[i : i + n]
