@@ -1,16 +1,20 @@
 import asyncio
 import logging
 import re
+
 import aiohttp
 
 from src import cloudflare
 
-replace_pattern = re.compile(r"(^([0-9.]+|[0-9a-fA-F:.]+)\s+|^(\|\||@@\|\||\*\.|\*))")
-domain_pattern = re.compile(
-    r"^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])"
-    r"(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9]))*$"
+replace_pattern = re.compile(
+    r"(^([0-9.]+|[0-9a-fA-F:.]+)\s+|^(\|\||@@\|\||\*\.|\*))"
 )
-ip_pattern = re.compile(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$")
+domain_pattern = re.compile(
+    r"^([a-zA-Z0-9](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?\.)*[a-zA-Z0-9](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?$"
+)
+ip_pattern = re.compile(
+    r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"
+)
 
 def convert_domains(line):
     if line.startswith(("#", "!", "/")) or line == "":
@@ -130,27 +134,39 @@ class App:
     def convert_to_domain_list(self, block_content: str, white_content: str):
         domains = set()
         filters_subdomains = set()
-        white_domains = {convert_domains(line) for line in white_content.splitlines() if convert_domains(line)}
-    
+        white_domains = set()
+        
+        # Process white_content
+        for line in white_content.splitlines():
+            white_domain = convert_domains(line)
+            if white_domain:
+                white_domains.add(white_domain)
+
         logging.info(f"Number of white domains: {len(white_domains)}")
 
+        # Process block_content
         for line in block_content.splitlines():
             domain = convert_domains(line)
             if domain:
                 parts = domain.split(".")
-                is_subdomain = any(".".join(parts[i:]) in filters_subdomains for i in range(len(parts) - 1, 0, -1))
+                is_subdomain = False
+                for i in range(len(parts) - 1, 0, -1):
+                    subdomain = ".".join(parts[i:])
+                    if subdomain in filters_subdomains:
+                        is_subdomain = True
+                        break
                 if not is_subdomain:
                     domains.add(domain)
                     filters_subdomains.add(domain)
 
         logging.info(f"Number of block domains: {len(domains)}")
 
-        domains -= white_domains
+        domains = sorted(list(domains - white_domains))
 
         logging.info(f"Number of final domains: {len(domains)}")
 
-        return sorted(list(domains))
-        
+        return domains
+
     def chunk_list(self, _list: list[str], n: int):
         for i in range(0, len(_list), n):
             yield _list[i : i + n]
