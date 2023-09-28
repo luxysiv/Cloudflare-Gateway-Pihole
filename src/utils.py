@@ -44,7 +44,7 @@ class App:
         async with aiohttp.ClientSession() as session:
             all_urls = self.adlist_urls + self.whitelist_urls
             download_tasks = [
-                self.download_file_async(session, url) for url in all_urls
+                self.download_file(session, url) for url in all_urls
             ]
             results = await asyncio.gather(*download_tasks)
             block_content = "".join(results[:len(self.adlist_urls)])
@@ -126,7 +126,7 @@ class App:
 
         logging.info("Done")
 
-    async def download_file_async(self, session: aiohttp.ClientSession, url: str):
+    async def download_file(self, session: aiohttp.ClientSession, url: str):
         async with session.get(url) as response:
             text = await response.text("utf-8")
             logging.info(f"Downloaded file from {url} File size: {len(text)}")
