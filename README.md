@@ -48,10 +48,7 @@ or add to  [.env](.env)
 
 If you add `CF_IDENTIFIER` and `CF_API_TOKEN` to [.env](.env) , you must edit [main.yml](.github/workflows/main.yml) like this, remove secret env:
 
-```yml
-- name: Install Dependencies
-  run: pip install -r requirements.txt
-          
+```yml         
 - name: Cloudflare Gateway Zero Trust 
   run: python -m src 
 ```
