@@ -73,9 +73,6 @@ Generate `CF_API_TOKEN` like:
 
 * Nếu không biết thêm vào Secret Github Action thì có thể điền giá trị vào file [.env](.env) và sửa file [main.yml](.github/workflows/main.yml) như sau, loại bỏ các dòng secret env
 ```yml
-- name: Install Dependencies
-  run: pip install -r requirements.txt
-          
 - name: Cloudflare Gateway Zero Trust 
   run: python -m src 
 ```
