@@ -1,4 +1,4 @@
-name: Re-run 2 
+name: Re-run
 on:
   workflow_run:
     workflows: ["Re-run"]
@@ -11,8 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Delay for 120 seconds
-        run: sleep 120
+      - name: Delay for 300 seconds
+        run: sleep 300
         
       - name: Checkout Repository
         uses: actions/checkout@v3
