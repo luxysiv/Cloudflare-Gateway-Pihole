@@ -80,11 +80,25 @@ cd Cloudflare-Gateway-Pihole
 nano .env
 ```
 
-Input your value then run
+Input your value then 
 
+* Command
+```
+nano adlist.ini
+```
+to edit block list
+
+* Command
+```
+nano whitelist.ini
+```
+to edit white list
+
+* Command
 ```
 python -m src
 ```
+to upload 
 
 * If Termux not work you can copy and paste this command
 ```
