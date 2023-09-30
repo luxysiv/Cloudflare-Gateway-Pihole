@@ -29,7 +29,6 @@ from typing import (
     Union,
 )
 
-import sys
 sys.path.append('libs')
 import attr
 import attrs
