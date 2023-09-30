@@ -63,6 +63,27 @@ Secret Github Action like:
 Generate `CF_API_TOKEN` like:
 ![CF_API_TOKEN](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/a5b90438-26cc-49ae-9a55-5409a90b683f)
 
+# Termux
+
+Now you can run on Termux
+
+* Download [Termux](https://github.com/termux/termux-app/releases/latest)
+
+* Copy and paste commands
+
+```
+yes | pkg upgrade
+yes | pkg install python-pip
+yes | pkg install git
+git clone https://github.com/luxysiv/Cloudflare-Gateway-Pihole
+cd Cloudflare-Gateway-Pihole
+nano .env
+```
+Input your value then run
+```
+python -m src
+```
+
 # Chú ý 
 
 * Đã hỗ trợ sử dụng list nào cũng được 
