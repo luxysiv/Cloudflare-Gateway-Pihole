@@ -92,6 +92,12 @@ termux-change-repo
 ```
 Enter 3 times
 
+Next time only use commands to run 
+```
+cd Cloudflare-Gateway-Pihole
+python -m src
+```
+
 # Chú ý 
 
 * Đã hỗ trợ sử dụng list nào cũng được 
