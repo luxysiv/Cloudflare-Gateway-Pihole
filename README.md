@@ -79,10 +79,18 @@ git clone https://github.com/luxysiv/Cloudflare-Gateway-Pihole
 cd Cloudflare-Gateway-Pihole
 nano .env
 ```
+
 Input your value then run
+
 ```
 python -m src
 ```
+
+* If Termux not work you can copy and paste this command
+```
+termux-change-repo
+```
+Enter 3 times
 
 # Chú ý 
 
