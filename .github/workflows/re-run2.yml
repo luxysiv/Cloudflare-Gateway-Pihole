@@ -1,7 +1,7 @@
-name: Re-run 2 Add Rules to Cloudflare Gateway 
+name: Re-run 2 
 on:
   workflow_run:
-    workflows: ["Re-run Add Rules to Cloudflare Gateway"]
+    workflows: ["Re-run"]
     types:
       - completed
 jobs:
@@ -11,8 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Delay for 60 seconds
-        run: sleep 60
+      - name: Delay for 120 seconds
+        run: sleep 120
         
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -29,12 +29,4 @@ jobs:
         env:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CF_IDENTIFIER: ${{ secrets.CF_IDENTIFIER }}
-          PYTHONDONTWRITEBYTECODE: 1
-        
-      - name: Delete workflow runs
-        uses: Mattraks/delete-workflow-runs@v2
-        with:
-          token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          retain_days: 0
-          keep_minimum_runs: 1       
+          PYTHONDONTWRITEBYTECODE: 1       
