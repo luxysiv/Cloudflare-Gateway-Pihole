@@ -6,7 +6,7 @@ on:
       - completed
 jobs:
   retry1:
-    name: Retry Add Rules to Cloudflare Gateway
+    name: Cloudflare Gateway
     if: ${{ github.event.workflow_run.conclusion == 'failure' }}
     runs-on: ubuntu-latest
     
