@@ -2,7 +2,7 @@ import asyncio
 import logging
 import re
 
-import aiohttp
+from libs import aiohttp
 
 from src import cloudflare
 
