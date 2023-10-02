@@ -66,12 +66,12 @@ except ImportError:  # pragma: no cover
     ssl = None  # type: ignore[assignment]
     SSLContext = object  # type: ignore[misc,assignment]
 
-#try:
-#    import cchardet as chardet
-#except ImportError:  # pragma: no cover
- #   from libs import charset_normalizer as chardet  # type: ignore[no-redef]
+try:
+    import libs.cchardet as chardet
+except ImportError:
+    import libs.charset_normalizer as chardet
 
-
+__all__ = ("ClientRequest", "ClientResponse", "RequestInfo", "Fingerprint")
 __all__ = ("ClientRequest", "ClientResponse", "RequestInfo", "Fingerprint")
 
 
