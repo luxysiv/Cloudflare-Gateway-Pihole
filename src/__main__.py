@@ -2,16 +2,8 @@ import asyncio
 import logging
 from configparser import ConfigParser
 
-from src.colorlogs import ColoredLevelFormatter
+from src import colorlogs
 from src.utils import App
-
-# Configure logging
-logging.getLogger().setLevel(logging.INFO)
-formatter = ColoredLevelFormatter("%(levelname)s: %(message)s")
-console = logging.StreamHandler()
-console.setFormatter(ColoredLevelFormatter("%(levelname)s: %(message)s"))
-logger = logging.getLogger()
-logger.addHandler(console)
 
 def read_urls_from_file(filename):
     urls = []

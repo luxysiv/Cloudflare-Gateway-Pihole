@@ -119,9 +119,9 @@ class App:
 
     def convert_to_domain_list(self, block_content: str, white_content: str):
         # Process the downloaded content to extract domains
-        domains = set()
-        filters_subdomains = set()
         white_domains = set()
+        block_domains = set()
+        filters_subdomains = set()
 
         # Process white content 
         for line in white_content.splitlines():
@@ -133,9 +133,9 @@ class App:
 
         # Process block content 
         for line in block_content.splitlines():
-            domain = self.convert_domains(line)
-            if domain:
-                parts = domain.split(".")
+            block_domain = self.convert_domains(line)
+            if block_domain:
+                parts = block_domain.split(".")
                 is_subdomain = False
                 for i in range(len(parts) - 1, 0, -1):
                     subdomain = ".".join(parts[i:])
@@ -143,16 +143,16 @@ class App:
                         is_subdomain = True
                         break
                 if not is_subdomain:
-                    domains.add(domain)
-                    filters_subdomains.add(domain)
+                    block_domains.add(block_domain)
+                    filters_subdomains.add(block_domain)
 
-        logging.info(f"Number of block domains: {len(domains)}")
+        logging.info(f"Number of block domains: {len(block_domains)}")
 
-        domains = sorted(list(domains - white_domains))
+        final_domains = sorted(list(block_domains - white_domains))
 
-        logging.info(f"Number of final domains: {len(domains)}")
+        logging.info(f"Number of final domains: {len(final_domains)}")
 
-        return domains
+        return final_domains
 
     def convert_domains(self, line: str):
         # Convert a line into a valid domain name
