@@ -17,20 +17,6 @@ ip_pattern = re.compile(
     r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"
 )
 
-def convert_domains(line):
-    if line.startswith(("#", "!", "/")) or line == "":
-        return None
-
-    linex = line.lower().strip().split("#")[0].split("^")[0].replace("\r", "")
-    domain = replace_pattern.sub("", linex, count=1)
-    try:
-        domain = domain.encode("idna").decode("utf-8", "replace")
-        if domain_pattern.match(domain) and not ip_pattern.match(domain):
-            return domain
-    except Exception:
-        pass
-    return None
-    
 class App:
     def __init__(
         self, adlist_name: str, adlist_urls: list[str], whitelist_urls: list[str]
@@ -107,6 +93,7 @@ class App:
         cf_policies = await cloudflare.get_firewall_policies(self.name_prefix)
         logging.info(f"Number of policies in Cloudflare: {len(cf_policies)}")
 
+        # setup the gateway policy
         if len(cf_policies) == 0:
             logging.info("Creating firewall policy")
             cf_policies = await cloudflare.create_gateway_policy(
@@ -117,12 +104,11 @@ class App:
             raise Exception("More than one firewall policy found")
         else:
             logging.info("Updating firewall policy")
-            update_policy_task = asyncio.create_task(
-                cloudflare.update_gateway_policy(
-                    policy_prefix, cf_policies[0]["id"], [l["id"] for l in cf_lists],
-                )
+            await cloudflare.update_gateway_policy(
+                f"{self.name_prefix} Block Ads",
+                cf_policies[0]["id"],
+                [l["id"] for l in cf_lists],
             )
-            await update_policy_task
 
         logging.info("Done")
 
@@ -133,21 +119,22 @@ class App:
             return text
 
     def convert_to_domain_list(self, block_content: str, white_content: str):
+        # Process the downloaded content to extract domains
         domains = set()
         filters_subdomains = set()
         white_domains = set()
-        
-        # Process white_content
+
+        # Process white content 
         for line in white_content.splitlines():
-            white_domain = convert_domains(line)
+            white_domain = self.convert_domains(line)
             if white_domain:
                 white_domains.add(white_domain)
 
         logging.info(f"Number of white domains: {len(white_domains)}")
 
-        # Process block_content
+        # Process block content 
         for line in block_content.splitlines():
-            domain = convert_domains(line)
+            domain = self.convert_domains(line)
             if domain:
                 parts = domain.split(".")
                 is_subdomain = False
@@ -167,6 +154,21 @@ class App:
         logging.info(f"Number of final domains: {len(domains)}")
 
         return domains
+
+    def convert_domains(self, line: str):
+        # Convert a line into a valid domain name
+        if line.startswith(("#", "!", "/")) or line == "":
+            return None
+
+        linex = line.lower().strip().split("#")[0].split("^")[0].replace("\r", "")
+        domain = replace_pattern.sub("", linex, count=1)
+        try:
+            domain = domain.encode("idna").decode("utf-8", "replace")
+            if domain_pattern.match(domain) and not ip_pattern.match(domain):
+                return domain
+        except Exception:
+            pass
+        return None
 
     def chunk_list(self, _list: list[str], n: int):
         for i in range(0, len(_list), n):
