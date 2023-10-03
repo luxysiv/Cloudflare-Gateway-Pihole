@@ -3,7 +3,6 @@ import logging
 import re
 
 from libs import aiohttp
-
 from src import cloudflare
 
 replace_pattern = re.compile(
