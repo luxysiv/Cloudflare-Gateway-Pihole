@@ -1,7 +1,7 @@
 import functools
 import os
 
-import aiohttp
+from libs import aiohttp
 from libs.dotenv import load_dotenv
 
 load_dotenv()
