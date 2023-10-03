@@ -1,7 +1,7 @@
 import asyncio
 import logging
-from configparser import ConfigParser
 
+from configparser import ConfigParser
 from src import colorlogs
 from src.utils import App
 
