@@ -121,7 +121,6 @@ class App:
         # Process the downloaded content to extract domains
         white_domains = set()
         block_domains = set()
-        filters_subdomains = set()
 
         # Process white content 
         for line in white_content.splitlines():
@@ -135,23 +134,16 @@ class App:
         for line in block_content.splitlines():
             block_domain = self.convert_domains(line)
             if block_domain:
-                parts = block_domain.split(".")
-                is_subdomain = False
-                for i in range(len(parts) - 1, 0, -1):
-                    subdomain = ".".join(parts[i:])
-                    if subdomain in filters_subdomains:
-                        is_subdomain = True
-                        break
-                if not is_subdomain:
-                    block_domains.add(block_domain)
-                    filters_subdomains.add(block_domain)
+                block_domains.add(block_domain)
 
-        logging.info(f"Number of block domains: {len(block_domains)}")
+        filtered_domains = self.remove_subdomains(block_domains)
 
-        final_domains = sorted(list(block_domains - white_domains))
-
+        logging.info(f"Number of block domains: {len(filtered_domains)}")
+        
+        final_domains = sorted(list(filtered_domains - white_domains))
+        
         logging.info(f"Number of final domains: {len(final_domains)}")
-
+        
         return final_domains
 
     def convert_domains(self, line: str):
@@ -168,6 +160,20 @@ class App:
         except Exception:
             pass
         return None
+
+    def remove_subdomains(self, domains: set[str]) -> set[str]:
+        final_domains = set()
+        for domain in domains:
+            parts = domain.split(".")
+            is_subdomain = False
+            for i in range(1, len(parts)):
+                higher_domain = ".".join(parts[i:])
+                if higher_domain in domains:
+                    is_subdomain = True
+                    break
+            if not is_subdomain:
+                final_domains.add(domain)
+        return final_domains
 
     def chunk_list(self, _list: list[str], n: int):
         for i in range(0, len(_list), n):
