@@ -1,5 +1,4 @@
 import asyncio
-import logging
 
 from configparser import ConfigParser
 from src import colorlogs

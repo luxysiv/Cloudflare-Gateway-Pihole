@@ -1,20 +1,8 @@
 import asyncio
+import aiohttp
 import logging
-import re
 
-from libs import aiohttp
-from src import cloudflare
-
-replace_pattern = re.compile(
-    r"(^([0-9.]+|[0-9a-fA-F:.]+)\s+|^(\|\||@@\|\||\*\.|\*))"
-)
-domain_pattern = re.compile(
-    r"^([a-zA-Z0-9](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?\.)*"
-    r"[a-zA-Z0-9](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?$"
-)
-ip_pattern = re.compile(
-    r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"
-)
+from src import replace_pattern, domain_pattern, ip_pattern, cloudflare
 
 class App:
     def __init__(
@@ -162,7 +150,7 @@ class App:
         return None
 
     def remove_subdomains(self, domains: set[str]) -> set[str]:
-        final_domains = set()
+        top_level_domains = set()
         for domain in domains:
             parts = domain.split(".")
             is_subdomain = False
@@ -172,8 +160,8 @@ class App:
                     is_subdomain = True
                     break
             if not is_subdomain:
-                final_domains.add(domain)
-        return final_domains
+                top_level_domains.add(domain)
+        return top_level_domains
 
     def chunk_list(self, _list: list[str], n: int):
         for i in range(0, len(_list), n):

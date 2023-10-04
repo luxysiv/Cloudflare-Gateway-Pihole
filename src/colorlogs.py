@@ -15,13 +15,3 @@ class ColoredLevelFormatter(logging.Formatter):
         reset_color = "\x1b[0m"
         record.levelname = f"{levelname_color}{levelname}{reset_color}"
         return super().format(record)
-
-logging.getLogger().setLevel(logging.INFO)
-
-formatter = ColoredLevelFormatter("%(levelname)s: %(message)s")
-
-console = logging.StreamHandler()
-console.setFormatter(ColoredLevelFormatter("%(levelname)s: %(message)s"))
-
-logger = logging.getLogger()
-logger.addHandler(console)
