@@ -46,19 +46,19 @@ or add to  [.env](.env)
 
 # Use .env
 
-If you add `CF_IDENTIFIER` and `CF_API_TOKEN` to [.env](.env) , you must edit [main.yml](.github/workflows/main.yml) like this, remove secret env:
+If you add `CF_IDENTIFIER` and `CF_API_TOKEN` to [.env](.env) , you must edit [main.yml](.github/workflows/main.yml) , [re-run.yml](.github/workflows/re-run.yml) and [re-run2](.github/workflows/re-run2.yml) like this, remove secret env:
 
 ```yml         
 - name: Cloudflare Gateway Zero Trust 
   run: python -m src 
 ```
 
+* Script has 2 backup workflow files that if the upload fails, will run 2 more times every 5 minutes.  So the failure rate will be very low
+
 # More informations about Secret Github Action and API TOKEN 
 
 Secret Github Action like:
 ![1000015672](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/6bd7f41d-0ca5-4944-95d3-d41dfd913c60)
-
-
 
 Generate `CF_API_TOKEN` like:
 ![CF_API_TOKEN](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/a5b90438-26cc-49ae-9a55-5409a90b683f)
@@ -120,13 +120,15 @@ python -m src
 
 * Các bạn đã up lists bằng script khác thì nên xoá đi bằng tính năng xoá của script đã up hoặc xoá tay
 
-* Nếu không biết thêm vào Secret Github Action thì có thể điền giá trị vào file [.env](.env) và sửa file [main.yml](.github/workflows/main.yml) như sau, loại bỏ các dòng secret env
+* Nếu không biết thêm vào Secret Github Action thì có thể điền giá trị vào file [.env](.env) và sửa file [main.yml](.github/workflows/main.yml) , [re-run.yml](.github/workflows/re-run.yml) và [re-run2](.github/workflows/re-run2.yml) như sau, loại bỏ các dòng secret env
 ```yml
 - name: Cloudflare Gateway Zero Trust 
   run: python -m src 
 ```
 
 * Mình đã update thêm tính năng xoá lists khi các bạn không cần sử dụng script nữa. Vào [__main__.py](src/__main__.py) để như sau:
+
+* Script có 2 files workflow dự phòng nếu upload thất bại sẽ chạy tiếp 2 lần sau mỗi 5p. Cho nên tỉ lệ fail sẽ rất thấp
 
 ```python
 async def main():
