@@ -47,27 +47,18 @@ def convert_domains(line: str):
 
 def remove_subdomains(domains: set[str]) -> set[str]:
     top_level_domains = set()
-    subdomains = set()
-
-    for domain in domains:
-        parts = domain.split(".")
-        
-        if len(parts) == 1: 
-            top_level_domains.add(domain)
-        else:
-            subdomains.add(domain)
-
-    for subdomain in subdomains:
-        parts = subdomain.split(".")
-
-        is_subdomain = False
-        for i in range(1, len(parts)):
-            higher_domain = ".".join(parts[i:])
-            if higher_domain in subdomains:
-                is_subdomain = True
-                break
-
-        if not is_subdomain:
-            top_level_domains.add(subdomain)
-
-    return top_level_domains
+    
+        for domain in domains:
+            parts = domain.split(".")
+            
+            is_subdomain = False            
+            for i in range(1, len(parts)):
+                higher_domain = ".".join(parts[i:])
+                if higher_domain in domains:
+                    is_subdomain = True
+                    break
+                    
+            if not is_subdomain:
+                top_level_domains.add(domain)
+                
+        return top_level_domains
