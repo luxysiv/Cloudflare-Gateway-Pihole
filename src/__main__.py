@@ -1,7 +1,6 @@
 import asyncio
 
 from configparser import ConfigParser
-from src import colorlogs
 from src.utils import App
 
 def read_urls_from_file(filename):
