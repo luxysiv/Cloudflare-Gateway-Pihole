@@ -18,25 +18,19 @@ def convert_to_domain_list(block_content: str, white_content: str) -> list[str]:
     return final_domains
 
 def extract_domains(content: str, domains: set[str]) -> None:
-    def extract_domain(line: str) -> str:
+    for line in content.splitlines():
         if line.startswith(("#", "!", "/")) or line == "":
-            return None
+            continue
 
-        line = line.lower().strip().split("#")[0].split("^")[0].replace("\r", "")
-        domain = replace_pattern.sub("", line, count=1)
+        cleaned_line = line.lower().strip().split("#")[0].split("^")[0].replace("\r", "")
+        domain = replace_pattern.sub("", cleaned_line, count=1)
         try:
             domain = domain.encode("idna").decode("utf-8", "replace")
             if domain_pattern.match(domain) and not ip_pattern.match(domain):
-                return domain
+                domains.add(domain)
         except Exception:
             pass
-        return None
-
-    for line in content.splitlines():
-        domain = extract_domain(line)
-        if domain:
-            domains.add(domain)
-
+            
 def remove_subdomains_if_higher(domains: set[str]) -> set[str]:
     top_level_domains = set()
     
