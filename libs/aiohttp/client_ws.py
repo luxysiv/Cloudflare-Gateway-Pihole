@@ -1,9 +1,9 @@
 """WebSocket client for asyncio."""
 
 import asyncio
-from typing import Any, Optional, cast
-
-from libs import async_timeout
+import dataclasses
+import sys
+from typing import Any, Final, Optional, cast
 
 from .client_exceptions import ClientError
 from .client_reqrep import ClientResponse
@@ -25,6 +25,22 @@ from .typedefs import (
     JSONEncoder,
 )
 
+if sys.version_info >= (3, 11):
+    import asyncio as async_timeout
+else:
+    import async_timeout
+
+
+@dataclasses.dataclass(frozen=True)
+class ClientWSTimeout:
+    ws_receive: Optional[float] = None
+    ws_close: Optional[float] = None
+
+
+DEFAULT_WS_CLIENT_TIMEOUT: Final[ClientWSTimeout] = ClientWSTimeout(
+    ws_receive=None, ws_close=10.0
+)
+
 
 class ClientWebSocketResponse:
     def __init__(
@@ -33,12 +49,11 @@ class ClientWebSocketResponse:
         writer: WebSocketWriter,
         protocol: Optional[str],
         response: ClientResponse,
-        timeout: float,
+        timeout: ClientWSTimeout,
         autoclose: bool,
         autoping: bool,
         loop: asyncio.AbstractEventLoop,
         *,
-        receive_timeout: Optional[float] = None,
         heartbeat: Optional[float] = None,
         compress: int = 0,
         client_notakeover: bool = False,
@@ -52,8 +67,7 @@ class ClientWebSocketResponse:
         self._closed = False
         self._closing = False
         self._close_code: Optional[int] = None
-        self._timeout = timeout
-        self._receive_timeout = receive_timeout
+        self._timeout: ClientWSTimeout = timeout
         self._autoclose = autoclose
         self._autoping = autoping
         self._heartbeat = heartbeat
@@ -83,7 +97,12 @@ class ClientWebSocketResponse:
 
         if self._heartbeat is not None:
             self._heartbeat_cb = call_later(
-                self._send_heartbeat, self._heartbeat, self._loop
+                self._send_heartbeat,
+                self._heartbeat,
+                self._loop,
+                timeout_ceil_threshold=self._conn._connector._timeout_ceil_threshold
+                if self._conn is not None
+                else 5,
             )
 
     def _send_heartbeat(self) -> None:
@@ -91,12 +110,17 @@ class ClientWebSocketResponse:
             # fire-and-forget a task is not perfect but maybe ok for
             # sending ping. Otherwise we need a long-living heartbeat
             # task in the class.
-            self._loop.create_task(self._writer.ping())
+            self._loop.create_task(self._writer.ping())  # type: ignore[unused-awaitable]
 
             if self._pong_response_cb is not None:
                 self._pong_response_cb.cancel()
             self._pong_response_cb = call_later(
-                self._pong_not_received, self._pong_heartbeat, self._loop
+                self._pong_not_received,
+                self._pong_heartbeat,
+                self._loop,
+                timeout_ceil_threshold=self._conn._connector._timeout_ceil_threshold
+                if self._conn is not None
+                else 5,
             )
 
     def _pong_not_received(self) -> None:
@@ -167,7 +191,8 @@ class ClientWebSocketResponse:
     async def close(self, *, code: int = WSCloseCode.OK, message: bytes = b"") -> bool:
         # we need to break `receive()` cycle first,
         # `close()` may be called from different task
-        if self._waiting is not None and not self._closed:
+        if self._waiting is not None and not self._closing:
+            self._closing = True
             self._reader.feed_data(WS_CLOSING_MESSAGE, 0)
             await self._waiting
 
@@ -186,13 +211,13 @@ class ClientWebSocketResponse:
                 self._response.close()
                 return True
 
-            if self._closing:
+            if self._close_code:
                 self._response.close()
                 return True
 
             while True:
                 try:
-                    async with async_timeout.timeout(self._timeout):
+                    async with async_timeout.timeout(self._timeout.ws_close):
                         msg = await self._reader.read()
                 except asyncio.CancelledError:
                     self._close_code = WSCloseCode.ABNORMAL_CLOSURE
@@ -225,7 +250,9 @@ class ClientWebSocketResponse:
             try:
                 self._waiting = self._loop.create_future()
                 try:
-                    async with async_timeout.timeout(timeout or self._receive_timeout):
+                    async with async_timeout.timeout(
+                        timeout or self._timeout.ws_receive
+                    ):
                         msg = await self._reader.read()
                     self._reset_heartbeat()
                 finally:
@@ -257,7 +284,8 @@ class ClientWebSocketResponse:
             if msg.type == WSMsgType.CLOSE:
                 self._closing = True
                 self._close_code = msg.data
-                if not self._closed and self._autoclose:
+                # Could be closed elsewhere while awaiting reader
+                if not self._closed and self._autoclose:  # type: ignore[redundant-expr]
                     await self.close()
             elif msg.type == WSMsgType.CLOSING:
                 self._closing = True

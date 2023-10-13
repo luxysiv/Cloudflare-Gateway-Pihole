@@ -1,13 +1,13 @@
 import asyncio
 import base64
 import binascii
+import dataclasses
 import hashlib
 import json
-from typing import Any, Iterable, Optional, Tuple, cast
+import sys
+from typing import Any, Final, Iterable, Optional, Tuple, cast
 
-import async_timeout
-import attr
-from multidict import CIMultiDict
+from libs.multidict import CIMultiDict
 
 from . import hdrs
 from .abc import AbstractStreamWriter
@@ -27,10 +27,15 @@ from .http import (
 )
 from .log import ws_logger
 from .streams import EofStream, FlowControlDataQueue
-from .typedefs import Final, JSONDecoder, JSONEncoder
+from .typedefs import JSONDecoder, JSONEncoder
 from .web_exceptions import HTTPBadRequest, HTTPException
 from .web_request import BaseRequest
 from .web_response import StreamResponse
+
+if sys.version_info >= (3, 11):
+    import asyncio as async_timeout
+else:
+    import async_timeout
 
 __all__ = (
     "WebSocketResponse",
@@ -41,7 +46,7 @@ __all__ = (
 THRESHOLD_CONNLOST_ACCESS: Final[int] = 5
 
 
-@attr.s(auto_attribs=True, frozen=True, slots=True)
+@dataclasses.dataclass(frozen=True)
 class WebSocketReady:
     ok: bool
     protocol: Optional[str]
@@ -51,8 +56,29 @@ class WebSocketReady:
 
 
 class WebSocketResponse(StreamResponse):
-
-    _length_check = False
+    __slots__ = (
+        "_protocols",
+        "_ws_protocol",
+        "_writer",
+        "_reader",
+        "_closed",
+        "_closing",
+        "_conn_lost",
+        "_close_code",
+        "_loop",
+        "_waiting",
+        "_exception",
+        "_timeout",
+        "_receive_timeout",
+        "_autoclose",
+        "_autoping",
+        "_heartbeat",
+        "_heartbeat_cb",
+        "_pong_heartbeat",
+        "_pong_response_cb",
+        "_compress",
+        "_max_msg_size",
+    )
 
     def __init__(
         self,
@@ -67,6 +93,7 @@ class WebSocketResponse(StreamResponse):
         max_msg_size: int = 4 * 1024 * 1024,
     ) -> None:
         super().__init__(status=101)
+        self._length_check = False
         self._protocols = protocols
         self._ws_protocol: Optional[str] = None
         self._writer: Optional[WebSocketWriter] = None
@@ -105,21 +132,31 @@ class WebSocketResponse(StreamResponse):
         if self._heartbeat is not None:
             assert self._loop is not None
             self._heartbeat_cb = call_later(
-                self._send_heartbeat, self._heartbeat, self._loop
+                self._send_heartbeat,
+                self._heartbeat,
+                self._loop,
+                timeout_ceil_threshold=self._req._protocol._timeout_ceil_threshold
+                if self._req is not None
+                else 5,
             )
 
     def _send_heartbeat(self) -> None:
         if self._heartbeat is not None and not self._closed:
-            assert self._loop is not None
+            assert self._loop is not None and self._writer is not None
             # fire-and-forget a task is not perfect but maybe ok for
             # sending ping. Otherwise we need a long-living heartbeat
             # task in the class.
-            self._loop.create_task(self._writer.ping())  # type: ignore[union-attr]
+            self._loop.create_task(self._writer.ping())  # type: ignore[unused-awaitable]
 
             if self._pong_response_cb is not None:
                 self._pong_response_cb.cancel()
             self._pong_response_cb = call_later(
-                self._pong_not_received, self._pong_heartbeat, self._loop
+                self._pong_not_received,
+                self._pong_heartbeat,
+                self._loop,
+                timeout_ceil_threshold=self._req._protocol._timeout_ceil_threshold
+                if self._req is not None
+                else 5,
             )
 
     def _pong_not_received(self) -> None:
@@ -286,6 +323,19 @@ class WebSocketResponse(StreamResponse):
     def compress(self) -> bool:
         return self._compress
 
+    def get_extra_info(self, name: str, default: Any = None) -> Any:
+        """Get optional transport information.
+
+        If no value associated with ``name`` is found, ``default`` is returned.
+        """
+        writer = self._writer
+        if writer is None:
+            return default
+        transport = writer.transport
+        if transport is None:
+            return default
+        return transport.get_extra_info(name, default)
+
     def exception(self) -> Optional[BaseException]:
         return self._exception
 
@@ -436,7 +486,8 @@ class WebSocketResponse(StreamResponse):
             if msg.type == WSMsgType.CLOSE:
                 self._closing = True
                 self._close_code = msg.data
-                if not self._closed and self._autoclose:
+                # Could be closed while awaiting reader.
+                if not self._closed and self._autoclose:  # type: ignore[redundant-expr]
                     await self.close()
             elif msg.type == WSMsgType.CLOSING:
                 self._closing = True
