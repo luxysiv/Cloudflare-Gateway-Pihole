@@ -1,5 +1,5 @@
 import logging
-from src import replace_pattern, domain_pattern, ip_pattern, trie
+from src import replace_pattern, domain_pattern, ip_pattern
 
 def convert_to_domain_list(block_content: str, white_content: str) -> list[str]:
     white_domains = set()
@@ -9,7 +9,7 @@ def convert_to_domain_list(block_content: str, white_content: str) -> list[str]:
     logging.info(f"Number of whitelisted domains: {len(white_domains)}")
 
     extract_domains(block_content, block_domains)
-    block_domains = trie.remove_subdomains(block_domains)
+    block_domains = remove_subdomains_if_higher(block_domains)
     logging.info(f"Number of blocked domains: {len(block_domains)}")
 
     final_domains = sorted(list(block_domains - white_domains))
@@ -30,3 +30,21 @@ def extract_domains(content: str, domains: set[str]) -> None:
                 domains.add(domain)
         except Exception:
             pass
+            
+def remove_subdomains_if_higher(domains: set[str]) -> set[str]:
+    top_level_domains = set()
+    
+    for domain in domains:
+        parts = domain.split(".")
+            
+        is_lower_subdomain = False            
+        for i in range(1, len(parts)):
+            higher_domain = ".".join(parts[i:])
+            if higher_domain in domains:
+                is_lower_subdomain = True
+                break
+                    
+        if not is_lower_subdomain:
+            top_level_domains.add(domain)
+                
+    return top_level_domains
