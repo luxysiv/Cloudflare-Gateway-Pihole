@@ -32,6 +32,3 @@ CF_API_TOKEN = os.getenv("CF_API_TOKEN") or os.environ.get("CF_API_TOKEN")
 CF_IDENTIFIER = os.getenv("CF_IDENTIFIER") or os.environ.get("CF_IDENTIFIER")
 if not CF_API_TOKEN or not CF_IDENTIFIER:
     raise Exception("Missing Cloudflare credentials")
-
-# Url
-BASE_URL = f"https://api.cloudflare.com/client/v4/accounts/{CF_IDENTIFIER}/gateway"
