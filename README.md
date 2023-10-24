@@ -1,23 +1,18 @@
-# Dành cho các bạn Việt Nam
-
-Các bạn cần phân biệt bộ lọc DNS và bộ lọc browser. Mình thấy nhiều bạn đem bộ lọc browser lên chạy -> lỗi lướt web
+# For Everyone
 
 # Credit
 
-* This repository modified from source [IanDesuyo/CloudflareGatewayAdBlock](https://github.com/IanDesuyo/CloudflareGatewayAdBlock)
+* Inspired by [IanDesuyo/CloudflareGatewayAdBlock](https://github.com/IanDesuyo/CloudflareGatewayAdBlock)
 
-* Thanks alot [@nhubaotruong](https://github.com/nhubaotruong) for his contribute 
+* Thanks alot [@nhubaotruong](https://github.com/nhubaotruong) for his contribution 
 
 # Cloudflare-Gateway-Pihole
-Create your block ad-list to Cloudflare Gateway
+Create your blocked ad-list using Cloudflare Gateway
 
-# Note
+> # Note
+* Supported white list
 
-* Supported mix list
-
-* Add your list to [adlist.ini](adlist.ini)
-
-* Supported 2 kinds of [adlist.ini](adlist.ini)
+* Supported 2 kinds balcklist [adlist.ini](adlist.ini)
 
 ```ini
 https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/hosts-VN
@@ -32,36 +27,16 @@ Antipopup = https://raw.githubusercontent.com/Yhonay/antipopads/master/hosts
 Hagezi = https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt
 ```
 
-* Supported white list 
 
-# Introduce
-Add variables secrets to 
-`https://github.com/your-user/your-repository/settings/secrets/actions`:
+# Setup
+Add variables secrets to your forked repository
+`https://github.com/<username>/<repository>/settings/secrets/actions`:
 
-* `CF_IDENTIFIER` from your Account ID from : https://dash.cloudflare.com/?to=/:account/workers
-
+* Grab your Account ID from https://dash.cloudflare.com/?to=/:account/workers and set to `CF_IDENTIFIER`
 * `CF_API_TOKEN` take from : https://dash.cloudflare.com/profile/api-tokens with 3 permissions `Account.Zero Trust : Edit` `Account.Account Firewall Access Rules : Edit` `Account.Access: Apps and Policies : Edit`
-
-or add to  [.env](.env)
-
-# Use .env
-
-If you add `CF_IDENTIFIER` and `CF_API_TOKEN` to [.env](.env) , you must edit [main.yml](.github/workflows/main.yml) , [re-run.yml](.github/workflows/re-run.yml) and [re-run2](.github/workflows/re-run2.yml) like this, remove secret env:
-
-```yml         
-- name: Cloudflare Gateway Zero Trust 
-  run: python -m src 
-```
 
 * Script has 2 backup workflow files that if the upload fails, will run 2 more times every 5 minutes.  So the failure rate will be very low
 
-# More informations about Secret Github Action and API TOKEN 
-
-Secret Github Action like:
-![1000015672](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/6bd7f41d-0ca5-4944-95d3-d41dfd913c60)
-
-Generate `CF_API_TOKEN` like:
-![CF_API_TOKEN](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/a5b90438-26cc-49ae-9a55-5409a90b683f)
 
 # Termux
 
@@ -114,21 +89,14 @@ python -m src
 
 # Chú ý 
 
-* Đã hỗ trợ sử dụng list nào cũng được 
+* Supports using any list
 
-* Giới hạn của Cloudflare Gateway Zero Trust free là 300k domains nên các bạn nhớ chú ý log, nếu quá script sẽ stop
+* The limit of Cloudflare Gateway Zero Trust free is 300k domains so remember to pay attention to the log, if it exceeds the script will stop
 
-* Các bạn đã up lists bằng script khác thì nên xoá đi bằng tính năng xoá của script đã up hoặc xoá tay
-
-* Nếu không biết thêm vào Secret Github Action thì có thể điền giá trị vào file [.env](.env) và sửa file [main.yml](.github/workflows/main.yml) , [re-run.yml](.github/workflows/re-run.yml) và [re-run2](.github/workflows/re-run2.yml) như sau, loại bỏ các dòng secret env
-```yml
-- name: Cloudflare Gateway Zero Trust 
-  run: python -m src 
+* If you have uploaded lists using another script, you should delete them using the delete feature of the uploaded script or delete them manually
 ```
 
-* Mình đã update thêm tính năng xoá lists khi các bạn không cần sử dụng script nữa. Vào [__main__.py](src/__main__.py) để như sau:
-
-* Script có 2 files workflow dự phòng nếu upload thất bại sẽ chạy tiếp 2 lần sau mỗi 5p. Cho nên tỉ lệ fail sẽ rất thấp
+* I have updated the feature to delete lists when you no longer need to use the script. Go to [__main__.py](src/__main__.py) as follows:
 
 ```python
 async def main():
@@ -140,29 +108,6 @@ async def main():
     # await app.run()
 ```
 
+👌 Wishing you success
 
-* Đã thêm tính năng white lists
-
-* Bạn có thể thay tên `DNS-Filters` bằng các tên bạn thích 
-
-* Thêm danh sách của bạn vào [adlist.ini](adlist.ini)
-
-* Đã hỗ trợ 2 loại [adlist.ini](adlist.ini)
-
-```ini
-https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/hosts-VN
-https://raw.githubusercontent.com/Yhonay/antipopads/master/hosts
-https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt
-```
-hoặc
-```ini
-[Hosts-Urls]
-hostsVN = https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/hosts-VN
-Antipopup = https://raw.githubusercontent.com/Yhonay/antipopads/master/hosts
-Hagezi = https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt
-```
-
-
-👌 Chúc các bạn thành công 
-
-👌 Mọi thắc mắc về script các bạn có thể mở issue
+👌 If you have any questions about the script, you can open an issue
