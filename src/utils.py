@@ -54,7 +54,7 @@ class App:
                 logging.warning("Firewall policy already exists, exiting script")
                 return
 
-            return 
+            return
 
         # Delete existing policy created by script
         policy_prefix = f"{self.name_prefix} Block Ads"
