@@ -7,7 +7,7 @@ def aiohttp_session(func):
     @functools.wraps(func)
     async def wrapper(*args, **kwargs):
         async with aiohttp.ClientSession(
-            timeout=aiohttp.ClientTimeout(total=10),
+            timeout=aiohttp.ClientTimeout(total=20),
             headers={"Authorization": f"Bearer {CF_API_TOKEN}"},
         ) as session:
             kwargs["session"] = session
