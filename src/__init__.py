@@ -2,7 +2,7 @@ import os
 import re
 import logging
 
-from libs import aiohttp
+import aiohttp
 from src.colorlogs import ColoredLevelFormatter
 
 # Regex Pattern
