@@ -18,7 +18,7 @@ class App:
             block_content = "".join(
                 await asyncio.gather(
                     *[
-                        self.download_file_async(session, url)
+                        self.download_file(session, url)
                         for url in self.adlist_urls
                     ]
                 )
@@ -26,7 +26,7 @@ class App:
             white_content = "".join(
                 await asyncio.gather(
                     *[
-                        self.download_file_async(session, url)
+                        self.download_file(session, url)
                         for url in self.whitelist_urls
                     ]
                 )
