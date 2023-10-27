@@ -1,3 +1,4 @@
+import os
 import asyncio
 import aiohttp
 import logging
@@ -32,12 +33,16 @@ class App:
                 )
             )
 
+            script_directory = os.path.dirname(os.path.abspath(__file__))
+            blacklist_path = os.path.join(script_directory, '../dynamic_blacklist.txt')
+            whitelist_path = os.path.join(script_directory, '../dynamic_whitelist.txt')
+            
             # Add dynamic_blacklist
-            with open("../dynamic_blacklist.txt") as block_file:
+            with open(blacklist_path, "r") as block_file:
                 block_content += block_file.read()
-
+                
             # Add dynamic_whitelist
-            with open("../dynamic_whitelist.txt") as white_file:
+            with open(whitelist_path, "r") as white_file:
                 white_content += white_file.read()
                         
         domains = convert.convert_to_domain_list(block_content, white_content)
