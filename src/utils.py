@@ -6,6 +6,7 @@ import logging
 from src import cloudflare, convert 
 
 class App:
+    
     def __init__(
         self, adlist_name: str, adlist_urls: list[str], whitelist_urls: list[str]
     ):
@@ -15,6 +16,8 @@ class App:
         self.name_prefix = f"[AdBlock-{adlist_name}]"
 
     async def run(self):
+
+        # Download block and white content 
         async with aiohttp.ClientSession() as session:
             block_content = "".join(
                 await asyncio.gather(
@@ -32,18 +35,6 @@ class App:
                     ]
                 )
             )
-
-            script_directory = os.path.dirname(os.path.abspath(__file__))
-            blacklist_path = os.path.join(script_directory, '../dynamic_blacklist.txt')
-            whitelist_path = os.path.join(script_directory, '../dynamic_whitelist.txt')
-            
-            # Add dynamic_blacklist
-            with open(blacklist_path, "r") as block_file:
-                block_content += block_file.read()
-                
-            # Add dynamic_whitelist
-            with open(whitelist_path, "r") as white_file:
-                white_content += white_file.read()
                         
         domains = convert.convert_to_domain_list(block_content, white_content)
         
