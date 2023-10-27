@@ -36,16 +36,13 @@ class App:
                 )
             )
             
-        # Add dynamic black list
-        with open("dynamic_blacklist.txt", "r") as black_file:
-            blacklist_content = black_file.read()
-            block_content += blacklist_content
+        # Add dynamic_blacklist
+        with open("dynamic_blacklist.txt", "r") as block_file:
+            block_content += block_file.read()
 
-
-        # Add dynamic white list 
+        # Add dynamic_whitelist
         with open("dynamic_whitelist.txt", "r") as white_file:
-            whitelist_content = white_file.read()
-            white_content += whitelist_content
+            white_content += white_file.read()
                         
         domains = convert.convert_to_domain_list(block_content, white_content)
         
