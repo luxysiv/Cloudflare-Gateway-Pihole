@@ -15,13 +15,30 @@ class App:
 
     async def run(self):
         async with aiohttp.ClientSession() as session:
-            all_urls = self.adlist_urls + self.whitelist_urls
-            download_tasks = [
-                self.download_file(session, url) for url in all_urls
-            ]
-            results = await asyncio.gather(*download_tasks)
-            block_content = "".join(results[:len(self.adlist_urls)])
-            white_content = "".join(results[len(self.adlist_urls):])
+            block_content = "".join(
+                await asyncio.gather(
+                    *[
+                        self.download_file_async(session, url)
+                        for url in self.adlist_urls
+                    ]
+                )
+            )
+            white_content = "".join(
+                await asyncio.gather(
+                    *[
+                        self.download_file_async(session, url)
+                        for url in self.whitelist_urls
+                    ]
+                )
+            )
+
+            # Add dynamic_blacklist
+            with open("dynamic_blacklist.txt", "r") as block_file:
+                block_content += block_file.read()
+
+            # Add dynamic_whitelist
+            with open("dynamic_whitelist.txt", "r") as white_file:
+                white_content += white_file.read()
                         
         domains = convert.convert_to_domain_list(block_content, white_content)
         
