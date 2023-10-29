@@ -1,5 +1,7 @@
 import functools
 import aiohttp
+import logging
+
 
 from src import CF_API_TOKEN, CF_IDENTIFIER
 
@@ -51,6 +53,7 @@ async def delete_list(name: str, list_id: str, session: aiohttp.ClientSession):
         f"https://api.cloudflare.com/client/v4/accounts/{CF_IDENTIFIER}/gateway/lists/{list_id}",
     ) as resp:
         if resp.status != 200:
+            logging.error(resp)
             raise Exception("Failed to delete Cloudflare list")
 
         return (await resp.json())["result"]
