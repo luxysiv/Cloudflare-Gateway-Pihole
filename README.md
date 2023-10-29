@@ -1,134 +1,86 @@
-# Dành cho các bạn Việt Nam
+# Pihole styled, but using Cloudflare Gateway
+`For Devs, Ops, and everyone who hates Ads.`
 
-Các bạn cần phân biệt bộ lọc DNS và bộ lọc browser. Mình thấy nhiều bạn đem bộ lọc browser lên chạy -> lỗi lướt web
+Create your ad blocklist using Cloudflare Gateway
 
-# Credit
+### Credit goes there.
+---
 
-* This repository modified from source [IanDesuyo/CloudflareGatewayAdBlock](https://github.com/IanDesuyo/CloudflareGatewayAdBlock)
+> First inspired by [IanDesuyo/CloudflareGatewayAdBlock](https://github.com/IanDesuyo/CloudflareGatewayAdBlock).
 
-* Thanks alot [@nhubaotruong](https://github.com/nhubaotruong) for his contribute 
+> Thanks alot to [@nhubaotruong](https://github.com/nhubaotruong) for his contributions.
 
-# Cloudflare-Gateway-Pihole
-Create your block ad-list to Cloudflare Gateway
+> Modified by [@minlaxz](https://github.com/minlaxz).
+>> Removed unnecessaries: removed `lib` directory and handling inside the github actions [check here](https://github.com/minlaxz/CFG-adblock/tree/main).
 
-# Note
+>> Added dynamic domain filter (whitelist and blacklist) idea (please check `ini` files, as you may also need to modify those.)
 
-* Supported mix list
-
-* Add your list to [adlist.ini](adlist.ini)
-
-* Supported 2 kinds of [adlist.ini](adlist.ini)
+### Supported styles
+---
+* White list [whitelist.ini](whitelist.ini) and
+* Two kinds of balcklist [adlist.ini](adlist.ini)
 
 ```ini
 https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/hosts-VN
-https://raw.githubusercontent.com/Yhonay/antipopads/master/hosts
-https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt
 ```
 or
 ```ini
 [Hosts-Urls]
 hostsVN = https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/hosts-VN
-Antipopup = https://raw.githubusercontent.com/Yhonay/antipopads/master/hosts
-Hagezi = https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt
 ```
 
-* Supported white list 
 
-# Introduce
-Add variables secrets to 
-`https://github.com/your-user/your-repository/settings/secrets/actions`:
+### How to set this up?
+---
+1. Fork this repository to your account.
+2. Grab your **Cloudflare Account ID** from ➞ `https://dash.cloudflare.com/?to=/:account/workers`
+3. Create your **API Token** from ➞ `https://dash.cloudflare.com/profile/api-tokens` with 3 permissions 
+   1. `Account.Zero Trust : Edit` 
+   2. `Account.Account Firewall Access Rules : Edit`
+   3. `Account.Access: Apps and Policies : Edit`
 
-* `CF_IDENTIFIER` from your Account ID from : https://dash.cloudflare.com/?to=/:account/workers
+4. Add **Repository Secrets** to your forked repository
+`➞ https://github.com/<username>/<forked-repository>/settings/secrets/actions`
+   1. Set **Cloudflare Account ID** to `CF_IDENTIFIER`
+   2. Set **API Token** to `CF_API_TOKEN`
 
-* `CF_API_TOKEN` take from : https://dash.cloudflare.com/profile/api-tokens with 3 permissions `Account.Zero Trust : Edit` `Account.Account Firewall Access Rules : Edit` `Account.Access: Apps and Policies : Edit`
 
-or add to  [.env](.env)
+#### Note
+---
+> Github Actions: it has 2 dependent backup workflows [re-run](.github/workflows/re-run.yml) and [re-run2]([re-run](.github/workflows/re-run2.yml)) in case if the **[main workflow](.github/workflows/main.yml)** fails, 
 
-# Use .env
+> They will retry after 5 minutes one after another only if the **main workflow** has been failed (not cancelled - if you cancelled the main workflow manually, they will not be triggered anyway).
 
-If you add `CF_IDENTIFIER` and `CF_API_TOKEN` to [.env](.env) , you must edit [main.yml](.github/workflows/main.yml) , [re-run.yml](.github/workflows/re-run.yml) and [re-run2](.github/workflows/re-run2.yml) like this, remove secret env:
+### How to set up using Termux?
+---
 
-```yml         
-- name: Cloudflare Gateway Zero Trust 
-  run: python -m src 
-```
+* Download the **GOAT** [Termux](https://github.com/termux/termux-app/releases/latest)
 
-* Script has 2 backup workflow files that if the upload fails, will run 2 more times every 5 minutes.  So the failure rate will be very low
+* Here're `commands` need to be run one after another to setup python
 
-# More informations about Secret Github Action and API TOKEN 
-
-Secret Github Action like:
-![1000015672](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/6bd7f41d-0ca5-4944-95d3-d41dfd913c60)
-
-Generate `CF_API_TOKEN` like:
-![CF_API_TOKEN](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/a5b90438-26cc-49ae-9a55-5409a90b683f)
-
-# Termux
-
-Now you can run on Termux
-
-* Download [Termux](https://github.com/termux/termux-app/releases/latest)
-
-* Copy and paste commands
+**if you know how to do, you can skip this step.**
 
 ```
-yes | pkg upgrade
-yes | pkg install python-pip
-yes | pkg install git
-git clone https://github.com/luxysiv/Cloudflare-Gateway-Pihole
-cd Cloudflare-Gateway-Pihole
-nano .env
+pkg upgrade
+pkg install python-pip
+pkg install git
+# Clone your forked repo. #
 ```
 
-Input your value then 
-
-* Command
-```
-nano adlist.ini
-```
-to edit block list
-
-* Command
-```
-nano whitelist.ini
-```
-to edit white list
-
-* Command
+* Command to upload (update) your DNS list.
 ```
 python -m src
 ```
-to upload 
+_You may also check this out [termux-change-repo](https://wiki.termux.com/wiki/Package_Management) in case if you run into trouble setting things up._
 
-* If Termux not work you can copy and paste this command
-```
-termux-change-repo
-```
-Enter 3 times
 
-Next time only use commands to run 
-```
-cd Cloudflare-Gateway-Pihole
-python -m src
-```
+### Note
+---
+* The **limit** of `Cloudflare Gateway Zero Trust` free is **300k domains** so remember to pay attention to the workflow logs, `if it is exceeded, the script will stop`
 
-# Chú ý 
+* If you have uploaded lists using another script, you should delete them using the delete feature of the uploaded script or delete them manually
 
-* Đã hỗ trợ sử dụng list nào cũng được 
-
-* Giới hạn của Cloudflare Gateway Zero Trust free là 300k domains nên các bạn nhớ chú ý log, nếu quá script sẽ stop
-
-* Các bạn đã up lists bằng script khác thì nên xoá đi bằng tính năng xoá của script đã up hoặc xoá tay
-
-* Nếu không biết thêm vào Secret Github Action thì có thể điền giá trị vào file [.env](.env) và sửa file [main.yml](.github/workflows/main.yml) , [re-run.yml](.github/workflows/re-run.yml) và [re-run2](.github/workflows/re-run2.yml) như sau, loại bỏ các dòng secret env
-```yml
-- name: Cloudflare Gateway Zero Trust 
-  run: python -m src 
-```
-
-* Mình đã update thêm tính năng xoá lists khi các bạn không cần sử dụng script nữa. Vào [__main__.py](src/__main__.py) để như sau:
-
-* Script có 2 files workflow dự phòng nếu upload thất bại sẽ chạy tiếp 2 lần sau mỗi 5p. Cho nên tỉ lệ fail sẽ rất thấp
+* I have updated the feature to delete lists when you no longer need to use the script. Go to [__main__.py](src/__main__.py) as follows:
 
 ```python
 async def main():
@@ -140,29 +92,12 @@ async def main():
     # await app.run()
 ```
 
-
-* Đã thêm tính năng white lists
-
-* Bạn có thể thay tên `DNS-Filters` bằng các tên bạn thích 
-
-* Thêm danh sách của bạn vào [adlist.ini](adlist.ini)
-
-* Đã hỗ trợ 2 loại [adlist.ini](adlist.ini)
-
-```ini
-https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/hosts-VN
-https://raw.githubusercontent.com/Yhonay/antipopads/master/hosts
-https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt
-```
-hoặc
-```ini
-[Hosts-Urls]
-hostsVN = https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/hosts-VN
-Antipopup = https://raw.githubusercontent.com/Yhonay/antipopads/master/hosts
-Hagezi = https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt
-```
+Note from [@minlaxz](https://github.com/minlaxz):
+1. Domain list stlye: I personally preferred second one in blacklist styles, which has more readablity and concise.`
+2. Dynamic domain list: You can also update your dynamic (fluid) whitelist and blacklist using [dynamic-blacklist.txt](dynamic-blacklist.txt) and [dynamic-whitelist.txt](dynamic-whitelist.txt)
+3. Deprected using `.env` : Setting sensitive information inside a public repository is considered too dangerous use-case, since any unwanted person could easily steal your Cloudflare credentials from that `.env` file.
 
 
-👌 Chúc các bạn thành công 
 
-👌 Mọi thắc mắc về script các bạn có thể mở issue
+ 🥂🥂 Cheers! 🍻🍻
+===
