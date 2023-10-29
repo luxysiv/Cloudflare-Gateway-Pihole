@@ -1,3 +1,5 @@
+[English](README.md) | [Việt Nam](docs/vi.md)
+
 # Pihole styled, but using Cloudflare Gateway
 `For Devs, Ops, and everyone who hates Ads.`
 
