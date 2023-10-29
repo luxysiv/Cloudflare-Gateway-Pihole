@@ -1,4 +1,4 @@
-name: Add Rules to Cloudflare Gateway
+name: Just delete workflows
 on:
   workflow_dispatch:
 jobs:
