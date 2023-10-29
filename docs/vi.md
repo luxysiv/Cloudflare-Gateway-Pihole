@@ -10,7 +10,7 @@ Các bạn cần phân biệt bộ lọc DNS và bộ lọc browser. Mình thấ
 
 * Các bạn đã up lists bằng script khác thì nên xoá đi bằng tính năng xoá của script đã up hoặc xoá tay
 
-* Nếu không biết thêm vào Secret Github Action thì có thể điền giá trị vào file [.env](.env) và sửa file [main.yml](.github/workflows/main.yml) , [re-run.yml](.github/workflows/re-run.yml) và [re-run2](.github/workflows/re-run2.yml) như sau, loại bỏ các dòng secret env
+* Nếu không biết thêm vào Secret Github Action thì có thể điền giá trị vào file [.env](.env) và sửa file [main.yml](.github/workflows/main.yml) , [re-run.yml](.github/workflows/re-run.yml) và [re-run2.yml](.github/workflows/re-run2.yml) như sau, loại bỏ các dòng secret env
 ```yml
 - name: Cloudflare Gateway Zero Trust 
   run: python -m src 
