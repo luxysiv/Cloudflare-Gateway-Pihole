@@ -2,6 +2,23 @@
 
 Các bạn cần phân biệt bộ lọc DNS và bộ lọc browser. Mình thấy nhiều bạn đem bộ lọc browser lên chạy -> lỗi lướt web
 
+# Hướng dẫn sử dụng
+
+Thêm Variables Secret vào 
+`https://github.com/your-user/your-repository/settings/secrets/actions`:
+
+* `CF_IDENTIFIER` được lấy từ tài khoản CF của bạn: https://dash.cloudflare.com/?to=/:account/workers
+
+* `CF_API_TOKEN` lấy từ : https://dash.cloudflare.com/profile/api-tokens with 3 permissions `Account.Zero Trust : Edit` `Account.Account Firewall Access Rules : Edit` `Account.Access: Apps and Policies : Edit`
+
+hoặc có thể thêm vào [.env](.env) (không khuyến khích)
+
+Secret Github Action giống như sau:
+![1000015672](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/6bd7f41d-0ca5-4944-95d3-d41dfd913c60)
+
+Tạo `CF_API_TOKEN` giống như sau:
+![CF_API_TOKEN](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/a5b90438-26cc-49ae-9a55-5409a90b683f)
+
 # Chú ý 
 
 * Đã hỗ trợ sử dụng list nào cũng được 
