@@ -10,6 +10,8 @@ Các bạn cần phân biệt bộ lọc DNS và bộ lọc browser. Mình thấ
 
 * Các bạn đã up lists bằng script khác thì nên xoá đi bằng tính năng xoá của script đã up hoặc xoá tay
 
+* Script có 2 files workflow dự phòng nếu upload thất bại sẽ chạy tiếp 2 lần sau mỗi 5p. Cho nên tỉ lệ fail sẽ rất thấp
+
 * Nếu không biết thêm vào Secret Github Action thì có thể điền giá trị vào file [.env](.env) và sửa file [main.yml](.github/workflows/main.yml) , [re-run.yml](.github/workflows/re-run.yml) và [re-run2.yml](.github/workflows/re-run2.yml) như sau, loại bỏ các dòng secret env
 ```yml
 - name: Cloudflare Gateway Zero Trust 
@@ -17,8 +19,6 @@ Các bạn cần phân biệt bộ lọc DNS và bộ lọc browser. Mình thấ
 ```
 
 * Mình đã update thêm tính năng xoá lists khi các bạn không cần sử dụng script nữa. Vào [__main__.py](src/__main__.py) để như sau:
-
-* Script có 2 files workflow dự phòng nếu upload thất bại sẽ chạy tiếp 2 lần sau mỗi 5p. Cho nên tỉ lệ fail sẽ rất thấp
 
 ```python
 async def main():
@@ -37,21 +37,17 @@ async def main():
 
 * Bạn có thể thay tên `DNS-Filters` bằng các tên bạn thích 
 
-* Thêm danh sách của bạn vào [adlist.ini](adlist.ini)
+* Thêm danh sách chặn của bạn vào [adlist.ini](adlist.ini) và loại bot chặn ở [whitelist.ini](whitelist.ini)
 
-* Đã hỗ trợ 2 loại [adlist.ini](adlist.ini)
+* Đã hỗ trợ 2 loại định dạng list
 
 ```ini
 https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/hosts-VN
-https://raw.githubusercontent.com/Yhonay/antipopads/master/hosts
-https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt
 ```
 hoặc
 ```ini
 [Hosts-Urls]
 hostsVN = https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/hosts-VN
-Antipopup = https://raw.githubusercontent.com/Yhonay/antipopads/master/hosts
-Hagezi = https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt
 ```
 
 
