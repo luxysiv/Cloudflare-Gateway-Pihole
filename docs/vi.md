@@ -30,9 +30,6 @@ async def main():
     # await app.run()
 ```
 
-
-* Đã thêm tính năng white lists
-
 * Hỗ trợ [dynamic_blacklist.txt](dynamic_blacklist.txt) và [dynamic_whitelist.txt](dynamic_whitelist.txt) để các bạn tự chặn hoặc bỏ chặn tên miền theo ý thích 
 
 * Bạn có thể thay tên `DNS-Filters` bằng các tên bạn thích 
