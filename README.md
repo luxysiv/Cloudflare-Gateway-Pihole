@@ -10,7 +10,7 @@ Create your ad blocklist using Cloudflare Gateway
 
 > Thanks alot to [@nhubaotruong](https://github.com/nhubaotruong) for his contributions.
 
-> Modified by [@minlaxz](https://github.com/minlaxz).
+> Readme by [@minlaxz](https://github.com/minlaxz).
 >> Removed unnecessaries: removed `lib` directory and handling inside the github actions [check here](https://github.com/minlaxz/CFG-adblock/tree/main).
 
 >> Added dynamic domain filter (whitelist and blacklist) idea (please check `ini` files, as you may also need to modify those.)
@@ -94,7 +94,7 @@ async def main():
 
 Note from [@minlaxz](https://github.com/minlaxz):
 1. Domain list stlye: I personally preferred second one in blacklist styles, which has more readablity and concise.`
-2. Dynamic domain list: You can also update your dynamic (fluid) whitelist and blacklist using [dynamic-blacklist.txt](dynamic-blacklist.txt) and [dynamic-whitelist.txt](dynamic-whitelist.txt)
+2. Dynamic domain list: You can also update your dynamic (fluid) whitelist and blacklist using [dynamic_blacklist.txt](dynamic_blacklist.txt) and [dynamic_whitelist.txt](dynamic_whitelist.txt)
 3. Deprected using `.env` : Setting sensitive information inside a public repository is considered too dangerous use-case, since any unwanted person could easily steal your Cloudflare credentials from that `.env` file.
 
 
