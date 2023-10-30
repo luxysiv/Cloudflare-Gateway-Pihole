@@ -34,8 +34,8 @@ hostsVN = https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/host
 ### How to set this up?
 ---
 1. Fork this repository to your account.
-2. Grab your **Cloudflare Account ID** (which after `https://dash.cloudflare.com/`) from ➞ `https://dash.cloudflare.com/?to=/:account/workers`
-3. Create your **API Token** from ➞ `https://dash.cloudflare.com/profile/api-tokens` with 3 permissions 
+2. Grab your **Cloudflare Account ID** (which after `https://dash.cloudflare.com/`) from ➞ https://dash.cloudflare.com/?to=/:account/workers
+3. Create your **API Token** from ➞ https://dash.cloudflare.com/profile/api-tokens with 3 permissions 
    1. `Account.Zero Trust : Edit` 
    2. `Account.Account Firewall Access Rules : Edit`
    3. `Account.Access: Apps and Policies : Edit`
