@@ -47,11 +47,11 @@ async def main():
     # await app.run()
 ```
 
-* Hỗ trợ [dynamic_blacklist.txt](dynamic_blacklist.txt) và [dynamic_whitelist.txt](dynamic_whitelist.txt) để các bạn tự chặn hoặc bỏ chặn tên miền theo ý thích 
+* Hỗ trợ [dynamic_blacklist.txt](./lists/dynamic_blacklist.txt) và [dynamic_whitelist.txt](./lists/dynamic_whitelist.txt) để các bạn tự chặn hoặc bỏ chặn tên miền theo ý thích 
 
 * Bạn có thể thay tên `DNS-Filters` bằng các tên bạn thích 
 
-* Thêm danh sách chặn của bạn vào [adlist.ini](adlist.ini) và loại bot chặn ở [whitelist.ini](whitelist.ini)
+* Thêm danh sách chặn của bạn vào [adlist.ini](./lists/adlist.ini) và loại bot chặn ở [whitelist.ini](./lists/whitelist.ini)
 
 * Đã hỗ trợ 2 loại định dạng list
 
