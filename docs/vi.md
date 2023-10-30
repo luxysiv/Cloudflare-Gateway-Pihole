@@ -11,7 +11,7 @@ Thêm Variables Secret vào
 
 * `CF_API_TOKEN` lấy từ : https://dash.cloudflare.com/profile/api-tokens with 3 permissions `Account.Zero Trust : Edit` `Account.Account Firewall Access Rules : Edit` `Account.Access: Apps and Policies : Edit`
 
-hoặc có thể thêm vào [.env](.env) (không khuyến khích)
+hoặc có thể thêm vào [.env](./docs/.env) (không khuyến khích)
 
 Secret Github Action giống như sau:
 ![1000015672](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/6bd7f41d-0ca5-4944-95d3-d41dfd913c60)
