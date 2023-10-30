@@ -18,7 +18,7 @@ jobs:
           write-mode: overwrite
           contents: |
             {
-              firewallId: ""
+              "firewallId": ""
             }
 
       - name: Commit & Push
@@ -27,4 +27,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: main
           force: true
-          message: 'Overwritten by Github Actions - ${date}'
+          message: 'Overwritten by Github Actions'
