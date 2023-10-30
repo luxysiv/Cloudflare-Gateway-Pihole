@@ -1,0 +1,30 @@
+name: Just create a file
+on:
+  workflow_dispatch:
+jobs:
+  run:
+    name: Just create a file
+    permissions: write-all
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Overwrite file
+        uses: "DamianReeves/write-file-action@master"        
+        with:
+          path: ./src/tracking-ids.json
+          write-mode: overwrite
+          contents: |
+            {
+              firewallId: ""
+            }
+
+      - name: Commit & Push
+        uses: Andro999b/push@v1.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
+          force: true
+          message: 'Overwritten by Github Actions - ${date}'
