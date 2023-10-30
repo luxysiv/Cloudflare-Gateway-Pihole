@@ -9,7 +9,7 @@ Thêm Variables Secret vào
 
 * `CF_IDENTIFIER` được lấy từ tài khoản CF của bạn (dãy ký tự ngay sau `https://dash.cloudflare.com/`: https://dash.cloudflare.com/?to=/:account/workers
 
-* `CF_API_TOKEN` lấy từ : https://dash.cloudflare.com/profile/api-tokens with 3 permissions `Account.Zero Trust : Edit` `Account.Account Firewall Access Rules : Edit` `Account.Access: Apps and Policies : Edit`
+* `CF_API_TOKEN` lấy từ : https://dash.cloudflare.com/profile/api-tokens với 3 permissions `Account.Zero Trust : Edit` `Account.Account Firewall Access Rules : Edit` `Account.Access: Apps and Policies : Edit`
 
 hoặc có thể thêm vào [.env](../.env) (không khuyến khích)
 
