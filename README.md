@@ -13,7 +13,6 @@ Create your ad blocklist using Cloudflare Gateway
 > Thanks alot to [@nhubaotruong](https://github.com/nhubaotruong) for his contributions.
 
 > Readme by [@minlaxz](https://github.com/minlaxz).
->> Removed unnecessaries: removed `lib` directory and handling inside the github actions [check here](https://github.com/minlaxz/CFG-adblock/tree/main).
 
 >> Added dynamic domain filter (whitelist and blacklist) idea (please check `ini` files, as you may also need to modify those.)
 
