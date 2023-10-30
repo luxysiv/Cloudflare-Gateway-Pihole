@@ -7,7 +7,7 @@ Các bạn cần phân biệt bộ lọc DNS và bộ lọc browser. Mình thấ
 Thêm Variables Secret vào 
 `https://github.com/your-user/your-repository/settings/secrets/actions`:
 
-* `CF_IDENTIFIER` được lấy từ tài khoản CF của bạn: https://dash.cloudflare.com/?to=/:account/workers
+* `CF_IDENTIFIER` được lấy từ tài khoản CF của bạn (dãy ký tự ngay sau `https://dash.cloudflare.com/`: https://dash.cloudflare.com/?to=/:account/workers
 
 * `CF_API_TOKEN` lấy từ : https://dash.cloudflare.com/profile/api-tokens with 3 permissions `Account.Zero Trust : Edit` `Account.Account Firewall Access Rules : Edit` `Account.Access: Apps and Policies : Edit`
 
