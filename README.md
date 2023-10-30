@@ -19,8 +19,8 @@ Create your ad blocklist using Cloudflare Gateway
 
 ### Supported styles
 ---
-* White list [whitelist.ini](whitelist.ini) and
-* Two kinds of balcklist [adlist.ini](adlist.ini)
+* White list [whitelist.ini](./lists/whitelist.ini) and
+* Two kinds of balcklist [adlist.ini](./lists/adlist.ini)
 
 ```ini
 https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/hosts-VN
@@ -96,7 +96,7 @@ async def main():
 
 Note from [@minlaxz](https://github.com/minlaxz):
 1. Domain list stlye: I personally preferred second one in blacklist styles, which has more readablity and concise.`
-2. Dynamic domain list: You can also update your dynamic (fluid) whitelist and blacklist using [dynamic_blacklist.txt](dynamic_blacklist.txt) and [dynamic_whitelist.txt](dynamic_whitelist.txt)
+2. Dynamic domain list: You can also update your dynamic (fluid) whitelist and blacklist using [dynamic_blacklist.txt](./lists/dynamic_blacklist.txt) and [dynamic_whitelist.txt](./lists/dynamic_whitelist.txt)
 3. Deprected using `.env` : Setting sensitive information inside a public repository is considered too dangerous use-case, since any unwanted person could easily steal your Cloudflare credentials from that `.env` file.
 
 
