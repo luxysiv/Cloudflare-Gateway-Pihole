@@ -18,8 +18,8 @@ Create your ad blocklist using Cloudflare Gateway
 
 ### Supported styles
 ---
-* White list [whitelist.ini](./lists/whitelist.ini) and
-* Two kinds of balcklist [adlist.ini](./lists/adlist.ini)
+* White list [whitelist.ini](./lists/whitelist.ini) and block list [adlist.ini](./lists/adlist.ini)
+* Two kinds of lists
 
 ```ini
 https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/hosts-VN
