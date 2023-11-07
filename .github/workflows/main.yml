@@ -29,6 +29,17 @@ jobs:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CF_IDENTIFIER: ${{ secrets.CF_IDENTIFIER }}
           PYTHONDONTWRITEBYTECODE: 1
+      
+      - name: Generate date 
+        run: echo "DATE=$(date +%F)" >> $GITHUB_ENV
+  
+      - name: Commit filters
+        uses: EndBug/add-and-commit@v9.1.1
+        with:
+          add: 'hosts'
+          default_author: github_actor 
+          message: 'Update: ${{ env.DATE }}'
+          push: true
           
       - name: Delete workflow runs
         uses: Mattraks/delete-workflow-runs@v2

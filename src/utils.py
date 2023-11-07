@@ -1,8 +1,10 @@
 import asyncio
-import aiohttp
 import logging
 
-from src import cloudflare, convert 
+import aiohttp
+
+from src import cloudflare, convert
+
 
 class App:
     
@@ -76,6 +78,13 @@ class App:
 
             return 
 
+        host_file = "hosts"
+        # Save domains to the host file
+        with open(host_file, "w", encoding="utf-8") as file:
+            for domain in domains:
+                file.write(f"{domain}\n")
+        logging.info(f"Domains saved to {host_file}")
+        
         # Delete existing policy created by script
         policy_prefix = f"{self.name_prefix} Block Ads"
         deleted_policies = await cloudflare.delete_gateway_policy(policy_prefix)
