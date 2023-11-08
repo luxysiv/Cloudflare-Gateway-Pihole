@@ -156,3 +156,4 @@ adsmetadata.mobileadexchange.net
 cloud2.gsdk.proximabeta.com
 ff.imacdn.com
 sponsor.imacdn.com
+qcc.qualcomm.com
