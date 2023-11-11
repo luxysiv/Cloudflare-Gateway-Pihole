@@ -64,11 +64,19 @@ hostsVN = https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/host
 **if you know how to do, you can skip this step.**
 
 ```
-pkg upgrade
-pkg install python-pip
-pkg install git
+yes | pkg upgrade
+yes | pkg install python-pip
+yes | pkg install git
 # Clone your forked repo. #
 ```
+
+* Edit `.env` (**required**)
+
+```
+nano .env
+```
+
+`CTRL + X + Y + ENTER` to save it
 
 * Command to upload (update) your DNS list.
 ```
