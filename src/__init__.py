@@ -1,10 +1,9 @@
 import os
 import re
-import logging
 
 from libs import aiohttp
+from libs import loguru
 from libs.dotenv import load_dotenv
-from src.colorlogs import ColoredLevelFormatter
 
 # Regex Pattern
 replace_pattern = re.compile(
@@ -17,14 +16,6 @@ domain_pattern = re.compile(
 ip_pattern = re.compile(
     r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"
 )
-
-# Logging Level Color 
-logging.getLogger().setLevel(logging.INFO)
-formatter = ColoredLevelFormatter("%(levelname)s: %(message)s")
-console = logging.StreamHandler()
-console.setFormatter(ColoredLevelFormatter("%(levelname)s: %(message)s"))
-logger = logging.getLogger()
-logger.addHandler(console)
 
 # load env
 load_dotenv()
