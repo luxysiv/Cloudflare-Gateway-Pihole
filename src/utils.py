@@ -1,7 +1,7 @@
 import asyncio
 import aiohttp
-from loguru import logger
 
+from loguru import logger
 from src import cloudflare, convert 
 
 class App:
