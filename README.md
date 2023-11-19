@@ -43,7 +43,7 @@ hostsVN = https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/host
    3. `Account.Access: Apps and Policies : Edit`
 
 4. Add **Repository Secrets** to your forked repository
-➞ [HERE](https://github.com/$GITHUB_REPOSITORY/settings/secrets/actions)
+`➞ https://github.com/<username>/<forked-repository>/settings/secrets/actions`
    1. Set **Cloudflare Account ID** to `CF_IDENTIFIER`
    2. Set **API Token** to `CF_API_TOKEN`
 
