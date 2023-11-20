@@ -112,24 +112,8 @@ async def update_gateway_policy(
 
 @aiohttp_session
 async def delete_gateway_policy(
-    policy_name_prefix: str, session: aiohttp.ClientSession
+    policy_id: str, session: aiohttp.ClientSession
 ):
-    async with session.get(
-        f"https://api.cloudflare.com/client/v4/accounts/{CF_IDENTIFIER}/gateway/rules",
-    ) as resp:
-        if resp.status != 200:
-            raise Exception("Failed to get Cloudflare firewall policies")
-
-        policies = (await resp.json())["result"] or []
-        policy_to_delete = next(
-            (p for p in policies if p["name"].startswith(policy_name_prefix)), None
-        )
-
-        if not policy_to_delete:
-            return 0
-
-        policy_id = policy_to_delete["id"]
-
     async with session.delete(
         f"https://api.cloudflare.com/client/v4/accounts/{CF_IDENTIFIER}/gateway/rules/{policy_id}",
     ) as resp:
