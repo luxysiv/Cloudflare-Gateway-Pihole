@@ -78,8 +78,10 @@ class App:
 
         # Delete existing policy created by script
         policy_prefix = f"{self.name_prefix} Block Ads"
-        deleted_policies = await cloudflare.delete_gateway_policy(policy_prefix)
-        logger.info(f"Deleted {deleted_policies} gateway policies")
+        firewall_policies = await cloudflare.get_firewall_policies(policy_prefix)
+        for policy in firewall_policies:
+            cloudflare.delete_gateway_policy(policy["id"])
+        logger.info(f"Deleted gateway policies")
 
         # Delete old lists on Cloudflare 
         delete_list_tasks = []
@@ -132,8 +134,10 @@ class App:
     async def delete(self):
         # Delete gateway policy
         policy_prefix = f"{self.name_prefix} Block Ads"
-        deleted_policies = await cloudflare.delete_gateway_policy(policy_prefix)
-        logger.info(f"Deleted {deleted_policies} gateway policies")
+        firewall_policies = await cloudflare.get_firewall_policies(policy_prefix)
+        for policy in firewall_policies:
+            cloudflare.delete_gateway_policy(policy["id"])
+        logger.info(f"Deleted gateway policies")
 
         # Delete lists
         cf_lists = await cloudflare.get_lists(self.name_prefix)
