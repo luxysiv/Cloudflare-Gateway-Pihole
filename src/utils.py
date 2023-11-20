@@ -80,7 +80,7 @@ class App:
         policy_prefix = f"{self.name_prefix} Block Ads"
         firewall_policies = await cloudflare.get_firewall_policies(policy_prefix)
         for policy in firewall_policies:
-            cloudflare.delete_gateway_policy(policy["id"])
+            await cloudflare.delete_gateway_policy(policy["id"])
         logger.info(f"Deleted gateway policies")
 
         # Delete old lists on Cloudflare 
@@ -136,7 +136,7 @@ class App:
         policy_prefix = f"{self.name_prefix} Block Ads"
         firewall_policies = await cloudflare.get_firewall_policies(policy_prefix)
         for policy in firewall_policies:
-            cloudflare.delete_gateway_policy(policy["id"])
+            await cloudflare.delete_gateway_policy(policy["id"])
         logger.info(f"Deleted gateway policies")
 
         # Delete lists
