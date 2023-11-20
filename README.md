@@ -62,13 +62,16 @@ hostsVN = https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/host
 * Here're `commands` need to be run one after another to setup python
 
 **if you know how to do, you can skip this step.**
-
 ```
 yes | pkg upgrade
 yes | pkg install python-pip
 yes | pkg install git
 # Clone your forked repo. #
 ```
+
+* Enter folder
+
+`cd <your forked name>`
 
 * Edit `.env` (**required**)
 
