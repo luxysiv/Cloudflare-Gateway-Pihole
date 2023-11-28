@@ -93,7 +93,7 @@ class App:
         # Start creating new lists and firewall policy concurrently
         create_list_tasks = []
         for i, chunk in enumerate(self.chunk_list(domains, 1000)):
-            list_name = f"{self.name_prefix} {i + 1}"
+            list_name = f"{self.name_prefix} {i + 1:03d}"
             logger.info(f"Creating list {list_name}")
             create_list_tasks.append(cloudflare.create_list(list_name, chunk))
     
