@@ -12,7 +12,7 @@ def convert_to_domain_list(block_content: str, white_content: str) -> list[str]:
     block_domains = remove_subdomains_if_higher(block_domains)
     logger.info(f"Number of blocked domains: {len(block_domains)}")
 
-    final_domains = list(block_domains - white_domains)
+    final_domains = sorted(list(block_domains - white_domains))
     logger.info(f"Number of final domains: {len(final_domains)}")
 
     return final_domains
