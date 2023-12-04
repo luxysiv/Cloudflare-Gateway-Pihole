@@ -98,12 +98,12 @@ _You may also check this out [termux-change-repo](https://wiki.termux.com/wiki/P
 
 ```python
 async def main():
-    adlist_urls = read_urls_from_file("./lists/adlist.ini")
-    whitelist_urls = read_urls_from_file("./lists/whitelist.ini")
+    adlist_urls = utils.read_urls_from_file("./lists/adlist.ini")
+    whitelist_urls = utils.read_urls_from_file("./lists/whitelist.ini")
     adlist_name = "DNS-Filters"
-    app = App(adlist_name, adlist_urls, whitelist_urls)
-    await app.delete()  # Leave script
-    # await app.run()
+    cloudflaremanager = CloudflareManager(adlist_name, adlist_urls, whitelist_urls)
+    await cloudflaremanager.leave()  # Leave script
+    # await cloudflaremanager.run()
 ```
 
 Note from [@minlaxz](https://github.com/minlaxz):
