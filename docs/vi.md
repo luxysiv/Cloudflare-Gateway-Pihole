@@ -44,12 +44,12 @@ Tạo `CF_API_TOKEN` giống như sau:
 
 ```python
 async def main():
-    adlist_urls = read_urls_from_file("./lists/adlist.ini")
-    whitelist_urls = read_urls_from_file("./lists/whitelist.ini")
+    adlist_urls = utils.read_urls_from_file("./lists/adlist.ini")
+    whitelist_urls = utils.read_urls_from_file("./lists/whitelist.ini")
     adlist_name = "DNS-Filters"
-    app = App(adlist_name, adlist_urls, whitelist_urls)
-    await app.delete()  # Leave script
-    # await app.run()
+    cloudflaremanager = CloudflareManager(adlist_name, adlist_urls, whitelist_urls)
+    await cloudflaremanager.leave()  # Leave script
+    # await cloudflaremanager.run()
 ```
 
 * Hỗ trợ **[dynamic_blacklist.txt](../lists/dynamic_blacklist.txt)** và **[dynamic_whitelist.txt](../lists/dynamic_whitelist.txt)** để các bạn tự **chặn hoặc bỏ chặn** tên miền theo ý thích 
