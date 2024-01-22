@@ -158,5 +158,3 @@ ff.imacdn.com
 sponsor.imacdn.com
 qcc.qualcomm.com
 browser.sentry-cdn.com
-adserver.unityads.unity3d.com
-api.ad.xiaomi.com
