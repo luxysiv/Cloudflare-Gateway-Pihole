@@ -23,7 +23,7 @@ jobs:
           fetch-depth: 0
           
       - name: Install Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@main
         with:
           python-version: 3.11
           
@@ -31,7 +31,7 @@ jobs:
         run: python -m src
           
       - name: Delete workflow runs
-        uses: Mattraks/delete-workflow-runs@v2
+        uses: Mattraks/delete-workflow-runs@main
         with:
           token: ${{ github.token }}
           repository: ${{ github.repository }}
