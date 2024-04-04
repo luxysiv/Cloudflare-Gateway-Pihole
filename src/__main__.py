@@ -2,7 +2,7 @@ import asyncio
 import aiohttp
 
 from loguru import logger
-from src import cloudflare, convert ,utils
+from src import cloudflare, convert , utils, commit
 
 class CloudflareManager:    
     def __init__(
@@ -14,7 +14,6 @@ class CloudflareManager:
         self.name_prefix = f"[AdBlock-{adlist_name}]"
 
     async def run(self):
-
         # Download block and white content 
         async with aiohttp.ClientSession() as session:
             block_content = "".join(
@@ -92,7 +91,7 @@ class CloudflareManager:
         # Start creating new lists and firewall policy concurrently
         create_list_tasks = []
         for i, chunk in enumerate(utils.chunk_list(domains, 1000)):
-            list_name = f"{self.name_prefix} {i + 1:03d}"
+            list_name = f"{self.name_prefix} - {i + 1:03d}"
             logger.info(f"Creating list {list_name}")
             create_list_tasks.append(cloudflare.create_list(list_name, chunk))
     
@@ -147,3 +146,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+    asyncio.run(commit.auto_commit())

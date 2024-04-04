@@ -9,30 +9,29 @@ jobs:
     name: Cloudflare Gateway
     permissions: write-all
     runs-on: ubuntu-latest
+    env:
+      GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+      GITHUB_REPOSITORY_NAME: ${{ github.event.repository.name }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+      CF_IDENTIFIER: ${{ secrets.CF_IDENTIFIER }}
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@main
         with:
           fetch-depth: 0
           
-      - name: Keep alive 
-        uses: gautamkrishnar/keepalive-workflow@v1
-
       - name: Install Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@main
         with:
           python-version: 3.11
           
       - name: Cloudflare Gateway Zero Trust 
-        run: python -m src 
-        env:
-          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
-          CF_IDENTIFIER: ${{ secrets.CF_IDENTIFIER }}
-          PYTHONDONTWRITEBYTECODE: 1
+        run: python -m src
           
       - name: Delete workflow runs
-        uses: Mattraks/delete-workflow-runs@v2
+        uses: Mattraks/delete-workflow-runs@main
         with:
           token: ${{ github.token }}
           repository: ${{ github.repository }}
