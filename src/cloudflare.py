@@ -1,19 +1,7 @@
 import functools
-import functools
 import aiohttp
-from loguru import logger
 
 from src import CF_API_TOKEN, CF_IDENTIFIER
-
-async def retry_request(func, *args, retries=3, **kwargs):
-    for attempt in range(retries):
-        try:
-            return await func(*args, **kwargs)
-        except aiohttp.ClientError as e:
-            if attempt < retries - 1:
-                logger.error(f"Retry attempt {attempt + 1} for {func.__name__}: {e}")
-            else:
-                raise
 
 def aiohttp_session(func):
     @functools.wraps(func)
@@ -23,7 +11,7 @@ def aiohttp_session(func):
             headers={"Authorization": f"Bearer {CF_API_TOKEN}"},
         ) as session:
             kwargs["session"] = session
-            return await retry_request(func, *args, **kwargs)
+            return await func(*args, **kwargs)
 
     return wrapper
 
