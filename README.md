@@ -54,40 +54,6 @@ hostsVN = https://raw.githubusercontent.com/bigdargon/hostsVN/master/option/host
 
 > They will retry after 5 minutes one after another only if the **main workflow** has been failed (not cancelled - if you cancelled the main workflow manually, they will not be triggered anyway).
 
-### How to set up using Termux?
----
-
-* Download the **GOAT** [Termux](https://github.com/termux/termux-app/releases/latest)
-
-* Here're `commands` need to be run one after another to setup python
-
-**if you know how to do, you can skip this step.**
-```
-yes | pkg upgrade
-yes | pkg install python-pip
-yes | pkg install git
-# Clone your forked repo. #
-```
-
-* Enter folder
-
-`cd <your forked name>`
-
-* Edit `.env` (**required**)
-
-```
-nano .env
-```
-
-`CTRL + X + Y + ENTER` to save it
-
-* Command to upload (update) your DNS list.
-```
-python -m src
-```
-_You may also check this out [termux-change-repo](https://wiki.termux.com/wiki/Package_Management) in case if you run into trouble setting things up._
-
-
 ### Note
 ---
 * The **limit** of `Cloudflare Gateway Zero Trust` free is **300k domains** so remember to pay attention to the workflow logs, `if it is exceeded, the script will stop`
