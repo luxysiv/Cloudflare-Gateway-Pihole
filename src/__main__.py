@@ -2,7 +2,7 @@ import asyncio
 import aiohttp
 
 from loguru import logger
-from src import cloudflare, convert , utils, commit
+from src import cloudflare, convert , utils
 
 class CloudflareManager:    
     def __init__(
@@ -146,4 +146,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-    asyncio.run(commit.auto_commit())
