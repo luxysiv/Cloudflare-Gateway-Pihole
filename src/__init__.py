@@ -1,9 +1,9 @@
 import os
 import re
 
-from libs import aiohttp
-from libs import loguru
-from libs.dotenv import load_dotenv
+import aiohttp
+import loguru
+from dotenv import load_dotenv
 
 # Regex Pattern
 replace_pattern = re.compile(

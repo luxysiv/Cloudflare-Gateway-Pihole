@@ -15,14 +15,17 @@ jobs:
         run: sleep 300
         
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@main
         with:
           fetch-depth: 0
           
       - name: Install Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@main
         with:
           python-version: 3.11
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
           
       - name: Cloudflare Gateway Zero Trust
         run: python -m src
