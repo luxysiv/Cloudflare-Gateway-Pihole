@@ -10,8 +10,6 @@ Create your ad blocklist using Cloudflare Gateway
 ### Credit goes there.
 ---
 
-> First inspired by [IanDesuyo/CloudflareGatewayAdBlock](https://github.com/IanDesuyo/CloudflareGatewayAdBlock).
-
 > Thanks alot to [@nhubaotruong](https://github.com/nhubaotruong) for his contributions.
 
 > Readme by [@minlaxz](https://github.com/minlaxz).
