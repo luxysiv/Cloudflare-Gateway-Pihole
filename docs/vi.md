@@ -73,13 +73,10 @@ Nhớ cài cron trigger cho Cloudflare Workers
 * Mình đã update thêm tính năng xoá danh sách khi các bạn không muốn sử dụng script nữa. Vào **[__main__.py](../src/__main__.py)** để như sau:
 
 ```python
-async def main():
-    adlist_urls = utils.read_urls_from_file("./lists/adlist.ini")
-    whitelist_urls = utils.read_urls_from_file("./lists/whitelist.ini")
-    adlist_name = "DNS-Filters"
-    cloudflaremanager = CloudflareManager(adlist_name, adlist_urls, whitelist_urls)
-    await cloudflaremanager.leave()  # Leave script
-    # await cloudflaremanager.run()
+if __name__ == "__main__":
+    cloudflare_manager = CloudflareManager(PREFIX, MAX_LISTS, MAX_LIST_SIZE)
+    cloudflare_manager.run()
+    # cloudflare_manager.leave() # Leave script 
 ```
 
 * Hỗ trợ **[dynamic_blacklist.txt](../lists/dynamic_blacklist.txt)** và **[dynamic_whitelist.txt](../lists/dynamic_whitelist.txt)** để các bạn tự **chặn hoặc bỏ chặn** tên miền theo ý thích 
