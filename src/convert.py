@@ -1,19 +1,23 @@
-from loguru import logger
-from src import replace_pattern, domain_pattern, ip_pattern
+from src import (
+    info,
+    ip_pattern, 
+    domain_pattern, 
+    replace_pattern
+)
 
 def convert_to_domain_list(block_content: str, white_content: str) -> list[str]:
     white_domains = set()
     block_domains = set()
 
     extract_domains(white_content, white_domains)
-    logger.info(f"Number of whitelisted domains: {len(white_domains)}")
+    info(f"Number of whitelisted domains: {len(white_domains)}")
 
     extract_domains(block_content, block_domains)
     block_domains = remove_subdomains_if_higher(block_domains)
-    logger.info(f"Number of blocked domains: {len(block_domains)}")
+    info(f"Number of blocked domains: {len(block_domains)}")
 
     final_domains = sorted(list(block_domains - white_domains))
-    logger.info(f"Number of final domains: {len(final_domains)}")
+    info(f"Number of final domains: {len(final_domains)}")
 
     return final_domains
 
