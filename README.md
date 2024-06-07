@@ -94,13 +94,10 @@ async function handleScheduledEvent() {
 * I have updated the feature to delete lists when you no longer need to use the script. Go to [__main__.py](src/__main__.py) as follows:
 
 ```python
-async def main():
-    adlist_urls = utils.read_urls_from_file("./lists/adlist.ini")
-    whitelist_urls = utils.read_urls_from_file("./lists/whitelist.ini")
-    adlist_name = "DNS-Filters"
-    cloudflaremanager = CloudflareManager(adlist_name, adlist_urls, whitelist_urls)
-    await cloudflaremanager.leave()  # Leave script
-    # await cloudflaremanager.run()
+if __name__ == "__main__":
+    cloudflare_manager = CloudflareManager(PREFIX, MAX_LISTS, MAX_LIST_SIZE)
+    # cloudflare_manager.run()
+    cloudflare_manager.leave() # Leave script 
 ```
 
 Note from [@minlaxz](https://github.com/minlaxz):
