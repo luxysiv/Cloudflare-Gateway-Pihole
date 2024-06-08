@@ -1,4 +1,12 @@
-import time
+import random
+from loguru import logger 
+from tenacity import (
+    retry,
+    stop_never,
+    wait_random_exponential,
+    retry_if_exception_type
+)
+from requests.exceptions import RequestException, HTTPError
 from src import (
     error,
     session,
@@ -7,103 +15,64 @@ from src import (
     MAX_LIST_SIZE
 )
 
-MAX_RETRY = 3
+tenacity = {
+    'stop': stop_never,
+    'wait': wait_random_exponential(multiplier=1, max=10),
+    'retry': retry_if_exception_type((HTTPError, RequestException)),
+    'after': lambda retry_state: logger.info(f"Retrying ({retry_state.attempt_number}): {retry_state.outcome.exception()}"),
+    'before_sleep': lambda retry_state: logger.info(f"Sleeping before next retry ({retry_state.attempt_number})")
+}
 
+@retry(**tenacity)
 def get_current_lists():
-    for _ in range(MAX_RETRY):
-        try:
-            response = session.get(f"{BASE_URL}/lists")
-            if response.status_code == 200:
-                return response.json()
-        except Exception as e:
-            silent_error(f"Failed to get current lists. Error: {e}")
-        time.sleep(1)
-    error("Failed to get current lists after retries")
+    response = session.get(f"{BASE_URL}/lists")
+    response.raise_for_status()
+    return response.json()
 
+@retry(**tenacity)
 def get_current_policies():
-    for _ in range(MAX_RETRY):
-        try:
-            response = session.get(f"{BASE_URL}/rules")
-            if response.status_code == 200:
-                return response.json()
-        except Exception as e:
-            silent_error(f"Failed to get current policies. Error: {e}")
-        time.sleep(1)  
-    error("Failed to get current policies after retries")
+    response = session.get(f"{BASE_URL}/rules")
+    response.raise_for_status()
+    return response.json()
 
+@retry(**tenacity)
 def get_list_items(list_id):
-    for _ in range(MAX_RETRY):
-        try:
-            response = session.get(f"{BASE_URL}/lists/{list_id}/items?limit={MAX_LIST_SIZE}")
-            if response.status_code == 200:
-                return response.json()
-        except Exception as e:
-            silent_error(f"Failed to get list items. Error: {e}")
-        time.sleep(1)  
-    error("Failed to get list items after retries")
+    response = session.get(f"{BASE_URL}/lists/{list_id}/items?limit={MAX_LIST_SIZE}")
+    response.raise_for_status()
+    return response.json()
 
+@retry(**tenacity)
 def patch_list(list_id, payload):
-    for _ in range(MAX_RETRY):
-        try:
-            response = session.patch(f"{BASE_URL}/lists/{list_id}",json=payload)
-            if response.status_code == 200:
-                return response.json()
-        except Exception as e:
-            silent_error(f"Failed to get patch list. Error: {e}")
-        time.sleep(1)  
-    error("Failed to get patch list after retries")
+    response = session.patch(f"{BASE_URL}/lists/{list_id}", json=payload)
+    response.raise_for_status()
+    return response.json()
 
+@retry(**tenacity)
 def create_list(payload):
-    for _ in range(MAX_RETRY):
-        try:
-            response = session.post(f"{BASE_URL}/lists",json=payload)
-            if response.status_code == 200:
-                return response.json()
-        except Exception as e:
-            silent_error(f"Failed to get create list. Error: {e}")
-        time.sleep(1)  
-    error("Failed to get create list after retries")
+    response = session.post(f"{BASE_URL}/lists", json=payload)
+    response.raise_for_status()
+    return response.json()
 
+@retry(**tenacity)
 def create_policy(json_data):
-    for _ in range(MAX_RETRY):
-        try:
-            response = session.post(f"{BASE_URL}/rules",json=json_data)
-            if response.status_code == 200:
-                return response.json()
-        except Exception as e:
-            silent_error(f"Failed to get create policy. Error: {e}")
-        time.sleep(1)  
-    error("Failed to get create policy after retries")
+    response = session.post(f"{BASE_URL}/rules", json=json_data)
+    response.raise_for_status()
+    return response.json()
 
+@retry(**tenacity)
 def update_policy(policy_id, json_data):
-    for _ in range(MAX_RETRY):
-        try:
-            response = session.put(f"{BASE_URL}/rules/{policy_id}",json=json_data)
-            if response.status_code == 200:
-                return response.json()
-        except Exception as e:
-            silent_error(f"Failed to get update policy. Error: {e}")
-        time.sleep(1)  
-    error("Failed to get update policy after retries")
+    response = session.put(f"{BASE_URL}/rules/{policy_id}", json=json_data)
+    response.raise_for_status()
+    return response.json()
 
+@retry(**tenacity)
 def delete_list(list_id):
-    for _ in range(MAX_RETRY):
-        try:
-            response = session.delete(f"{BASE_URL}/lists/{list_id}")
-            if response.status_code == 200:
-                return response.json()
-        except Exception as e:
-            silent_error(f"Failed to get delete list. Error: {e}")
-        time.sleep(1)  
-    error("Failed to get delete list after retries")
+    response = session.delete(f"{BASE_URL}/lists/{list_id}")
+    response.raise_for_status()
+    return response.json()
 
+@retry(**tenacity)
 def delete_policy(policy_id):
-    for _ in range(MAX_RETRY):
-        try:
-            response = session.delete(f"{BASE_URL}/rules/{policy_id}")
-            if response.status_code == 200:
-                return response.json()
-        except Exception as e:
-            silent_error(f"Failed to get delete policy. Error: {e}")
-        time.sleep(1)  
-    error("Failed to get delete policy after retries")
+    response = session.delete(f"{BASE_URL}/rules/{policy_id}")
+    response.raise_for_status()
+    return response.json()
