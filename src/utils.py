@@ -77,7 +77,7 @@ def update_lists(current_lists, chunked_lists):
 
                     cloudflare.patch_list(list_item["id"], payload)
                     used_list_ids.append(list_item["id"])
-                    time.sleep(0.35)
+                    time.sleep(0.7)
                 else:
                     info(f"Marking list {list_item['name']} for deletion")
                     excess_list_ids.append(list_item["id"])
@@ -99,7 +99,7 @@ def create_lists(chunked_lists, missing_indices):
         if created_list:
             used_list_ids.append(created_list.get("result", {}).get("id"))
 
-        time.sleep(0.35)
+        time.sleep(0.7)
 
     return used_list_ids
 
@@ -120,7 +120,7 @@ def update_or_create_policy(current_policies, used_list_ids):
     else:
         info(f"Updating policy [{PREFIX}] Block Ads")
         cloudflare.update_policy(policy_id, json_data)
-    time.sleep(0.35)
+    time.sleep(0.7)
 
 def delete_excess_lists(current_lists, excess_list_ids):
     info("Deleting lists...")
@@ -128,7 +128,7 @@ def delete_excess_lists(current_lists, excess_list_ids):
         if list_item["id"] in excess_list_ids:
             info(f"Deleting list {list_item['name']}")
             cloudflare.delete_list(list_item["id"])
-            time.sleep(0.35)
+            time.sleep(0.7)
 
 def delete_policy(current_policies):
     policy_id = None
@@ -139,7 +139,7 @@ def delete_policy(current_policies):
     if policy_id:
         info(f"Deleting policy [{PREFIX}] Block Ads")
         cloudflare.delete_policy(policy_id)
-        time.sleep(0.35)
+        time.sleep(0.7)
 
 def delete_lists(current_lists):
     list_ids_to_delete = []
@@ -157,6 +157,6 @@ def delete_lists(current_lists):
             if list_to_delete:
                 info(f"Deleting list {list_to_delete['name']}")
                 cloudflare.delete_list(list_id)
-                time.sleep(0.35)
+                time.sleep(0.7)
     else:
         silent_error("No lists to delete")
