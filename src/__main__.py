@@ -38,7 +38,7 @@ class CloudflareManager:
         current_lists_count_without_prefix = 0
 
         if current_lists.get("result"):
-            current_lists["result"].sort(key=lambda x: int(re.search(r'\d+', x["name"]).group()))
+            current_lists["result"].sort(key=utils.safe_sort_key)
             current_lists_count = len(
                 [list_item for list_item in current_lists["result"] if self.prefix in list_item["name"]]
             )
@@ -84,4 +84,4 @@ class CloudflareManager:
 if __name__ == "__main__":
     cloudflare_manager = CloudflareManager(PREFIX, MAX_LISTS, MAX_LIST_SIZE)
     cloudflare_manager.run()
-    # cloudflare_manager.leave() # Leave script 
+    # cloudflare_manager.leave() # Uncomment if you want to leave script

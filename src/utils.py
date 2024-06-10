@@ -1,5 +1,5 @@
-import time
 import re
+import time
 from src import (
     info,
     PREFIX, 
@@ -43,6 +43,10 @@ def get_missing_indices(existing_indices, total_lists):
     missing_indices = list(all_indices - set(existing_indices))
     missing_indices.sort()
     return missing_indices
+
+def safe_sort_key(list_item):
+    match = re.search(r'\d+', list_item["name"])
+    return int(match.group()) if match else float('inf')
 
 def update_lists(current_lists, chunked_lists):
     used_list_ids = []
