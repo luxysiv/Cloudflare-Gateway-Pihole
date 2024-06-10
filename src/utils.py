@@ -44,6 +44,10 @@ def get_missing_indices(existing_indices, total_lists):
     missing_indices.sort()
     return missing_indices
 
+def safe_sort_key(list_item):
+    match = re.search(r'\d+', list_item["name"])
+    return int(match.group()) if match else float('inf')
+
 def update_lists(current_lists, chunked_lists):
     used_list_ids = []
     excess_list_ids = []
@@ -60,27 +64,27 @@ def update_lists(current_lists, chunked_lists):
     for list_item in current_lists.get("result", []):
         if f"[{PREFIX}]" in list_item["name"]:
             list_index = int(re.search(r'\d+', list_item["name"]).group())
-            if list_index in existing_indices and chunked_lists:
-                info(f"Updating list {list_item['name']}")
+            if list_index in existing_indices:
+                if chunked_lists:
+                    info(f"Updating list {list_item['name']}")
 
-                list_items = cloudflare.get_list_items(list_item["id"])
-                list_items_values = [
-                    item["value"] for item in list_items.get("result", []) if item["value"] is not None
-                ]
-                list_items_array = [{"value": domain} for domain in chunked_lists.pop(0)]
+                    list_items = cloudflare.get_list_items(list_item["id"])
+                    list_items_values = [
+                        item["value"] for item in list_items.get("result", []) if item["value"] is not None
+                    ]
+                    list_items_array = [{"value": domain} for domain in chunked_lists.pop(0)]
 
-                payload = {
-                    "append": list_items_array,
-                    "remove": list_items_values,
-                }
+                    payload = {
+                        "append": list_items_array,
+                        "remove": list_items_values,
+                    }
 
-                cloudflare.patch_list(list_item["id"], payload)
-                used_list_ids.append(list_item["id"])
-                time.sleep(0.7)
-                continue 
-
-            info(f"Marking list {list_item['name']} for deletion")
-            excess_list_ids.append(list_item["id"])
+                    cloudflare.patch_list(list_item["id"], payload)
+                    used_list_ids.append(list_item["id"])
+                    time.sleep(0.7)
+                else:
+                    info(f"Marking list {list_item['name']} for deletion")
+                    excess_list_ids.append(list_item["id"])
 
     return used_list_ids, excess_list_ids, missing_indices
 
@@ -144,6 +148,8 @@ def delete_policy(current_policies):
 def delete_lists(current_lists):
     list_ids_to_delete = []
     if current_lists.get("result"):
+        current_lists["result"].sort(key=lambda x: int(x["name"].split("-")[-1].strip()))
+
         for list_item in current_lists["result"]:
             if f"[{PREFIX}]" in list_item["name"]:
                 list_ids_to_delete.append(list_item['id'])
