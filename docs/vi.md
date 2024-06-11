@@ -62,8 +62,6 @@ Nhớ cài cron trigger cho Cloudflare Workers
 
 * Các bạn đã tải các danh sách bộ lọc bằng script khác thì nên xoá đi bằng tính năng xoá của script đã up hoặc xoá tay
 
-* Script có 2 workflows dự phòng nếu tải danh sách chặn lên thất bại sẽ chạy tiếp 2 lần mỗi lần là 5p (hạn chế vượt giới hạn requests của Cloudflare). Cho nên tỉ lệ thất bại sẽ rất thấp
-
 * Nếu không biết thêm vào Secret Github Action thì có thể điền giá trị vào file **[.env](../.env)** và sửa file **[main.yml](../.github/workflows/main.yml)** như sau, loại bỏ các dòng secret env
 ```yml
 - name: Cloudflare Gateway Zero Trust 
