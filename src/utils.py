@@ -82,9 +82,10 @@ def update_lists(current_lists, chunked_lists):
                     cloudflare.patch_list(list_item["id"], payload)
                     used_list_ids.append(list_item["id"])
                     time.sleep(0.7)
-                else:
-                    info(f"Marking list {list_item['name']} for deletion")
-                    excess_list_ids.append(list_item["id"])
+                    continue 
+
+            info(f"Marking list {list_item['name']} for deletion")
+            excess_list_ids.append(list_item["id"])
 
     return used_list_ids, excess_list_ids, missing_indices
 
