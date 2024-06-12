@@ -4,7 +4,6 @@ from sys import exit
 from loguru import logger
 from dotenv import load_dotenv
 import requests 
-from requests.adapters import HTTPAdapter
 
 replace_pattern = re.compile(
     r"(^([0-9.]+|[0-9a-fA-F:.]+)\s+|^(\|\||@@\|\||\*\.|\*))"
@@ -22,9 +21,11 @@ CF_API_TOKEN = os.getenv("CF_API_TOKEN") or os.environ.get("CF_API_TOKEN")
 CF_IDENTIFIER = os.getenv("CF_IDENTIFIER") or os.environ.get("CF_IDENTIFIER")
 if not CF_API_TOKEN or not CF_IDENTIFIER:
     raise Exception("Missing Cloudflare credentials")
+
 PREFIX = "AdBlock-DNS-Filters"
 MAX_LIST_SIZE = 1000
 MAX_LISTS = 300
+RATE_LIMIT_INTERVAL = 1.0
 
 session = requests.Session()
 session.headers.update({
@@ -32,10 +33,6 @@ session.headers.update({
     "Content-Type": "application/json",
     "Accept-Encoding": "gzip, deflate" 
 })
-
-adapter = HTTPAdapter(pool_connections=10, pool_maxsize=10, max_retries=3)
-session.mount('http://', adapter)
-session.mount('https://', adapter)
 
 BASE_URL = f"https://api.cloudflare.com/client/v4/accounts/{CF_IDENTIFIER}/gateway"
 
