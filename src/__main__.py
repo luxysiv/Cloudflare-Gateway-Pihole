@@ -1,6 +1,7 @@
 import re
 import argparse
 from src import (
+    info,
     error,
     utils,
     domains,
@@ -33,19 +34,33 @@ class CloudflareManager:
             total_lists += 1
 
         current_lists = cloudflare.get_current_lists() or {"result": []}
+        current_lists_result = current_lists.get("result")
+        
+        if current_lists_result is None:
+            current_lists_result = []
+
+        info(f"Total lists on Cloudflare: {len(current_lists_result)}")
+        total_domains = sum([l['count'] for l in current_lists_result]) if current_lists_result else 0
+        info(f"Total domains on Cloudflare: {total_domains}")
+        
         current_policies = cloudflare.get_current_policies() or {"result": []}
+        current_policies_result = current_policies.get("result")
+        
+        if current_policies_result is None:
+            current_policies_result = []
+
         current_lists_count = 0
         current_lists_count_without_prefix = 0
 
-        if current_lists.get("result"):
-            current_lists["result"].sort(key=utils.safe_sort_key)
+        if current_lists_result:
+            current_lists_result.sort(key=utils.safe_sort_key)
             current_lists_count = len(
-                [list_item for list_item in current_lists["result"] if self.prefix in list_item["name"]]
+                [list_item for list_item in current_lists_result if self.prefix in list_item["name"]]
             )
             current_lists_count_without_prefix = len(
-                [list_item for list_item in current_lists["result"] if self.prefix not in list_item["name"]]
+                [list_item for list_item in current_lists_result if self.prefix not in list_item["name"]]
             )
-            if total_lines == sum([l["count"] for l in current_lists["result"]]):
+            if total_lines == sum([l['count'] for l in current_lists_result]):
                 silent_error("Same size, skipping")
                 return
 
@@ -57,6 +72,9 @@ class CloudflareManager:
             return
 
         chunked_lists = utils.split_domain_list(domain_list)
+        
+        info(f"Total chunked lists generated: {len(chunked_lists)}")
+
         used_list_ids = [] 
         excess_list_ids = []
         missing_indices = []
@@ -77,7 +95,17 @@ class CloudflareManager:
 
     def leave(self):
         current_lists = cloudflare.get_current_lists() or {"result": []}
+        current_lists_result = current_lists.get("result")
+        
+        if current_lists_result is None:
+            current_lists_result = []
+        
         current_policies = cloudflare.get_current_policies() or {"result": []}
+        current_policies_result = current_policies.get("result")
+        
+        if current_policies_result is None:
+            current_policies_result = []
+
         utils.delete_policy(current_policies)
         utils.delete_lists(current_lists)
 
