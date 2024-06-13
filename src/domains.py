@@ -45,7 +45,7 @@ class DomainConverter:
 
     def download_file(self, url):
         response = requests.get(url, allow_redirects=True)
-        info(f"Downloaded file from {url} File size: {len(r.content)}")
+        info(f"Downloaded file from {url} File size: {len(response.content)}")
         return response.content
 
     def process_urls(self):
