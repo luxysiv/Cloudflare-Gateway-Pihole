@@ -49,8 +49,8 @@ class DomainConverter:
         return response.content
 
     def process_urls(self):
-        block_content = b""
-        white_content = b""
+        block_content = ""
+        white_content = ""
         for url in self.adlist_urls:
             block_content += self.download_file(url)
         for url in self.whitelist_urls:
@@ -64,5 +64,5 @@ class DomainConverter:
             whitelist_content = white_file.read()
             white_content += whitelist_content
         
-        domains = convert.convert_to_domain_list(block_content.decode('utf-8'), white_content.decode('utf-8'))
+        domains = convert.convert_to_domain_list(block_content, white_content)
         return domains
