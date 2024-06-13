@@ -49,8 +49,8 @@ class DomainConverter:
         return response.content
 
     def process_urls(self):
-        block_content = ""
-        white_content = ""
+        block_content = b""
+        white_content = b""
         for url in self.adlist_urls:
             block_content += self.download_file(url)
         for url in self.whitelist_urls:
