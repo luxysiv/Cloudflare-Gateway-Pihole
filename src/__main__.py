@@ -108,6 +108,7 @@ class CloudflareManager:
 
         utils.delete_policy(current_policies)
         utils.delete_lists(current_lists)
+        
 
 if __name__ == "__main__":
     cloudflare_manager = CloudflareManager(PREFIX, MAX_LISTS, MAX_LIST_SIZE)
