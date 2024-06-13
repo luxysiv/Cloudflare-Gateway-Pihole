@@ -44,25 +44,25 @@ class DomainConverter:
         return urls
 
     def download_file(self, url):
-        r = requests.get(url, allow_redirects=True)
+        response = requests.get(url, allow_redirects=True)
         info(f"Downloaded file from {url} File size: {len(r.content)}")
-        return r.text
-        
+        return response.content
+
     def process_urls(self):
-        block_content = ""
-        white_content = ""
+        block_content = b""
+        white_content = b""
         for url in self.adlist_urls:
             block_content += self.download_file(url)
         for url in self.whitelist_urls:
             white_content += self.download_file(url)
             
-        with open("./lists/dynamic_blacklist.txt", "r") as black_file:
+        with open("./lists/dynamic_blacklist.txt", "rb") as black_file:
             blacklist_content = black_file.read()
             block_content += blacklist_content
         
-        with open("./lists/dynamic_whitelist.txt", "r") as white_file:
+        with open("./lists/dynamic_whitelist.txt", "rb") as white_file:
             whitelist_content = white_file.read()
             white_content += whitelist_content
         
-        domains = convert.convert_to_domain_list(block_content, white_content)
+        domains = convert.convert_to_domain_list(block_content.decode('utf-8'), white_content.decode('utf-8'))
         return domains
