@@ -25,7 +25,7 @@ https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
 ```
 or
 ```ini
-[Hosts-Urls]
+[Ad-Urls]
 Adguard = https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
 ```
 
