@@ -2,7 +2,6 @@ import re
 import time
 from src import (
     info,
-    PREFIX, 
     cloudflare,
     silent_error,
     MAX_LIST_SIZE,
@@ -18,7 +17,7 @@ class RateLimiter:
         now = time.time()
         elapsed = now - self.timestamp
         sleep_time = max(0, self.interval - elapsed)
-        if sleep_time > 0:
+        if (sleep_time > 0):
             time.sleep(sleep_time)
         self.timestamp = time.time()
 
@@ -64,21 +63,21 @@ def safe_sort_key(list_item):
     match = re.search(r'\d+', list_item["name"])
     return int(match.group()) if match else float('inf')
 
-def update_lists(current_lists, chunked_lists):
+def update_lists(current_lists, chunked_lists, adlist_name):
     used_list_ids = []
     excess_list_ids = []
 
     existing_indices = [
         int(re.search(r'\d+', list_item["name"]).group())
         for list_item in current_lists.get("result", [])
-        if f"[{PREFIX}]" in list_item["name"]
+        if f"{adlist_name}" in list_item["name"]
     ]
 
     total_lists = len(chunked_lists)
     missing_indices = get_missing_indices(existing_indices, total_lists)
 
     for list_item in current_lists.get("result", []):
-        if f"[{PREFIX}]" in list_item["name"]:
+        if f"{adlist_name}" in list_item["name"]:
             list_index = int(re.search(r'\d+', list_item["name"]).group())
             if list_index in existing_indices:
                 if chunked_lists:
@@ -106,15 +105,15 @@ def update_lists(current_lists, chunked_lists):
 
     return used_list_ids, excess_list_ids, missing_indices
 
-def create_lists(chunked_lists, missing_indices):
+def create_lists(chunked_lists, missing_indices, adlist_name):
     used_list_ids = []
 
     for chunk_list, index in zip(chunked_lists, missing_indices):
         formatted_counter = f"{index:03d}"
-        info(f"Creating list [{PREFIX}] - {formatted_counter}")
+        info(f"Creating list {adlist_name} - {formatted_counter}")
 
         payload = create_list_payload(
-            f"[{PREFIX}] - {formatted_counter}", chunk_list
+            f"{adlist_name} - {formatted_counter}", chunk_list
         )
 
         created_list = cloudflare.create_list(payload)
@@ -125,22 +124,22 @@ def create_lists(chunked_lists, missing_indices):
 
     return used_list_ids
 
-def update_or_create_policy(current_policies, used_list_ids):
+def update_or_create_policy(current_policies, used_list_ids, policy_name):
     policy_id = None
 
     for policy_item in current_policies.get("result", []):
-        if policy_item["name"] == f"[{PREFIX}] Block Ads":
+        if policy_item["name"] == policy_name:
             policy_id = policy_item["id"]
 
     json_data = create_policy_json(
-        f"[{PREFIX}] Block Ads", used_list_ids
+        policy_name, used_list_ids
     )
 
     if not policy_id or policy_id == "null":
-        info(f"Creating policy [{PREFIX}] Block Ads")
+        info(f"Creating policy {policy_name}")
         cloudflare.create_policy(json_data)
     else:
-        info(f"Updating policy [{PREFIX}] Block Ads")
+        info(f"Updating policy {policy_name}")
         cloudflare.update_policy(policy_id, json_data)
     rate_limiter.wait_for_next_request()
 
@@ -152,24 +151,24 @@ def delete_excess_lists(current_lists, excess_list_ids):
             cloudflare.delete_list(list_item["id"])
             rate_limiter.wait_for_next_request()
 
-def delete_policy(current_policies):
+def delete_policy(current_policies, policy_name):
     policy_id = None
     for policy_item in current_policies.get("result", []):
-        if policy_item["name"] == f"[{PREFIX}] Block Ads":
+        if policy_item["name"] == policy_name:
             policy_id = policy_item["id"]
 
     if policy_id:
-        info(f"Deleting policy [{PREFIX}] Block Ads")
+        info(f"Deleting policy {policy_name}")
         cloudflare.delete_policy(policy_id)
         rate_limiter.wait_for_next_request()
 
-def delete_lists(current_lists):
+def delete_lists(current_lists, adlist_name):
     list_ids_to_delete = []
     if current_lists.get("result"):
         current_lists["result"].sort(key=lambda x: int(x["name"].split("-")[-1].strip()))
 
         for list_item in current_lists["result"]:
-            if f"[{PREFIX}]" in list_item["name"]:
+            if f"{adlist_name}" in list_item["name"]:
                 list_ids_to_delete.append(list_item['id'])
 
         for list_id in list_ids_to_delete:
