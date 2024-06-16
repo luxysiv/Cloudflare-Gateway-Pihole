@@ -76,7 +76,9 @@ if __name__ == "__main__":
     cloudflare_manager.leave() # Leave script 
 ```
 
-* Hỗ trợ **[dynamic_blacklist.txt](../lists/dynamic_blacklist.txt)** và **[dynamic_whitelist.txt](../lists/dynamic_whitelist.txt)** để các bạn tự **chặn hoặc bỏ chặn** tên miền theo ý thích 
+* Hỗ trợ **[dynamic_blacklist.txt](../lists/dynamic_blacklist.txt)** và **[dynamic_whitelist.txt](../lists/dynamic_whitelist.txt)** để các bạn tự `chặn` hoặc `bỏ chặn` tên miền theo ý thích
+
+* Hỗ trợ thêm `chặn` và `bỏ chặn` trong `Github Actions variables `. Định dạng giống như **[dynamic_blacklist.txt](../lists/dynamic_blacklist.txt)** và **[dynamic_whitelist.txt](../lists/dynamic_whitelist.txt)** ở `Value*`. `DYNAMIC_BLACKLIST` và `DYNAMIC_WHITELIST` cho `Name*`
 
 * Thêm danh sách `chặn` của bạn vào **[adlist.ini](../lists/adlist.ini)** và `loại bỏ chặn` ở **[whitelist.ini](../lists/whitelist.ini)**
 
