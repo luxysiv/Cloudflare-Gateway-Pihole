@@ -7,12 +7,13 @@ jobs:
     name: Cloudflare Gateway
     permissions: write-all
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     env:
       CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
       CF_IDENTIFIER: ${{ secrets.CF_IDENTIFIER }}
       ADLIST_URLS: ${{ vars.ADLIST_URLS }}
       WHITELIST_URLS: ${{ vars.WHITELIST_URLS }}
+      DYNAMIC_BLACKLIST: ${{ vars.DYNAMIC_BLACKLIST }}
+      DYNAMIC_WHITELIST: ${{ vars.DYNAMIC_WHITELIST }}
 
     steps:
       - name: Checkout Repository
@@ -25,14 +26,14 @@ jobs:
         with:
           python-version: 3.11
 
-      - name: Install Dependencies
-        run: pip install -r requirements.txt
-          
+      - name: Install dependencies
+        run: pip install requests python-dotenv loguru tenacity
+        
       - name: Cloudflare Gateway Zero Trust 
-        run: python -m src
+        run: python -m src run 
           
       - name: Delete workflow runs
-        uses: Mattraks/delete-workflow-runs@main
+        uses: Mattraks/delete-workflow-runs@v2
         with:
           token: ${{ github.token }}
           repository: ${{ github.repository }}
