@@ -15,6 +15,7 @@ Create your ad blocklist using Cloudflare Gateway.
 > Readme by [@minlaxz](https://github.com/minlaxz).
 
 >> Added dynamic domain filter (whitelist and blacklist) idea (please check `ini` files, as you may also need to modify those).
+>>> Added dynamic domain filter (whitelist and blacklist) to Actions variables (please check [dynamic_blacklist.txt](./lists/dynamic_blacklist.txt) and [dynamic_whitelist.txt](./lists/dynamic_whitelist.txt). to know examples to add `Value*`).Use `DYNAMIC_BLACKLIST` and `DYNAMIC_WHITELIST` for `Name*` in Actions variables 
 
 ### Supported styles
 ---
@@ -35,10 +36,10 @@ Adguard = https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
   > White list [whitelist.ini](./lists/whitelist.ini) and block list [adlist.ini](./lists/adlist.ini).
 
 * Add to GitHub Action variables:
-  > Name:
+  > `Name*`
   >> `ADLIST_URLS` or `WHITELIST_URLS`.
 
-  > Value: `URLs list`
+  > `Value*` `URLs list`
   >> Example:
   ```text
   https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
