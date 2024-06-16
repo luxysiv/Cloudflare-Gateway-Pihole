@@ -17,7 +17,7 @@ class RateLimiter:
         now = time.time()
         elapsed = now - self.timestamp
         sleep_time = max(0, self.interval - elapsed)
-        if (sleep_time > 0):
+        if sleep_time > 0:
             time.sleep(sleep_time)
         self.timestamp = time.time()
 
@@ -79,15 +79,18 @@ def update_lists(current_lists, chunked_lists, adlist_name):
     for list_item in current_lists.get("result", []):
         if f"{adlist_name}" in list_item["name"]:
             list_index = int(re.search(r'\d+', list_item["name"]).group())
-            if list_index in existing_indices:
-                if chunked_lists:
-                    info(f"Updating list {list_item['name']}")
+            if list_index in existing_indices and list_index - 1 < len(chunked_lists):
+                info(f"Checking list {list_item['name']} for updates")
 
-                    list_items = cloudflare.get_list_items(list_item["id"])
-                    list_items_values = [
-                        item["value"] for item in list_items.get("result", []) if item["value"] is not None
-                    ]
-                    list_items_array = [{"value": domain} for domain in chunked_lists.pop(0)]
+                list_items = cloudflare.get_list_items(list_item["id"])
+                list_items_values = [
+                    item["value"] for item in list_items.get("result", []) if item["value"] is not None
+                ]
+                new_list_items = chunked_lists[list_index - 1]
+
+                if set(list_items_values) != set(new_list_items):
+                    info(f"Updating list {list_item['name']}")
+                    list_items_array = [{"value": domain} for domain in new_list_items]
 
                     payload = {
                         "append": list_items_array,
@@ -97,30 +100,33 @@ def update_lists(current_lists, chunked_lists, adlist_name):
                     cloudflare.patch_list(list_item["id"], payload)
                     used_list_ids.append(list_item["id"])
                     rate_limiter.wait_for_next_request()
-                    continue 
+                else:
+                    info(f"No changes detected for list {list_item['name']}, skipping update")
+                    used_list_ids.append(list_item["id"])
+                continue 
 
             info(f"Marking list {list_item['name']} for deletion")
             excess_list_ids.append(list_item["id"])
-                
 
     return used_list_ids, excess_list_ids, missing_indices
 
 def create_lists(chunked_lists, missing_indices, adlist_name):
     used_list_ids = []
 
-    for chunk_list, index in zip(chunked_lists, missing_indices):
-        formatted_counter = f"{index:03d}"
-        info(f"Creating list {adlist_name} - {formatted_counter}")
+    for index in missing_indices:
+        if index - 1 < len(chunked_lists):
+            formatted_counter = f"{index:03d}"
+            info(f"Creating list {adlist_name} - {formatted_counter}")
 
-        payload = create_list_payload(
-            f"{adlist_name} - {formatted_counter}", chunk_list
-        )
+            payload = create_list_payload(
+                f"{adlist_name} - {formatted_counter}", chunked_lists[index - 1]
+            )
 
-        created_list = cloudflare.create_list(payload)
-        if created_list:
-            used_list_ids.append(created_list.get("result", {}).get("id"))
+            created_list = cloudflare.create_list(payload)
+            if created_list:
+                used_list_ids.append(created_list.get("result", {}).get("id"))
 
-        rate_limiter.wait_for_next_request()
+            rate_limiter.wait_for_next_request()
 
     return used_list_ids
 
