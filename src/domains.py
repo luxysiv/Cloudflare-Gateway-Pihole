@@ -1,10 +1,7 @@
 import os
 import requests
 from configparser import ConfigParser
-from src import (
-    info,
-    convert
-)
+from src import info, convert
 
 class DomainConverter:
     def __init__(self):
@@ -58,6 +55,7 @@ class DomainConverter:
         for url in self.whitelist_urls:
             white_content += self.download_file(url)
         
+        # Check for dynamic blacklist and whitelist in environment variables
         dynamic_blacklist = os.getenv("DYNAMIC_BLACKLIST", "")
         dynamic_whitelist = os.getenv("DYNAMIC_WHITELIST", "")
         

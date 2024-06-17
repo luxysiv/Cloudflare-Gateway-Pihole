@@ -1,10 +1,14 @@
-from src import info, session, BASE_URL, MAX_LIST_SIZE
 from requests.exceptions import RequestException, HTTPError
-from src.retry import retry, stop_never, wait_random_exponential, retry_if_exception_type
+from src import (
+    info, session, BASE_URL, MAX_LIST_SIZE,
+    retry, stop_never, wait_random_exponential, retry_if_exception_type
+)
 
 retry_config = {
     'stop': stop_never,
-    'wait': lambda attempt_number: wait_random_exponential(attempt_number, multiplier=1, max_wait=10),
+    'wait': lambda attempt_number: wait_random_exponential(
+        attempt_number, multiplier=1, max_wait=10
+    ),
     'retry': retry_if_exception_type((HTTPError, RequestException)),
     'after': lambda retry_state: info(
         f"Retrying ({retry_state['attempt_number']}): {retry_state['outcome']}"

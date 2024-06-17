@@ -1,14 +1,8 @@
 import re
 from src import (
-    info,
-    error,
-    utils,
-    domains,
-    cloudflare,
-    silent_error,
-    PREFIX,
-    MAX_LISTS,
-    MAX_LIST_SIZE,
+    info, error, silent_error,
+    utils, domains, cloudflare, 
+    PREFIX, MAX_LISTS, MAX_LIST_SIZE,
 )
 
 class CloudflareManager:
