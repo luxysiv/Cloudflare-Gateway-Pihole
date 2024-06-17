@@ -1,11 +1,7 @@
+import time
 import random
-from tenacity import (
-    retry,
-    stop_never,
-    wait_random_exponential,
-    retry_if_exception_type
-)
 from requests.exceptions import RequestException, HTTPError
+from functools import wraps
 from src import (
     info,
     session,
@@ -13,15 +9,49 @@ from src import (
     MAX_LIST_SIZE
 )
 
+def retry(stop=None, wait=None, retry=None, after=None, before_sleep=None):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            attempt_number = 0
+            while True:
+                try:
+                    attempt_number += 1
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    if retry and not retry(e):
+                        raise
+                    if after:
+                        after({'attempt_number': attempt_number, 'outcome': e})
+                    if stop and stop(attempt_number):
+                        raise
+                    if before_sleep:
+                        before_sleep({'attempt_number': attempt_number})
+                    if wait:
+                        time.sleep(wait(attempt_number))
+                    else:
+                        time.sleep(1)
+        return wrapper
+    return decorator
+
+def stop_never(attempt_number):
+    return False
+
+def wait_random_exponential(attempt_number, multiplier=1, max=10):
+    return min(multiplier * (2 ** random.uniform(0, attempt_number - 1)), max)
+
+def retry_if_exception_type(exceptions):
+    return lambda e: isinstance(e, exceptions)
+
 retry_config = {
     'stop': stop_never,
-    'wait': wait_random_exponential(multiplier=1, max=10),
+    'wait': lambda attempt_number: wait_random_exponential(attempt_number, multiplier=1, max=10),
     'retry': retry_if_exception_type((HTTPError, RequestException)),
     'after': lambda retry_state: info(
-        f"Retrying ({retry_state.attempt_number}): {retry_state.outcome.exception()}"
+        f"Retrying ({retry_state['attempt_number']}): {retry_state['outcome']}"
     ),
     'before_sleep': lambda retry_state: info(
-        f"Sleeping before next retry ({retry_state.attempt_number})"
+        f"Sleeping before next retry ({retry_state['attempt_number']})"
     )
 }
 
