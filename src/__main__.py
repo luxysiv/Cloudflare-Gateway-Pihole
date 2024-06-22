@@ -1,5 +1,4 @@
 import re
-import argparse 
 from src import (
     info, error, silent_error,
     utils, domains, cloudflare, 
