@@ -79,14 +79,14 @@ def update_lists(current_lists, chunked_lists, adlist_name):
 
     existing_indices = [
         int(re.search(r'\d+', list_item["name"]).group())
-        for list_item in current_lists.get("result", [])
+        for list_item in current_lists
         if f"{adlist_name}" in list_item["name"]
     ]
 
     total_lists = len(chunked_lists)
     missing_indices = get_missing_indices(existing_indices, total_lists)
 
-    for list_item in current_lists.get("result", []):
+    for list_item in current_lists:
         if f"{adlist_name}" in list_item["name"]:
             list_index = int(re.search(r'\d+', list_item["name"]).group())
             if list_index in existing_indices and list_index - 1 < len(chunked_lists):
@@ -141,7 +141,7 @@ def create_lists(chunked_lists, missing_indices, adlist_name):
 def update_or_create_policy(current_policies, used_list_ids, policy_name):
     policy_id = None
 
-    for policy_item in current_policies.get("result", []):
+    for policy_item in current_policies:
         if policy_item["name"] == policy_name:
             policy_id = policy_item["id"]
 
@@ -159,7 +159,7 @@ def update_or_create_policy(current_policies, used_list_ids, policy_name):
 
 def delete_excess_lists(current_lists, excess_list_ids):
     info("Deleting lists...")
-    for list_item in current_lists.get("result", []):
+    for list_item in current_lists:
         if list_item["id"] in excess_list_ids:
             info(f"Deleting list {list_item['name']}")
             cloudflare.delete_list(list_item["id"])
@@ -167,7 +167,7 @@ def delete_excess_lists(current_lists, excess_list_ids):
 
 def delete_policy(current_policies, policy_name):
     policy_id = None
-    for policy_item in current_policies.get("result", []):
+    for policy_item in current_policies:
         if policy_item["name"] == policy_name:
             policy_id = policy_item["id"]
 
@@ -178,16 +178,16 @@ def delete_policy(current_policies, policy_name):
 
 def delete_lists(current_lists, adlist_name):
     list_ids_to_delete = []
-    if current_lists.get("result"):
-        current_lists["result"].sort(key=lambda x: int(x["name"].split("-")[-1].strip()))
+    if current_lists:
+        current_lists.sort(key=lambda x: int(x["name"].split("-")[-1].strip()))
 
-        for list_item in current_lists["result"]:
+        for list_item in current_lists:
             if f"{adlist_name}" in list_item["name"]:
                 list_ids_to_delete.append(list_item['id'])
 
         for list_id in list_ids_to_delete:
             list_to_delete = next(
-                (list_item for list_item in current_lists["result"] if list_item["id"] == list_id), None
+                (list_item for list_item in current_lists if list_item["id"] == list_id), None
             )
             if list_to_delete:
                 info(f"Deleting list {list_to_delete['name']}")
