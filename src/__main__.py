@@ -29,8 +29,8 @@ class CloudflareManager:
             total_lists += 1
 
         current_lists = cloudflare.get_current_lists()["result"] or []
-    
         info(f"Total lists on Cloudflare: {len(current_lists)}")
+        
         total_domains = sum([l['count'] for l in current_lists]) if current_lists else 0
         info(f"Total domains on Cloudflare: {total_domains}")
         
