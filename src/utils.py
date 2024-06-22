@@ -4,23 +4,8 @@ import hashlib
 from src import (
     cloudflare,
     info, silent_error,
-    MAX_LIST_SIZE, RATE_LIMIT_INTERVAL
+    MAX_LIST_SIZE
 )
-
-class RateLimiter:
-    def __init__(self, interval):
-        self.interval = interval
-        self.timestamp = time.time()
-
-    def wait_for_next_request(self):
-        now = time.time()
-        elapsed = now - self.timestamp
-        sleep_time = max(0, self.interval - elapsed)
-        if sleep_time > 0:
-            time.sleep(sleep_time)
-        self.timestamp = time.time()
-
-rate_limiter = RateLimiter(interval=RATE_LIMIT_INTERVAL)
 
 def split_domain_list(domain_list):
     return [
@@ -105,7 +90,6 @@ def update_lists(current_lists, chunked_lists, adlist_name):
 
                     cloudflare.patch_list(list_item["id"], payload)
                     used_list_ids.append(list_item["id"])
-                    rate_limiter.wait_for_next_request()
                 continue
 
             info(f"Marking list {list_item['name']} for deletion")
@@ -129,8 +113,6 @@ def create_lists(chunked_lists, missing_indices, adlist_name):
             if created_list:
                 used_list_ids.append(created_list.get("result", {}).get("id"))
 
-            rate_limiter.wait_for_next_request()
-
     return used_list_ids
 
 def update_or_create_policy(current_policies, used_list_ids, policy_name):
@@ -150,7 +132,6 @@ def update_or_create_policy(current_policies, used_list_ids, policy_name):
     else:
         info(f"Updating policy {policy_name}")
         cloudflare.update_policy(policy_id, json_data)
-    rate_limiter.wait_for_next_request()
 
 def delete_excess_lists(current_lists, excess_list_ids):
     info("Deleting lists...")
@@ -158,8 +139,7 @@ def delete_excess_lists(current_lists, excess_list_ids):
         if list_item["id"] in excess_list_ids:
             info(f"Deleting list {list_item['name']}")
             cloudflare.delete_list(list_item["id"])
-            rate_limiter.wait_for_next_request()
-
+        
 def delete_policy(current_policies, policy_name):
     policy_id = None
     for policy_item in current_policies:
@@ -169,7 +149,6 @@ def delete_policy(current_policies, policy_name):
     if policy_id:
         info(f"Deleting policy {policy_name}")
         cloudflare.delete_policy(policy_id)
-        rate_limiter.wait_for_next_request()
 
 def delete_lists(current_lists, adlist_name):
     list_ids_to_delete = []
@@ -187,6 +166,5 @@ def delete_lists(current_lists, adlist_name):
             if list_to_delete:
                 info(f"Deleting list {list_to_delete['name']}")
                 cloudflare.delete_list(list_id)
-                rate_limiter.wait_for_next_request()
     else:
         silent_error("No lists to delete")

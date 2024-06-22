@@ -1,6 +1,6 @@
 from requests.exceptions import RequestException, HTTPError
 from src import (
-    info, session, BASE_URL, MAX_LIST_SIZE,
+    info, session, BASE_URL, MAX_LIST_SIZE, rate_limited_request,
     retry, stop_never, wait_random_exponential, retry_if_exception_type
 )
 
@@ -37,12 +37,14 @@ def get_list_items(list_id):
     return response.json()
 
 @retry(**retry_config)
+@rate_limited_request
 def patch_list(list_id, payload):
     response = session.patch(f"{BASE_URL}/lists/{list_id}", json=payload)
     response.raise_for_status()
     return response.json()
 
 @retry(**retry_config)
+@rate_limited_request
 def create_list(payload):
     response = session.post(f"{BASE_URL}/lists", json=payload)
     response.raise_for_status()
@@ -61,6 +63,7 @@ def update_policy(policy_id, json_data):
     return response.json()
 
 @retry(**retry_config)
+@rate_limited_request
 def delete_list(list_id):
     response = session.delete(f"{BASE_URL}/lists/{list_id}")
     response.raise_for_status()
