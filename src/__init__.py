@@ -21,9 +21,16 @@ MAX_LIST_SIZE = 1000
 MAX_LISTS = 300
 
 # Compile regex patterns
-replace_pattern = re.compile(r"(^([0-9.]+|[0-9a-fA-F:.]+)\s+|^(\|\||@@\|\||\*\.|\*))")
-domain_pattern = re.compile(r"^([a-zA-Z0-9](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?\.)*[a-zA-Z0-9](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?$")
-ip_pattern = re.compile(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$")
+replace_pattern = re.compile(
+    r"(^([0-9.]+|[0-9a-fA-F:.]+)\s+|^(\|\||@@\|\||\*\.|\*))"
+)
+domain_pattern = re.compile(
+    r"^([a-zA-Z0-9](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?\.)*"
+    r"[a-zA-Z0-9](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?$"
+)
+ip_pattern = re.compile(
+    r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"
+)
 
 # Configure session
 session = requests.Session()
@@ -94,12 +101,10 @@ class RateLimiter:
             time.sleep(sleep_time)
         self.timestamp = time.time()
 
-rate_limiter = RateLimiter(1.0)
-
 # Function to limit requests
 def rate_limited_request(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        rate_limiter.wait_for_next_request()
+        RateLimiter(1.0).wait_for_next_request()
         return func(*args, **kwargs)
     return wrapper
