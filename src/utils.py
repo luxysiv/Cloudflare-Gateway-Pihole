@@ -68,11 +68,6 @@ def hash_list(list_items):
         hash_object.update(item.encode('utf-8'))
     return hash_object.hexdigest()
 
-def compare_lists_hash(new_list_items, list_items_values):
-    new_list_hash = hash_list(new_list_items)
-    old_list_hash = hash_list(list_items_values)
-    return new_list_hash == old_list_hash
-
 def update_lists(current_lists, chunked_lists, adlist_name):
     used_list_ids = []
     excess_list_ids = []
@@ -96,7 +91,7 @@ def update_lists(current_lists, chunked_lists, adlist_name):
                 ]
                 new_list_items = chunked_lists[list_index - 1]
 
-                if compare_lists_hash(new_list_items, list_items_values):
+                if hash_list(new_list_items) == hash_list(list_items_values):
                     info(f"No changes detected for list {list_item['name']}, skipping update")
                     used_list_ids.append(list_item["id"])
                 else:
