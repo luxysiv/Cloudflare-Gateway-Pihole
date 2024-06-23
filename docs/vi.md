@@ -61,12 +61,6 @@ Nhớ cài cron trigger cho Cloudflare Workers
 
 * Các bạn đã tải các danh sách bộ lọc bằng script khác thì nên xoá đi bằng tính năng xoá của script đã up hoặc xoá tay
 
-* Nếu không biết thêm vào Secret Github Action thì có thể điền giá trị vào file **[.env](../.env)** và sửa file **[main.yml](../.github/workflows/main.yml)** như sau, loại bỏ các dòng secret env
-```yml
-- name: Cloudflare Gateway Zero Trust 
-  run: python -m src 
-```
-
 * Mình đã update thêm tính năng xoá danh sách khi các bạn không muốn sử dụng script nữa. Vào **[__main__.py](../src/__main__.py)** để như sau:
 
 ```python
