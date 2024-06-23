@@ -101,10 +101,12 @@ class RateLimiter:
             time.sleep(sleep_time)
         self.timestamp = time.time()
 
+rate_limiter = RateLimiter(1.0)
+
 # Function to limit requests
 def rate_limited_request(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        RateLimiter(1.0).wait_for_next_request()
+        rate_limiter.wait_for_next_request()
         return func(*args, **kwargs)
     return wrapper
