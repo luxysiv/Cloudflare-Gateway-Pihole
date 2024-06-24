@@ -94,46 +94,86 @@ async function handleScheduledEvent() {
 ```
 >> Remember to set up Cloudflare Workers triggers.
 
-### How to set up using Termux?
+### How to set up using Termux
 ---
 
-* Download the **GOAT** [Termux](https://github.com/termux/termux-app/releases/latest).
+To use this tool on Termux, follow the steps below. If you are already familiar with setting up Python and the basics, you can skip this section.
 
-* Here are the `commands` that need to be run one after another to set up Python.
+#### Method 1:
 
-**If you know how to do this, you can skip this step.**
+1. Open Termux and run the following commands one by one:
+
 ```sh
 yes | pkg upgrade
 yes | pkg install python-pip
 yes | pkg install git
-# Clone your forked repo. #
+# Clone your forked repo #
+git clone https://github.com/<username>/<repo-name>.git
 ```
 
-* Enter folder:
+2. Navigate to the cloned repository folder:
 
-`cd <your forked name>`
+```sh
+cd <repo-name>
+```
 
-* Edit `.env` (**required**):
+3. Edit the `.env` file (required):
 
 ```sh
 nano .env
 ```
 
-`CTRL + X + Y + ENTER` to save it.
+After editing, press `CTRL + X`, then `Y`, and `ENTER` to save the file.
 
-* Install Dependencies:
+4. Install dependencies:
 
 ```sh
 pip install -r requirements.txt
 ```
 
-* Command to upload (update) your DNS list:
+5. Run the command to upload (update) your DNS list:
 
 ```sh
 python -m src
 ```
 
-_You may also check this out [termux-change-repo](https://wiki.termux.com/wiki/Package_Management) in case you run into trouble setting things up._
+#### Method 2:
+
+1. Download the ZIP file of the repository from the 'Code' button on the GitHub page and select 'Download ZIP'.
+
+2. Unzip the downloaded file.
+
+3. Edit the values in `.env` and `adlist.ini` etc...
+
+4. Open Termux and enter the following commands to set up Python and necessary tools:
+
+```sh
+yes | pkg upgrade
+yes | pkg install python-pip
+termux-setup-storage
+```
+
+5. Allow Termux to access storage.
+
+6. Navigate to the folder containing the unzipped source code:
+
+```sh
+cd storage/downloads/Cloudflare-Gateway-Pihole-main
+```
+
+7. Install dependencies:
+
+```sh
+pip install -r requirements.txt
+```
+
+8. Run the command to upload (update) your DNS list:
+
+```sh
+python -m src
+```
+
+If you encounter issues during setup, you can refer to [termux-change-repo](https://wiki.termux.com/wiki/Package_Management) for changing Termux repositories.
 
 ### Note
 ---
