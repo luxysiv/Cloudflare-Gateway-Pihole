@@ -1,5 +1,6 @@
 import os
-import requests
+import http.client
+from urllib.parse import urlparse
 from configparser import ConfigParser
 from src import info, convert
 
@@ -43,9 +44,16 @@ class DomainConverter:
         return urls
 
     def download_file(self, url):
-        r = requests.get(url, allow_redirects=True)
-        info(f"Downloaded file from {url} File size: {len(r.content)}")
-        return r.text
+        parsed_url = urlparse(url)
+        conn = http.client.HTTPSConnection(parsed_url.netloc)
+        conn.request("GET", parsed_url.path)
+        response = conn.getresponse()
+        if response.status != 200:
+            raise Exception(f"Failed to download file from {url}, status code: {response.status}")
+        data = response.read().decode('utf-8')
+        conn.close()
+        info(f"Downloaded file from {url}. File size: {len(data)}")
+        return data
         
     def process_urls(self):
         block_content = ""

@@ -3,8 +3,11 @@ import re
 import time
 import random
 import logging
-import requests
+import http.client
+import json
+import gzip
 from functools import wraps
+from io import BytesIO
 from src.colorlog import logger
 
 # Read .env
@@ -50,15 +53,15 @@ ip_pattern = re.compile(
     r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"
 )
 
-# Configure session
-session = requests.Session()
-session.headers.update({
+# Configure connection
+conn = http.client.HTTPSConnection("api.cloudflare.com")
+headers = {
     "Authorization": f"Bearer {CF_API_TOKEN}",
     "Content-Type": "application/json",
     "Accept-Encoding": "gzip, deflate"
-})
+}
 
-BASE_URL = f"https://api.cloudflare.com/client/v4/accounts/{CF_IDENTIFIER}/gateway"
+BASE_URL = f"/client/v4/accounts/{CF_IDENTIFIER}/gateway"
 
 # Retry decorator
 def retry(stop=None, wait=None, retry=None, after=None, before_sleep=None):
