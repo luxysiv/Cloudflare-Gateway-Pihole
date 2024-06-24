@@ -1,16 +1,17 @@
 import os
 import re
+import gzip
+import json
 import time
 import random
-import logging
 import http.client
-import json
-import gzip
-from functools import wraps
+from sys import exit
 from io import BytesIO
+from functools import wraps
 from src.colorlog import logger
+from http.client import HTTPException
 
-# Read .env
+# Read .env variables 
 def dot_env(file_path=".env"):
     env_vars = {}
     try:
@@ -27,19 +28,19 @@ def dot_env(file_path=".env"):
         raise Exception(f"File {file_path} not found")
     return env_vars
 
-# Load variables
 env_vars = dot_env()
 
+# Load environment or .env variables
 CF_API_TOKEN = os.getenv("CF_API_TOKEN") or env_vars.get("CF_API_TOKEN")
 CF_IDENTIFIER = os.getenv("CF_IDENTIFIER") or env_vars.get("CF_IDENTIFIER")
-
 if not CF_API_TOKEN or not CF_IDENTIFIER:
     raise Exception("Missing Cloudflare credentials")
 
 # Constants
-PREFIX = "AdBlock-DNS-Filters"
-MAX_LIST_SIZE = 1000
 MAX_LISTS = 300
+MAX_LIST_SIZE = 1000
+RATE_LIMIT_INTERVAL = 1.0
+PREFIX = "AdBlock-DNS-Filters"
 
 # Compile regex patterns
 replace_pattern = re.compile(
@@ -53,15 +54,59 @@ ip_pattern = re.compile(
     r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"
 )
 
-# Configure connection
-conn = http.client.HTTPSConnection("api.cloudflare.com")
-headers = {
-    "Authorization": f"Bearer {CF_API_TOKEN}",
-    "Content-Type": "application/json",
-    "Accept-Encoding": "gzip, deflate"
-}
+# Logging functions
+def error(message):
+    logger.error(message)
+    exit(1)
 
-BASE_URL = f"/client/v4/accounts/{CF_IDENTIFIER}/gateway"
+def silent_error(message):
+    logger.warning(message)
+
+def info(message):
+    logger.info(message)
+    
+# Configure connection
+def perform_request(method, endpoint, body=None):
+    conn = http.client.HTTPSConnection("api.cloudflare.com")
+    
+    headers = {
+        "Authorization": f"Bearer {CF_API_TOKEN}",
+        "Content-Type": "application/json",
+        "Accept-Encoding": "gzip, deflate"
+    }
+    
+    url = f"https://api.cloudflare.com/client/v4/accounts/{CF_IDENTIFIER}/gateway{endpoint}"
+    conn.request(method, url, body, headers)
+    response = conn.getresponse()
+    data = response.read()
+    status = response.status
+
+    if status >= 400:
+        error_message = ""
+        if status == 400:
+            error_message = f"400 Client Error: Bad Request for url: {url}"
+        elif status == 401:
+            error_message = f"401 Client Error: Unauthorized for url: {url}"
+        elif status == 403:
+            error_message = f"403 Client Error: Forbidden for url: {url}"
+        elif status == 404:
+            error_message = f"404 Client Error: Not Found for url: {url}"
+        elif status == 429:
+            error_message = f"429 Client Error: Too Many Requests for url: {url}"
+        elif status >= 500:
+            error_message = f"{status} Server Error for url: {url}"
+        else:
+            error_message = f"HTTP request failed with status {status} for url: {url}"
+
+        info(error_message)
+        raise HTTPException(error_message)
+
+    if response.getheader('Content-Encoding') == 'gzip':
+        buf = BytesIO(data)
+        f = gzip.GzipFile(fileobj=buf)
+        data = f.read()
+
+    return response.status, json.loads(data.decode('utf-8'))
 
 # Retry decorator
 def retry(stop=None, wait=None, retry=None, after=None, before_sleep=None):
@@ -97,17 +142,6 @@ def wait_random_exponential(attempt_number, multiplier=1, max_wait=10):
 def retry_if_exception_type(exceptions):
     return lambda e: isinstance(e, exceptions)
 
-# Logging functions
-def error(message):
-    logger.error(message)
-    exit(1)
-
-def silent_error(message):
-    logger.warning(message)
-
-def info(message):
-    logger.info(message)
-
 # Rate limiter
 class RateLimiter:
     def __init__(self, interval):
@@ -122,7 +156,7 @@ class RateLimiter:
             time.sleep(sleep_time)
         self.timestamp = time.time()
 
-rate_limiter = RateLimiter(1.0)
+rate_limiter = RateLimiter(RATE_LIMIT_INTERVAL)
 
 # Function to limit requests
 def rate_limited_request(func):
