@@ -75,7 +75,8 @@ def perform_request(method, endpoint, body=None):
         "Accept-Encoding": "gzip, deflate"
     }
     
-    url = f"https://api.cloudflare.com/client/v4/accounts/{CF_IDENTIFIER}/gateway{endpoint}"
+    url = f"/client/v4/accounts/{CF_IDENTIFIER}/gateway" + endpoint
+    full_url = f"https://api.cloudflare.com" + url
     conn.request(method, url, body, headers)
     response = conn.getresponse()
     data = response.read()
@@ -84,19 +85,19 @@ def perform_request(method, endpoint, body=None):
     if status >= 400:
         error_message = ""
         if status == 400:
-            error_message = f"400 Client Error: Bad Request for url: {url}"
+            error_message = f"400 Client Error: Bad Request for url: {full_url}"
         elif status == 401:
-            error_message = f"401 Client Error: Unauthorized for url: {url}"
+            error_message = f"401 Client Error: Unauthorized for url: {full_url}"
         elif status == 403:
-            error_message = f"403 Client Error: Forbidden for url: {url}"
+            error_message = f"403 Client Error: Forbidden for url: {full_url}"
         elif status == 404:
-            error_message = f"404 Client Error: Not Found for url: {url}"
+            error_message = f"404 Client Error: Not Found for url: {full_url}"
         elif status == 429:
-            error_message = f"429 Client Error: Too Many Requests for url: {url}"
+            error_message = f"429 Client Error: Too Many Requests for url: {full_url}"
         elif status >= 500:
-            error_message = f"{status} Server Error for url: {url}"
+            error_message = f"{status} Server Error for url: {full_url}"
         else:
-            error_message = f"HTTP request failed with status {status} for url: {url}"
+            error_message = f"HTTP request failed with status {status} for url: {full_url}"
 
         info(error_message)
         raise HTTPException(error_message)
@@ -141,6 +142,20 @@ def wait_random_exponential(attempt_number, multiplier=1, max_wait=10):
 
 def retry_if_exception_type(exceptions):
     return lambda e: isinstance(e, exceptions)
+
+retry_config = {
+    'stop': stop_never,
+    'wait': lambda attempt_number: wait_random_exponential(
+        attempt_number, multiplier=1, max_wait=10
+    ),
+    'retry': retry_if_exception_type((HTTPException,)),
+    'after': lambda retry_state: info(
+        f"Retrying ({retry_state['attempt_number']}): {retry_state['outcome']}"
+    ),
+    'before_sleep': lambda retry_state: info(
+        f"Sleeping before next retry ({retry_state['attempt_number']})"
+    )
+}
 
 # Rate limiter
 class RateLimiter:

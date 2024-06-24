@@ -1,23 +1,8 @@
 import json
 from http.client import HTTPException
 from src import (
-    info, rate_limited_request, perform_request,
-    retry, stop_never, wait_random_exponential, retry_if_exception_type
+    info, rate_limited_request, perform_request, retry_config, retry
 )
-
-retry_config = {
-    'stop': stop_never,
-    'wait': lambda attempt_number: wait_random_exponential(
-        attempt_number, multiplier=1, max_wait=10
-    ),
-    'retry': retry_if_exception_type((HTTPException,)),
-    'after': lambda retry_state: info(
-        f"Retrying ({retry_state['attempt_number']}): {retry_state['outcome']}"
-    ),
-    'before_sleep': lambda retry_state: info(
-        f"Sleeping before next retry ({retry_state['attempt_number']})"
-    )
-}
 
 @retry(**retry_config)
 def get_current_lists():
