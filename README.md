@@ -94,10 +94,10 @@ async function handleScheduledEvent() {
 ```
 >> Remember to set up Cloudflare Workers triggers.
 
-### How to set up using Termux
+### How to set up using Termux?
 ---
 
-To use this tool on Termux, follow the steps below. If you are already familiar with setting up Python and the basics, you can skip this section.
+To use this tool on the **GOAT** [Termux](https://github.com/termux/termux-app/releases/latest), follow the steps below. If you are already familiar with setting up Python and the basics, you can skip this section.
 
 #### Method 1:
 
