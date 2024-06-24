@@ -2,10 +2,10 @@ import os
 import re
 import time
 import random
+import logging
 import requests
-from sys import exit
 from functools import wraps
-from loguru import logger
+from src.colorlog import logger
 
 # Read .env
 def dot_env(file_path=".env"):
@@ -115,7 +115,7 @@ class RateLimiter:
         now = time.time()
         elapsed = now - self.timestamp
         sleep_time = max(0, self.interval - elapsed)
-        if (sleep_time > 0):
+        if sleep_time > 0:
             time.sleep(sleep_time)
         self.timestamp = time.time()
 
