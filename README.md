@@ -125,13 +125,7 @@ nano .env
 
 After editing, press `CTRL + X`, then `Y`, and `ENTER` to save the file.
 
-4. Install dependencies:
-
-```sh
-pip install -r requirements.txt
-```
-
-5. Run the command to upload (update) your DNS list:
+4. Run the command to upload (update) your DNS list:
 
 ```sh
 python -m src
@@ -161,13 +155,7 @@ termux-setup-storage
 cd storage/downloads/Cloudflare-Gateway-Pihole-main
 ```
 
-7. Install dependencies:
-
-```sh
-pip install -r requirements.txt
-```
-
-8. Run the command to upload (update) your DNS list:
+7. Run the command to upload (update) your DNS list:
 
 ```sh
 python -m src
