@@ -45,7 +45,10 @@ class DomainConverter:
 
     def download_file(self, url):
         parsed_url = urlparse(url)
-        conn = http.client.HTTPSConnection(parsed_url.netloc)
+        if parsed_url.scheme == "https":
+            conn = http.client.HTTPSConnection(parsed_url.netloc)
+        else:
+            conn = http.client.HTTPConnection(parsed_url.netloc)
         conn.request("GET", parsed_url.path)
         response = conn.getresponse()
         if response.status != 200:
