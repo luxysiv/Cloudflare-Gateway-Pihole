@@ -1,7 +1,9 @@
 import json
 from http.client import HTTPException
 from src import (
-    info, rate_limited_request, perform_request, retry_config, retry
+    MAX_LIST_SIZE,
+    info, rate_limited_request, 
+    perform_request, retry_config, retry
 )
 
 @retry(**retry_config)
@@ -16,7 +18,7 @@ def get_current_policies():
 
 @retry(**retry_config)
 def get_list_items(list_id):
-    status, data = perform_request("GET", f"/lists/{list_id}/items?limit=1000")
+    status, data = perform_request("GET", f"/lists/{list_id}/items?limit={MAX_LIST_SIZE}")
     return data
 
 @retry(**retry_config)
