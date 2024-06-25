@@ -14,7 +14,7 @@ from http.client import HTTPException
 # Read .env variables 
 def dot_env(file_path=".env"):
     env_vars = {}
-    try:
+    if os.path.exists(file_path):
         with open(file_path) as f:
             for line in f:
                 line = line.strip()
@@ -24,8 +24,6 @@ def dot_env(file_path=".env"):
                     value = value.strip()
                     value = re.sub(r'^["\'<]*(.*?)["\'>]*$', r'\1', value)
                     env_vars[key] = value
-    except FileNotFoundError:
-        raise Exception(f"File {file_path} not found")
     return env_vars
 
 env_vars = dot_env()
