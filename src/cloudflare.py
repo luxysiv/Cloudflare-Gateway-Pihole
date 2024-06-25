@@ -1,5 +1,4 @@
 import json
-from http.client import HTTPException
 from src import (
     MAX_LIST_SIZE,
     info, rate_limited_request, 
