@@ -50,10 +50,11 @@ def cloudflare_gateway_request(method: str, endpoint: str, body: Optional[str] =
         if status == 400:
             error_message = get_error_message(status, full_url)
             error(error_message)
+            raise HTTPException(error_message)
 
         if status != 200:
             error_message = get_error_message(status, full_url)
-            silent_error(error_message)
+            info(error_message)
             raise HTTPException(error_message)
 
         content_encoding = response.getheader('Content-Encoding')
@@ -67,14 +68,11 @@ def cloudflare_gateway_request(method: str, endpoint: str, body: Optional[str] =
         return status, json.loads(data.decode('utf-8'))
 
     except (http.client.HTTPException, ssl.SSLError, socket.timeout, OSError) as e:
-        silent_error(f"Network error occurred: {e}")
+        info(f"Network error occurred: {e}")
         raise HTTPException(f"Network error occurred: {e}")
     except json.JSONDecodeError:
-        silent_error("Failed to decode JSON response")
+        info("Failed to decode JSON response")
         raise HTTPException("Failed to decode JSON response")
-    except Exception as e:
-        silent_error(f"Request failed: {e}")
-        raise HTTPException(f"Request failed: {e}")
     finally:
         conn.close()
 
