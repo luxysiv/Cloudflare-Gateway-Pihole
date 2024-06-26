@@ -88,6 +88,10 @@ def cloudflare_gateway_request(method: str, endpoint: str, body: Optional[str] =
         data = response.read()
         status = response.status
 
+        if status == 400:
+            error_message = get_error_message(status, full_url)
+            error(error_message)
+            
         if status >= 400:
             error_message = get_error_message(status, full_url)
             silent_error(error_message)
