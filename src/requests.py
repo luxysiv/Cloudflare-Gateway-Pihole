@@ -1,75 +1,67 @@
-import os
-import sys
-import json
+import ssl
 import gzip
-import zlib
+import json
 import time
 import random
 import http.client
+import socket
 import urllib.parse
+import zlib
+from io import BytesIO
 from functools import wraps
-from src import (
-    info, silent_error, error, 
-    RATE_LIMIT_INTERVAL, CF_IDENTIFIER, CF_API_TOKEN
-)
+from typing import Optional, Tuple
+from src import info, silent_error, error, RATE_LIMIT_INTERVAL, CF_IDENTIFIER, CF_API_TOKEN
 
-class RequestException(Exception):
+class HTTPException(Exception):
     pass
 
-class Session:
-    def __init__(self):
-        self.headers = {
-            "Authorization": f"Bearer {CF_API_TOKEN}",
-            "Content-Type": "application/json",
-            "Accept-Encoding": "gzip, deflate"
-        }
-        self.base_url = f"https://api.cloudflare.com/client/v4/accounts/{CF_IDENTIFIER}/gateway"
+def cloudflare_gateway_request(method: str, endpoint: str, body: Optional[str] = None, timeout: int = 10) -> Tuple[int, dict]:
+    context = ssl.create_default_context()
+    conn = http.client.HTTPSConnection("api.cloudflare.com", context=context, timeout=timeout)
 
-    def _decode_response(self, response):
-        content_encoding = response.getheader('Content-Encoding', '')
-        response_body = response.read()
-        
+    headers = {
+        "Authorization": f"Bearer {CF_API_TOKEN}",
+        "Content-Type": "application/json",
+        "Accept-Encoding": "gzip, deflate"
+    }
+
+    url = f"/client/v4/accounts/{CF_IDENTIFIER}/gateway{endpoint}"
+    full_url = f"https://api.cloudflare.com{url}"
+
+    try:
+        conn.request(method, url, body, headers)
+        response = conn.getresponse()
+        data = response.read()
+        status = response.status
+
+        content_encoding = response.getheader('Content-Encoding')
         if content_encoding == 'gzip':
-            response_body = gzip.decompress(response_body).decode('utf-8')
+            buf = BytesIO(data)
+            with gzip.GzipFile(fileobj=buf) as f:
+                data = f.read()
         elif content_encoding == 'deflate':
-            response_body = zlib.decompress(response_body).decode('utf-8')
-        else:
-            response_body = response_body.decode('utf-8')
-        
-        return response_body
+            data = zlib.decompress(data)
 
-    def _request(self, method, endpoint, data=None):
-        url = self.base_url + endpoint
-        parsed_url = urllib.parse.urlparse(url)
-        connection = http.client.HTTPSConnection(parsed_url.netloc)
-        
-        body = None
-        if data:
-            body = json.dumps(data)
-        
-        connection.request(method, parsed_url.path + ('?' + parsed_url.query if parsed_url.query else ''), body, self.headers)
-        response = connection.getresponse()
-        
-        response_body = self._decode_response(response)
-        
-        if response.status >= 400:
-            if response.status == 400:
-                error(f"Request failed: {response.status} {response.reason}, Body: {response_body} for url: {url}")
-            raise RequestException(f"Request failed: {response.status} {response.reason}, Body: {response_body} for url: {url}")
-        
-        return response_body
+        if status >= 400:
+            error_message = f"Request failed: {status} {response.reason}, Body: {data.decode('utf-8', errors='ignore')} for url: {full_url}"
+            if status == 400:
+                error(error_message)
+            else:
+                silent_error(error_message)
+            raise HTTPException(error_message)
 
-    def get(self, endpoint):
-        return self._request("GET", endpoint)
+        return status, json.loads(data.decode('utf-8'))
 
-    def post(self, endpoint, json=None):
-        return self._request("POST", endpoint, json)
-
-    def patch(self, endpoint, json=None):
-        return self._request("PATCH", endpoint, json)
-
-    def delete(self, endpoint):
-        return self._request("DELETE", endpoint)
+    except (http.client.HTTPException, ssl.SSLError, socket.timeout, OSError) as e:
+        error_message = f"Network error occurred: {e}"
+        info(error_message)
+        raise HTTPException(error_message)
+    except json.JSONDecodeError:
+        error_message = "Failed to decode JSON response"
+        info(error_message)
+        raise HTTPException(error_message)
+    finally:
+        conn.close()
 
 def stop_never(attempt_number):
     return False
@@ -108,11 +100,8 @@ retry_config = {
     'wait': lambda attempt_number: wait_random_exponential(
         attempt_number, multiplier=1, max_wait=10
     ),
-    'retry': retry_if_exception_type((RequestException, )),
-    'after': lambda retry_state: silent_error(
-        f"Retrying ({retry_state['attempt_number']}): {retry_state['outcome']}"
-    ),
-    'before_sleep': lambda retry_state: silent_error(
+    'retry': retry_if_exception_type((HTTPException,)),
+    'before_sleep': lambda retry_state: info(
         f"Sleeping before next retry ({retry_state['attempt_number']})"
     )
 }
@@ -138,5 +127,3 @@ def rate_limited_request(func):
         rate_limiter.wait_for_next_request()
         return func(*args, **kwargs)
     return wrapper
-    
-session = Session()

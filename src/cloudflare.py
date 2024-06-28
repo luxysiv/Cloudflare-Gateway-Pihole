@@ -1,51 +1,57 @@
 import json
-from src import MAX_LIST_SIZE
-from src.requests import session, retry, retry_config, rate_limited_request
+from http.client import HTTPException
+from src import info
+from src.requests import rate_limited_request, cloudflare_gateway_request, retry_config, retry
+
 
 @retry(**retry_config)
 def get_current_lists():
-    response = session.get(f"/lists")
-    return json.loads(response)
+    status, data = cloudflare_gateway_request("GET", "/lists")
+    return data
 
 @retry(**retry_config)
 def get_current_policies():
-    response = session.get(f"/rules")
-    return json.loads(response)
+    status, data = cloudflare_gateway_request("GET", "/rules")
+    return data
 
 @retry(**retry_config)
 def get_list_items(list_id):
-    response = session.get(f"/lists/{list_id}/items?limit={MAX_LIST_SIZE}")
-    return json.loads(response)
+    status, data = cloudflare_gateway_request("GET", f"/lists/{list_id}/items?limit=1000")
+    return data
 
 @retry(**retry_config)
 @rate_limited_request
 def patch_list(list_id, payload):
-    response = session.patch(f"/lists/{list_id}", json=payload)
-    return json.loads(response)
+    body = json.dumps(payload)
+    status, data = cloudflare_gateway_request("PATCH", f"/lists/{list_id}", body)
+    return data
 
 @retry(**retry_config)
 @rate_limited_request
 def create_list(payload):
-    response = session.post(f"/lists", json=payload)
-    return json.loads(response)
+    body = json.dumps(payload)
+    status, data = cloudflare_gateway_request("POST", "/lists", body)
+    return data
 
 @retry(**retry_config)
 def create_policy(json_data):
-    response = session.post(f"/rules", json=json_data)
-    return json.loads(response)
+    body = json.dumps(json_data)
+    status, data = cloudflare_gateway_request("POST", "/rules", body)
+    return data
 
 @retry(**retry_config)
 def update_policy(policy_id, json_data):
-    response = session.patch(f"/rules/{policy_id}", json=json_data)
-    return json.loads(response)
+    body = json.dumps(json_data)
+    status, data = cloudflare_gateway_request("PUT", f"/rules/{policy_id}", body)
+    return data
 
 @retry(**retry_config)
 @rate_limited_request
 def delete_list(list_id):
-    response = session.delete(f"/lists/{list_id}")
-    return json.loads(response)
+    status, data = cloudflare_gateway_request("DELETE", f"/lists/{list_id}")
+    return data
 
 @retry(**retry_config)
 def delete_policy(policy_id):
-    response = session.delete(f"/rules/{policy_id}")
-    return json.loads(response)
+    status, data = cloudflare_gateway_request("DELETE", f"/rules/{policy_id}")
+    return data
