@@ -47,7 +47,7 @@ class CloudflareManager:
             current_lists_count_without_prefix = len(
                 [list_item for list_item in current_lists if self.prefix not in list_item["name"]]
             )
-            if total_lines == sum([l['count'] for l in current_lists]):
+            if total_lines == sum([l['count'] for l in current_lists if self.prefix in l["name"]]):
                 silent_error("Same size, skipping")
                 return
 
