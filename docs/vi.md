@@ -61,13 +61,11 @@ Nhớ cài cron trigger cho Cloudflare Workers
 
 * Các bạn đã tải các danh sách bộ lọc bằng script khác thì nên xoá đi bằng tính năng xoá của script đã up hoặc xoá tay
 
-* Mình đã update thêm tính năng xoá danh sách khi các bạn không muốn sử dụng script nữa. Vào **[__main__.py](../src/__main__.py)** để như sau:
+* Mình đã update thêm tính năng xoá danh sách khi các bạn không muốn sử dụng script nữa. Vào **[main.yml](..github/workflows/main.yml)** để như sau:
 
-```python
-if __name__ == "__main__":
-    cloudflare_manager = CloudflareManager(PREFIX, MAX_LISTS, MAX_LIST_SIZE)
-    # cloudflare_manager.run()
-    cloudflare_manager.leave() # Leave script 
+```yml
+      - name: Cloudflare Gateway Zero Trust 
+        run: python -m src leave
 ```
 
 * Hỗ trợ **[dynamic_blacklist.txt](../lists/dynamic_blacklist.txt)** và **[dynamic_whitelist.txt](../lists/dynamic_whitelist.txt)** để các bạn tự `chặn` hoặc `bỏ chặn` tên miền theo ý thích
