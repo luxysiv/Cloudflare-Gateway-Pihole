@@ -19,17 +19,18 @@ class CloudflareManager:
         domain_list = converter.process_urls()
         total_lines = len(domain_list)
 
-        if total_lines == 0:
+        if (total_lines == 0):
             silent_error("No domain")
             return
 
-        if total_lines > self.max_list_size * self.max_lists:
+        if total_lines > (self.max_list_size * self.max_lists):
             error(f"The domains list has more than {self.max_list_size * self.max_lists} lines")
             return
 
-        total_lists = -(-total_lines // self.max_list_size)  # Ceiling division
+        total_lists = total_lines // self.max_list_size
         current_lists = cloudflare.get_current_lists()["result"] or []
         current_policies = cloudflare.get_current_policies()["result"] or []
+        current_lists.sort(key=utils.safe_sort_key)
 
         info(f"Total lists on Cloudflare: {len(current_lists)}")
         total_domains = sum([l['count'] for l in current_lists]) if current_lists else 0
@@ -66,32 +67,31 @@ class CloudflareManager:
         missing_indices = utils.get_missing_indices(existing_indices, total_lists)
 
         for list_item in current_lists_with_prefix:
-            if f"{self.adlist_name}" in list_item["name"]:
-                list_index = int(re.search(r'\d+', list_item["name"]).group())
-                if list_index in existing_indices and list_index - 1 < len(chunked_lists):
-                    list_items = cloudflare.get_list_items(list_item["id"])
-                    list_items_values = [
-                        item["value"] for item in list_items.get("result", []) if item["value"] is not None
-                    ]
-                    new_list_items = chunked_lists[list_index - 1]
+            list_index = int(re.search(r'\d+', list_item["name"]).group())
+            if list_index in existing_indices and list_index - 1 < len(chunked_lists):
+                list_items = cloudflare.get_list_items(list_item["id"])
+                list_items_values = [
+                    item["value"] for item in list_items.get("result", []) if item["value"] is not None
+                ]
+                new_list_items = chunked_lists[list_index - 1]
 
-                    if utils.hash_list(new_list_items) == utils.hash_list(list_items_values):
-                        info(f"No changes detected for list {list_item['name']}, skipping update")
-                        used_list_ids.append(list_item["id"])
-                    else:
-                        info(f"Updating list {list_item['name']}")
-                        list_items_array = [{"value": domain} for domain in new_list_items]
-
-                        payload = {
-                            "append": list_items_array,
-                            "remove": list_items_values,
-                        }
-
-                        cloudflare.patch_list(list_item["id"], payload)
-                        used_list_ids.append(list_item["id"])
+                if utils.hash_list(new_list_items) == utils.hash_list(list_items_values):
+                    info(f"No changes detected for list {list_item['name']}, skipping update")
+                    used_list_ids.append(list_item["id"])
                 else:
-                    info(f"Marking list {list_item['name']} for deletion")
-                    excess_list_ids.append(list_item["id"])
+                    info(f"Updating list {list_item['name']}")
+                    list_items_array = [{"value": domain} for domain in new_list_items]
+
+                    payload = {
+                        "append": list_items_array,
+                        "remove": list_items_values,
+                    }
+
+                    cloudflare.patch_list(list_item["id"], payload)
+                    used_list_ids.append(list_item["id"])
+            else:
+                info(f"Marking list {list_item['name']} for deletion")
+                excess_list_ids.append(list_item["id"])
 
         for index in missing_indices:
             if index - 1 < len(chunked_lists):
@@ -131,6 +131,7 @@ class CloudflareManager:
     def leave(self):
         current_lists = cloudflare.get_current_lists()["result"] or []
         current_policies = cloudflare.get_current_policies()["result"] or []
+        current_lists.sort(key=utils.safe_sort_key)
         policy_id = None
         list_ids_to_delete = []
 
@@ -141,9 +142,6 @@ class CloudflareManager:
         if policy_id:
             info(f"Deleting policy {self.policy_name}")
             cloudflare.delete_policy(policy_id)
-            
-        if current_lists:
-            current_lists.sort(key=lambda x: int(x["name"].split("-")[-1].strip()))
 
         for list_item in current_lists:
             if f"{self.adlist_name}" in list_item["name"]:
@@ -167,7 +165,7 @@ def main():
     elif args.action == "leave":
         cloudflare_manager.leave()
     else:
-        logger.error("Invalid action. Please choose either 'run' or 'leave'.")
+        error("Invalid action. Please choose either 'python -m src run' or 'python -m src leave'.")
 
 if __name__ == "__main__":
     main()
