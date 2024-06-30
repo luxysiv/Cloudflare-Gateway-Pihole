@@ -61,7 +61,7 @@ Nhớ cài cron trigger cho Cloudflare Workers
 
 * Các bạn đã tải các danh sách bộ lọc bằng script khác thì nên xoá đi bằng tính năng xoá của script đã up hoặc xoá tay
 
-* Mình đã update thêm tính năng xoá danh sách khi các bạn không muốn sử dụng script nữa. Vào **[main.yml](../github/workflows/main.yml)** để như sau:
+* Mình đã update thêm tính năng xoá danh sách khi các bạn không muốn sử dụng script nữa. Vào **[main.yml](../.github/workflows/main.yml)** để như sau:
 
 ```yml
       - name: Cloudflare Gateway Zero Trust 
