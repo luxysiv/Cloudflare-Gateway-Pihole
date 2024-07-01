@@ -28,8 +28,8 @@ class CloudflareManager:
             return
 
         total_lists = total_lines // self.max_list_size
-        current_lists = cloudflare.get_current_lists()["result"] or []
-        current_policies = cloudflare.get_current_policies()["result"] or []
+        current_lists = cloudflare.get_current_lists()
+        current_policies = cloudflare.get_current_policies()
         current_lists.sort(key=utils.safe_sort_key)
 
         info(f"Total lists on Cloudflare: {len(current_lists)}")
@@ -69,10 +69,8 @@ class CloudflareManager:
         for list_item in current_lists_with_prefix:
             list_index = int(re.search(r'\d+', list_item["name"]).group())
             if list_index in existing_indices and list_index - 1 < len(chunked_lists):
-                list_items = cloudflare.get_list_items(list_item["id"])["result"] or []
-                list_items_values = [
-                    item["value"] for item in list_items
-                ]
+                list_items = cloudflare.get_list_items(list_item["id"])
+                list_items_values = [item["value"] for item in list_items]
                 new_list_items = chunked_lists[list_index - 1]
 
                 if utils.hash_list(new_list_items) == utils.hash_list(list_items_values):
@@ -102,7 +100,7 @@ class CloudflareManager:
                     f"{self.adlist_name} - {formatted_counter}", chunked_lists[index - 1]
                 )
 
-                created_list = cloudflare.create_list(payload)["result"] or []
+                created_list = cloudflare.create_list(payload)
                 if created_list:
                     used_list_ids.append(created_list["id"])
 
@@ -129,8 +127,8 @@ class CloudflareManager:
                     cloudflare.delete_list(list_item["id"])
 
     def leave(self):
-        current_lists = cloudflare.get_current_lists()["result"] or []
-        current_policies = cloudflare.get_current_policies()["result"] or []
+        current_lists = cloudflare.get_current_lists()
+        current_policies = cloudflare.get_current_policies()
         current_lists.sort(key=utils.safe_sort_key)
         policy_id = None
         list_ids_to_delete = []
@@ -138,10 +136,8 @@ class CloudflareManager:
         for policy_item in current_policies:
             if policy_item["name"] == self.policy_name:
                 policy_id = policy_item["id"]
-
-        if policy_id:
-            info(f"Deleting policy {self.policy_name}")
-            cloudflare.delete_policy(policy_id)
+                info(f"Deleting policy {self.policy_name}")
+                cloudflare.delete_policy(policy_id)
 
         for list_item in current_lists:
             if f"{self.adlist_name}" in list_item["name"]:
@@ -151,9 +147,8 @@ class CloudflareManager:
             list_to_delete = next(
                 list_item for list_item in current_lists if list_item["id"] == list_id
             )
-            if list_to_delete:
-                info(f"Deleting list {list_to_delete['name']}")
-                cloudflare.delete_list(list_id)
+            info(f"Deleting list {list_to_delete['name']}")
+            cloudflare.delete_list(list_id)
 
 def main():
     parser = argparse.ArgumentParser(description="Cloudflare Manager Script")
