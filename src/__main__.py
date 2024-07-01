@@ -69,9 +69,9 @@ class CloudflareManager:
         for list_item in current_lists_with_prefix:
             list_index = int(re.search(r'\d+', list_item["name"]).group())
             if list_index in existing_indices and list_index - 1 < len(chunked_lists):
-                list_items = cloudflare.get_list_items(list_item["id"])
+                list_items = cloudflare.get_list_items(list_item["id"])["result"] or []
                 list_items_values = [
-                    item["value"] for item in list_items.get("result", []) if item["value"] is not None
+                    item["value"] for item in list_items
                 ]
                 new_list_items = chunked_lists[list_index - 1]
 
@@ -102,9 +102,9 @@ class CloudflareManager:
                     f"{self.adlist_name} - {formatted_counter}", chunked_lists[index - 1]
                 )
 
-                created_list = cloudflare.create_list(payload)
+                created_list = cloudflare.create_list(payload)["result"] or []
                 if created_list:
-                    used_list_ids.append(created_list.get("result", {}).get("id"))
+                    used_list_ids.append(created_list["id"])
 
         policy_id = None
         for policy_item in current_policies:
@@ -149,7 +149,7 @@ class CloudflareManager:
 
         for list_id in list_ids_to_delete:
             list_to_delete = next(
-                (list_item for list_item in current_lists if list_item["id"] == list_id), None
+                list_item for list_item in current_lists if list_item["id"] == list_id
             )
             if list_to_delete:
                 info(f"Deleting list {list_to_delete['name']}")
