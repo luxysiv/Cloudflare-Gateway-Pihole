@@ -1,12 +1,11 @@
 import re
 import time
 import hashlib
-from src import MAX_LIST_SIZE
 
-def split_domain_list(domain_list):
+def split_domain_list(domain_list, list_size):
     return [
-        domain_list[i : i + MAX_LIST_SIZE]
-        for i in range(0, len(domain_list), MAX_LIST_SIZE)
+        domain_list[i : i + list_size]
+        for i in range(0, len(domain_list), list_size)
     ]
 
 def create_list_payload(name, chunk_list):

@@ -53,7 +53,7 @@ class CloudflareManager:
             )
             return
 
-        chunked_lists = utils.split_domain_list(domain_list)
+        chunked_lists = utils.split_domain_list(domain_list, self.max_list_size)
         info(f"Total chunked lists generated: {len(chunked_lists)}")
 
         used_list_ids = []
