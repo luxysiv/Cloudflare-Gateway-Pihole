@@ -12,8 +12,8 @@ def get_current_policies():
     return response["result"] or []
 
 @retry(**retry_config)
-def get_list_items(list_id):
-    status, response = cloudflare_gateway_request("GET", f"/lists/{list_id}/items?limit=1000")
+def get_list_items(list_id, list_size):
+    status, response = cloudflare_gateway_request("GET", f"/lists/{list_id}/items?limit={list_size}")
     return response["result"]
 
 @retry(**retry_config)

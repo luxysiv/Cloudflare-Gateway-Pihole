@@ -38,17 +38,15 @@ class CloudflareManager:
         prefixed_lists = [
             list_item for list_item in existing_lists if self.prefix in list_item["name"]
         ]
-        prefixed_list_count = len(prefixed_lists)
-        non_prefixed_list_count = len(existing_lists) - prefixed_list_count
 
         if total_domains == sum([l['count'] for l in prefixed_lists]):
             silent_error("Same size, skipping")
             return
 
-        if total_required_lists > self.max_lists - non_prefixed_list_count:
+        if total_required_lists > self.max_lists - (len(existing_lists) - len(prefixed_lists)):
             error(
                 f"The number of lists required ({total_required_lists}) is greater than the maximum allowed "
-                f"({self.max_lists - non_prefixed_list_count})"
+                f"({self.max_lists - (len(existing_lists) - len(prefixed_lists))})"
             )
 
         chunked_domain_lists = utils.split_domain_list(domain_list, self.max_list_size)
@@ -65,7 +63,7 @@ class CloudflareManager:
         for list_item in prefixed_lists:
             list_index = int(re.search(r'\d+', list_item["name"]).group())
             if list_index - 1 < len(chunked_domain_lists):
-                current_list_items = cloudflare.get_list_items(list_item["id"])
+                current_list_items = cloudflare.get_list_items(list_item["id"], self.max_list_size)
                 current_list_values = [item["value"] for item in current_list_items]
                 new_list_values = chunked_domain_lists[list_index - 1]
 
