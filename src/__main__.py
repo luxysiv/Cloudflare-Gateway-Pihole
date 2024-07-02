@@ -61,7 +61,6 @@ class CloudflareManager:
         existing_indices = [
             int(re.search(r'\d+', list_item["name"]).group())
             for list_item in current_lists_with_prefix
-            if f"{self.adlist_name}" in list_item["name"]
         ]
         total_lists = len(chunked_lists)
         missing_indices = utils.get_missing_indices(existing_indices, total_lists)
