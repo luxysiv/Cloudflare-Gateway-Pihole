@@ -1,5 +1,4 @@
 import re
-import time
 import hashlib
 
 def split_domain_list(domain_list, list_size):
