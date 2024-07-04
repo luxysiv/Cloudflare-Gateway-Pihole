@@ -42,7 +42,7 @@ def cloudflare_gateway_request(method: str, endpoint: str, body: Optional[str] =
         elif content_encoding == 'deflate':
             data = zlib.decompress(data)
 
-        if status >= 400:
+        if status in [400, 404]:
             error_message = f"Request failed: {status} {response.reason}, Body: {data.decode('utf-8', errors='ignore')} for url: {full_url}"
             if status == 400:
                 error(error_message)
