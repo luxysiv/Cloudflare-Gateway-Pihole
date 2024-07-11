@@ -74,8 +74,8 @@ class CloudflareManager:
                     list_items_array = [{"value": domain} for domain in new_list_values]
 
                     payload = {
-                        "append": [item for item in list_items_array if item["value"] not in current_list_values],
-                        "remove": [item for item in current_list_items if item["value"] not in new_list_values],
+                        "append": list_items_array,
+                        "remove": current_list_values,
                     }
 
                     cloudflare.patch_list(list_item["id"], payload)
