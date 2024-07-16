@@ -1,154 +1,92 @@
-import re
 import argparse
-from src import (
-    info, error, silent_error,
-    utils, domains, cloudflare, 
-    PREFIX, MAX_LISTS, MAX_LIST_SIZE,
+from src.domains import DomainConverter
+from src.cloudflare import (
+    get_lists, get_rules, create_list, update_list, create_rule, 
+    update_rule, delete_list, delete_rule, get_list_items
 )
+from src import utils, info, silent_error,PREFIX
 
 class CloudflareManager:
-    def __init__(self, prefix, max_lists, max_list_size):
-        self.prefix = prefix
-        self.max_lists = max_lists
-        self.max_list_size = max_list_size
-        self.adlist_name = f"[{self.prefix}]"
-        self.policy_name = f"[{self.prefix}] Block Ads"
+    def __init__(self, prefix_name):
+        self.prefix_name = f"[{prefix_name}]"
+        self.rule_name = f"[{prefix_name}] Block Ads"
 
-    def update_domain_lists(self):
-        domain_converter = domains.DomainConverter()
-        domain_list = domain_converter.process_urls()
-        total_domains = len(domain_list)
+    def update_resources(self):
+        domains_to_block = DomainConverter().process_urls()
+        current_lists = get_lists(self.prefix_name)
+        current_rules = get_rules(self.rule_name)
 
-        if total_domains == 0:
-            silent_error("No domain")
-            return
+        chunked_domains = list(utils.split_domain_list(domains_to_block, 1000))
+        list_ids = []
 
-        if total_domains > (self.max_list_size * self.max_lists):
-            error(f"The domains list has more than {self.max_list_size * self.max_lists} lines")
+        for index, chunk in enumerate(chunked_domains, start=1):
+            list_name = f"{self.prefix_name} - {index:03d}"
+            
+            existing_list = next((lst for lst in current_lists if lst["name"] == list_name), None)
 
-        total_required_lists = total_domains // self.max_list_size
-        existing_lists = cloudflare.get_current_lists()
-        existing_policies = cloudflare.get_current_policies()
-        existing_lists.sort(key=utils.safe_sort_key)
+            if existing_list:
+                current_items = get_list_items(existing_list["id"])
+                current_values = {item["value"] for item in current_items}
 
-        info(f"Total lists on Cloudflare: {len(existing_lists)}")
-        total_domains_on_cloudflare = sum([l['count'] for l in existing_lists]) if existing_lists else 0
-        info(f"Total domains on Cloudflare: {total_domains_on_cloudflare}")
-
-        prefixed_lists = [
-            list_item for list_item in existing_lists if self.prefix in list_item["name"]
-        ]
-
-        if total_domains == sum([l['count'] for l in prefixed_lists]):
-            silent_error("Same size, skipping")
-            return
-
-        if total_required_lists > self.max_lists - (len(existing_lists) - len(prefixed_lists)):
-            error(
-                f"The number of lists required ({total_required_lists}) is greater than the maximum allowed "
-                f"({self.max_lists - (len(existing_lists) - len(prefixed_lists))})"
-            )
-
-        chunked_domain_lists = utils.split_domain_list(domain_list, self.max_list_size)
-        info(f"Total chunked lists generated: {len(chunked_domain_lists)}")
-
-        used_list_ids = []
-        excess_list_ids = []
-        existing_indices = [
-            int(re.search(r'\d+', list_item["name"]).group())
-            for list_item in prefixed_lists
-        ]
-        missing_indices = utils.get_missing_indices(existing_indices, len(chunked_domain_lists))
-
-        for list_item in prefixed_lists:
-            list_index = int(re.search(r'\d+', list_item["name"]).group())
-            if list_index - 1 < len(chunked_domain_lists):
-                current_list_items = cloudflare.get_list_items(list_item["id"], self.max_list_size)
-                current_list_values = [item["value"] for item in current_list_items]
-                new_list_values = chunked_domain_lists[list_index - 1]
-
-                if utils.hash_list(new_list_values) == utils.hash_list(current_list_values):
-                    info(f"No changes detected for list {list_item['name']}, skipping update")
+                if utils.hash_list(current_values) == utils.hash_list(chunk):
+                    silent_error(f"Skipping list update: {list_name}")
                 else:
-                    info(f"Updating list {list_item['name']}")
-                    list_items_array = [{"value": domain} for domain in new_list_values]
-
-                    payload = {
-                        "append": list_items_array,
-                        "remove": current_list_values,
-                    }
-
-                    cloudflare.patch_list(list_item["id"], payload)
-                used_list_ids.append(list_item["id"])
+                    remove_items = list(current_values - set(chunk))
+                    append_items = list(set(chunk) - current_values)
+                    update_list(existing_list["id"], remove_items, append_items)
+                    info(f"Updated list: {list_name}")
+                list_ids.append(existing_list["id"])
             else:
-                info(f"Marking list {list_item['name']} for deletion")
-                excess_list_ids.append(list_item["id"])
+                list_id = create_list(list_name, chunk)
+                info(f"Created list: {list_name}")
+                list_ids.append(list_id)
 
-        for index in missing_indices:
-            if index - 1 < len(chunked_domain_lists):
-                formatted_counter = f"{index:03d}"
-                info(f"Creating list {self.adlist_name} - {formatted_counter}")
+        rule_exists = next((rule for rule in current_rules if rule["name"] == self.rule_name), None)
 
-                payload = utils.create_list_payload(
-                    f"{self.adlist_name} - {formatted_counter}", chunked_domain_lists[index - 1]
-                )
-
-                created_list = cloudflare.create_list(payload)
-                used_list_ids.append(created_list["id"])
-
-        policy_id = next(
-            (policy["id"] for policy in existing_policies if policy["name"] == self.policy_name), 
-            None
-        )
-        policy_payload = utils.create_policy_json(self.policy_name, used_list_ids)
-
-        if not policy_id:
-            info(f"Creating policy {self.policy_name}")
-            cloudflare.create_policy(policy_payload)
+        if rule_exists:
+            rule_id = rule_exists["id"]
+            info(f"Rule '{self.rule_name}' already exists. Updating...")
+            update_rule(self.rule_name, rule_id, list_ids)
         else:
-            info(f"Updating policy {self.policy_name}")
-            cloudflare.update_policy(policy_id, policy_payload)
+            info(f"Rule '{self.rule_name}' does not exist. Creating...")
+            create_rule(self.rule_name, list_ids)
 
-        for list_id in excess_list_ids:
-            list_to_delete = next(
-                list_item for list_item in existing_lists if list_item["id"] == list_id
-            )
-            info(f"Deleting list {list_to_delete['name']}")
-            cloudflare.delete_list(list_id)
+        info(f"Updated rule: {self.rule_name}")
 
-    def remove_all_resources(self):
-        existing_lists = cloudflare.get_current_lists()
-        existing_policies = cloudflare.get_current_policies()
-        existing_lists.sort(key=utils.safe_sort_key)
+        # Delete excess lists
+        excess_lists = [lst for lst in current_lists if lst["id"] not in list_ids]
+        for lst in excess_lists:
+            delete_list(lst["id"])
+            info(f"Deleted excess list: {lst['name']}")
 
-        policy_id = next(
-            (policy["id"] for policy in existing_policies if policy["name"] == self.policy_name), 
-            None
-        )
-        if policy_id:
-            info(f"Deleting policy {self.policy_name}")
-            cloudflare.delete_policy(policy_id)
+    def delete_resources(self):
+        current_lists = get_lists(self.prefix_name)
+        current_rules = get_rules(self.rule_name)
+        current_lists.sort(key=utils.safe_sort_key)
+        
 
-        list_ids_to_delete = [
-            list_item['id'] for list_item in existing_lists if self.adlist_name in list_item["name"]
-        ]
-        for list_id in list_ids_to_delete:
-            list_to_delete = next(
-                list_item for list_item in existing_lists if list_item["id"] == list_id
-            )
-            info(f"Deleting list {list_to_delete['name']}")
-            cloudflare.delete_list(list_id)
+        info(f"Deleting rule '{self.rule_name}' and associated lists.")
+
+        # Delete rules with the name rule_name
+        for rule in current_rules:
+            delete_rule(rule["id"])
+            info(f"Deleted rule: {rule['name']}")
+
+        # Delete lists with names that include prefix_name
+        for lst in current_lists:
+            delete_list(lst["id"])
+            info(f"Deleted list: {lst['name']}")
 
 def main():
     parser = argparse.ArgumentParser(description="Cloudflare Manager Script")
     parser.add_argument("action", choices=["run", "leave"], help="Choose action: run or leave")
     args = parser.parse_args()    
-    cloudflare_manager = CloudflareManager(PREFIX, MAX_LISTS, MAX_LIST_SIZE)
+    cloudflare_manager = CloudflareManager(PREFIX)
     
     if args.action == "run":
-        cloudflare_manager.update_domain_lists()
+        cloudflare_manager.update_resources()
     elif args.action == "leave":
-        cloudflare_manager.remove_all_resources()
+        cloudflare_manager.delete_resources()
     else:
         error("Invalid action. Please choose either 'run' or 'leave'.")
 

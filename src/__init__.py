@@ -4,8 +4,6 @@ from sys import exit
 from src.colorlog import logger
 
 # Constants
-MAX_LISTS = 300
-MAX_LIST_SIZE = 1000
 RATE_LIMIT_INTERVAL = 1.0
 PREFIX = "AdBlock-DNS-Filters"
 

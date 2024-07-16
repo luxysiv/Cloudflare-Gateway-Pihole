@@ -1,54 +1,92 @@
 import json
-from src.requests import rate_limited_request, cloudflare_gateway_request, retry_config, retry
+from src.requests import (
+    cloudflare_gateway_request, retry, rate_limited_request, retry_config
+)
+
 
 @retry(**retry_config)
-def get_current_lists():
+@rate_limited_request
+def create_list(name, domains):
+    endpoint = "/lists"
+    items = [{"value": domain} for domain in domains]
+    data = {
+        "name": name,
+        "description": "Ads & Tracking Domains",
+        "type": "DOMAIN",
+        "items": items
+    }
+    status, response = cloudflare_gateway_request("POST", endpoint, body=json.dumps(data))
+    return response["result"]["id"]
+
+@retry(**retry_config)
+@rate_limited_request
+def update_list(list_id, remove_items, append_items):
+    endpoint = f"/lists/{list_id}"
+    
+    remove = [{"value": item} for item in remove_items]
+    append = [{"value": item} for item in append_items]
+    
+    data = {
+        "remove": [item["value"] for item in remove],
+        "append": append
+    }
+    
+    status, response = cloudflare_gateway_request("PATCH", endpoint, body=json.dumps(data))
+    return response["result"]
+
+@retry(**retry_config)
+def create_rule(rule_name, list_ids):
+    endpoint = "/rules"
+    data = {
+        "name": rule_name,
+        "description": "Block Ads & Tracking",
+        "action": "block",
+        "traffic": " or ".join(f'any(dns.domains[*] in ${lst})' for lst in list_ids),
+        "enabled": True,
+    }
+    status, response = cloudflare_gateway_request("POST", endpoint, body=json.dumps(data))
+    return response["result"]["id"]
+
+@retry(**retry_config)
+def update_rule(rule_name, rule_id, list_ids):
+    endpoint = f"/rules/{rule_id}"
+    data = {
+        "name": rule_name,
+        "description": "Block Ads & Tracking",
+        "action": "block",
+        "traffic": " or ".join(f'any(dns.domains[*] in ${lst})' for lst in list_ids),
+        "enabled": True,
+    }
+    status, response = cloudflare_gateway_request("PUT", endpoint, body=json.dumps(data))
+    return response["result"]["id"]
+
+@retry(**retry_config)
+def get_lists(prefix_name):
     status, response = cloudflare_gateway_request("GET", "/lists")
-    return response["result"] or []
+    lists = response["result"] or []
+    return [l for l in lists if l["name"].startswith(prefix_name)]
 
 @retry(**retry_config)
-def get_current_policies():
+def get_rules(rule_name_prefix):
     status, response = cloudflare_gateway_request("GET", "/rules")
-    return response["result"] or []
-
-@retry(**retry_config)
-def get_list_items(list_id, list_size):
-    status, response = cloudflare_gateway_request("GET", f"/lists/{list_id}/items?limit={list_size}")
-    return response["result"]
-
-@retry(**retry_config)
-@rate_limited_request
-def patch_list(list_id, payload):
-    body = json.dumps(payload)
-    status, response = cloudflare_gateway_request("PATCH", f"/lists/{list_id}", body)
-    return response["result"]
-
-@retry(**retry_config)
-@rate_limited_request
-def create_list(payload):
-    body = json.dumps(payload)
-    status, response = cloudflare_gateway_request("POST", "/lists", body)
-    return response ["result"]
-
-@retry(**retry_config)
-def create_policy(json_data):
-    body = json.dumps(json_data)
-    status, response = cloudflare_gateway_request("POST", "/rules", body)
-    return response["result"]
-
-@retry(**retry_config)
-def update_policy(policy_id, json_data):
-    body = json.dumps(json_data)
-    status, response = cloudflare_gateway_request("PUT", f"/rules/{policy_id}", body)
-    return response["result"]
+    rules = response["result"] or []
+    return [r for r in rules if r["name"].startswith(rule_name_prefix)]
 
 @retry(**retry_config)
 @rate_limited_request
 def delete_list(list_id):
-    status, response = cloudflare_gateway_request("DELETE", f"/lists/{list_id}")
+    endpoint = f"/lists/{list_id}"
+    status, response = cloudflare_gateway_request("DELETE", endpoint)
     return response["result"]
 
 @retry(**retry_config)
-def delete_policy(policy_id):
-    status, response = cloudflare_gateway_request("DELETE", f"/rules/{policy_id}")
+def delete_rule(rule_id):
+    endpoint = f"/rules/{rule_id}"
+    status, response = cloudflare_gateway_request("DELETE", endpoint)
+    return response["result"]
+
+@retry(**retry_config)
+def get_list_items(list_id):
+    endpoint = f"/lists/{list_id}/items?limit=1000"
+    status, response = cloudflare_gateway_request("GET", endpoint)
     return response["result"]
