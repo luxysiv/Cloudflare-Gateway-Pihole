@@ -4,7 +4,7 @@ from src.cloudflare import (
     get_lists, get_rules, create_list, update_list, create_rule, 
     update_rule, delete_list, delete_rule, get_list_items
 )
-from src import utils, info, silent_error,PREFIX
+from src import utils, info, error, silent_error,PREFIX
 
 
 class CloudflareManager:
@@ -14,6 +14,9 @@ class CloudflareManager:
 
     def update_resources(self):
         domains_to_block = DomainConverter().process_urls()
+        if len(domains_to_block) > 300000:
+            error("The domains list exceeds Cloudflare Gateway's free limit of 300,000 domains.")
+        
         current_lists = get_lists(self.prefix_name)
         current_rules = get_rules(self.rule_name)
 
