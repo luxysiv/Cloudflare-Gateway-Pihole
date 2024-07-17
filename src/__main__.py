@@ -6,6 +6,7 @@ from src.cloudflare import (
 )
 from src import utils, info, silent_error,PREFIX
 
+
 class CloudflareManager:
     def __init__(self, prefix_name):
         self.prefix_name = f"[{prefix_name}]"
@@ -41,17 +42,22 @@ class CloudflareManager:
                 info(f"Created list: {list_name}")
                 list_ids.append(list_id)
 
-        rule_exists = next((rule for rule in current_rules if rule["name"] == self.rule_name), None)
-
-        if rule_exists:
-            rule_id = rule_exists["id"]
-            info(f"Rule '{self.rule_name}' already exists. Updating...")
-            update_rule(self.rule_name, rule_id, list_ids)
+        # Check if the list_ids have changed
+        existing_list_ids = {lst["id"] for lst in current_lists if lst["name"].startswith(self.prefix_name)}
+        if set(list_ids) == existing_list_ids:
+            silent_error(f"Skipping rule update as list IDs are unchanged: {self.rule_name}")
         else:
-            info(f"Rule '{self.rule_name}' does not exist. Creating...")
-            create_rule(self.rule_name, list_ids)
+            rule_exists = next((rule for rule in current_rules if rule["name"] == self.rule_name), None)
 
-        info(f"Updated rule: {self.rule_name}")
+            if rule_exists:
+                rule_id = rule_exists["id"]
+                info(f"Rule '{self.rule_name}' already exists. Updating...")
+                update_rule(self.rule_name, rule_id, list_ids)
+            else:
+                info(f"Rule '{self.rule_name}' does not exist. Creating...")
+                create_rule(self.rule_name, list_ids)
+
+            info(f"Updated rule: {self.rule_name}")
 
         # Delete excess lists
         excess_lists = [lst for lst in current_lists if lst["id"] not in list_ids]
@@ -63,7 +69,6 @@ class CloudflareManager:
         current_lists = get_lists(self.prefix_name)
         current_rules = get_rules(self.rule_name)
         current_lists.sort(key=utils.safe_sort_key)
-        
 
         info(f"Deleting rule '{self.rule_name}' and associated lists.")
 
