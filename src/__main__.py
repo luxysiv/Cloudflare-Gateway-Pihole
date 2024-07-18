@@ -4,7 +4,7 @@ from src.cloudflare import (
     get_lists, get_rules, create_list, update_list, create_rule, 
     update_rule, delete_list, delete_rule, get_list_items
 )
-from src import utils, info, error, silent_error,PREFIX
+from src import utils, info, error, silent_error, PREFIX
 
 
 class CloudflareManager:
@@ -31,12 +31,12 @@ class CloudflareManager:
             if existing_list:
                 current_items = get_list_items(existing_list["id"])
                 current_values = {item["value"] for item in current_items}
+                remove_items = list(current_values - set(chunk))
+                append_items = list(set(chunk) - current_values)
 
-                if utils.hash_list(current_values) == utils.hash_list(chunk):
+                if not remove_items and not append_items:
                     silent_error(f"Skipping list update: {list_name}")
                 else:
-                    remove_items = list(current_values - set(chunk))
-                    append_items = list(set(chunk) - current_values)
                     update_list(existing_list["id"], remove_items, append_items)
                     info(f"Updated list: {list_name}")
                 list_ids.append(existing_list["id"])
@@ -45,15 +45,15 @@ class CloudflareManager:
                 info(f"Created list: {list_name}")
                 list_ids.append(list_id)
 
-        # Check if the list_ids have changed
-        existing_list_ids = {lst["id"] for lst in current_lists if lst["name"].startswith(self.prefix_name)}
+        # Extract existing list IDs from current_rules for comparison
+        existing_rule = next((rule for rule in current_rules if rule["name"] == self.rule_name), None)
+        existing_list_ids = utils.extract_list_ids(existing_rule)
+
         if set(list_ids) == existing_list_ids:
             silent_error(f"Skipping rule update as list IDs are unchanged: {self.rule_name}")
         else:
-            rule_exists = next((rule for rule in current_rules if rule["name"] == self.rule_name), None)
-
-            if rule_exists:
-                rule_id = rule_exists["id"]
+            if existing_rule:
+                rule_id = existing_rule["id"]
                 info(f"Rule '{self.rule_name}' already exists. Updating...")
                 update_rule(self.rule_name, rule_id, list_ids)
             else:

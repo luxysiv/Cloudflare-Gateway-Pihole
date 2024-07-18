@@ -43,6 +43,9 @@ domain_pattern = re.compile(
 ip_pattern = re.compile(
     r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"
 )
+ids_pattern = re.compile(
+    r"\$(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})"
+)
 
 # Logging functions
 def error(message):
@@ -54,4 +57,3 @@ def silent_error(message):
 
 def info(message):
     logger.info(message)
-    
