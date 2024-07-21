@@ -49,10 +49,38 @@ class DomainConverter:
             conn = http.client.HTTPSConnection(parsed_url.netloc)
         else:
             conn = http.client.HTTPConnection(parsed_url.netloc)
-        conn.request("GET", parsed_url.path)
+    
+        headers = {
+            'User-Agent': 'Mozilla/5.0'
+        }
+    
+        conn.request("GET", parsed_url.path, headers=headers)
         response = conn.getresponse()
+    
+        while response.status in (301, 302, 303, 307, 308):
+            location = response.getheader('Location')
+            if not location:
+                break
+        
+            if not urlparse(location).netloc:
+                location = urljoin(url, location)
+        
+            url = location
+            parsed_url = urlparse(url)
+        
+            if parsed_url.scheme == "https":
+                conn = http.client.HTTPSConnection(parsed_url.netloc)
+            else:
+                conn = http.client.HTTPConnection(parsed_url.netloc)
+        
+            conn.request("GET", parsed_url.path, headers=headers)
+            response = conn.getresponse()
+    
         if response.status != 200:
             silent_error(f"Failed to download file from {url}, status code: {response.status}")
+            conn.close()
+            return ""
+    
         data = response.read().decode('utf-8')
         conn.close()
         info(f"Downloaded file from {url} File size: {len(data)}")
@@ -66,7 +94,6 @@ class DomainConverter:
         for url in self.whitelist_urls:
             white_content += self.download_file(url)
         
-        # Check for dynamic blacklist and whitelist in environment variables
         dynamic_blacklist = os.getenv("DYNAMIC_BLACKLIST", "")
         dynamic_whitelist = os.getenv("DYNAMIC_WHITELIST", "")
         
