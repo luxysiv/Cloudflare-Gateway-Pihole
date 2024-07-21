@@ -33,19 +33,10 @@ if CF_API_TOKEN == "your CF_API_TOKEN value" or CF_IDENTIFIER == "your CF_IDENTI
     raise Exception("Please provide valid values for CF_API_TOKEN and CF_IDENTIFIER")
 
 # Compile regex patterns
-replace_pattern = re.compile(
-    r"(^([0-9.]+|[0-9a-fA-F:.]+)\s+|^(\|\||@@\|\||\*\.|\*))"
-)
-domain_pattern = re.compile(
-    r"^([a-zA-Z0-9](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?\.)*"
-    r"[a-zA-Z0-9](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?$"
-)
-ip_pattern = re.compile(
-    r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"
-)
-ids_pattern = re.compile(
-    r"\$(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})"
-)
+ids_pattern = re.compile(r"\$([a-f0-9-]+)")
+ip_pattern = re.compile(r"^\d{1,3}(\.\d{1,3}){3,4}$")
+replace_pattern = re.compile(r"(^([0-9.]+|[0-9a-fA-F:.]+)\s+|^(\|\||@@\|\||\*\.|\*))")
+domain_pattern = re.compile(r"^(?!-)[a-zA-Z0-9-]{1,63}(?:\.(?!-)[a-zA-Z0-9-]{1,63})*$")
 
 # Logging functions
 def error(message):
