@@ -26,7 +26,7 @@ Tạo `CF_API_TOKEN` giống như sau:
 
 ### Cài thời gian script tự động chạy 
 ---
-> Sử dụng Cloudflare Workers để chạy Github Action. Không lo sau 2 tháng Github tắt Action.Tạo Github Token không hết hạn với tất cả các quyền
+> Sử dụng Cloudflare Workers để chạy Github Action. Không lo sau 2 tháng Github tắt Action.Tạo Github Token không hết hạn với quyền truy cập workflow là đủ.
 ```javascript
 addEventListener('scheduled', event => {
   event.waitUntil(handleScheduledEvent());
