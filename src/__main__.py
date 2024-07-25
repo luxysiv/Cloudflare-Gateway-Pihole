@@ -29,10 +29,9 @@ class CloudflareManager:
             existing_list = next((lst for lst in current_lists if lst["name"] == list_name), None)
 
             if existing_list:
-                current_items = get_list_items(existing_list["id"])
-                current_values = {item["value"] for item in current_items}
-                remove_items = list(current_values - set(chunk))
-                append_items = list(set(chunk) - current_values)
+                current_values = get_list_items(existing_list["id"])
+                remove_items = set(current_values) - set(chunk)
+                append_items = set(chunk) - set(current_values)
 
                 if not remove_items and not append_items:
                     silent_error(f"Skipping list update: {list_name}")

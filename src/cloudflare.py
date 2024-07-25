@@ -8,12 +8,11 @@ from src.requests import (
 @rate_limited_request
 def create_list(name, domains):
     endpoint = "/lists"
-    items = [{"value": domain} for domain in domains]
     data = {
         "name": name,
         "description": "Ads & Tracking Domains",
         "type": "DOMAIN",
-        "items": items
+        "items": [{"value": domain} for domain in domains]
     }
     status, response = cloudflare_gateway_request("POST", endpoint, body=json.dumps(data))
     return response["result"]["id"]
@@ -21,16 +20,11 @@ def create_list(name, domains):
 @retry(**retry_config)
 @rate_limited_request
 def update_list(list_id, remove_items, append_items):
-    endpoint = f"/lists/{list_id}"
-    
-    remove = [{"value": item} for item in remove_items]
-    append = [{"value": item} for item in append_items]
-    
+    endpoint = f"/lists/{list_id}"    
     data = {
-        "remove": [item["value"] for item in remove],
-        "append": append
-    }
-    
+        "remove": [domain for domain in remove_items],
+        "append": [{"value": domain} for domain in append_items]
+    }    
     status, response = cloudflare_gateway_request("PATCH", endpoint, body=json.dumps(data))
     return response["result"]
 
@@ -89,4 +83,5 @@ def delete_rule(rule_id):
 def get_list_items(list_id):
     endpoint = f"/lists/{list_id}/items?limit=1000"
     status, response = cloudflare_gateway_request("GET", endpoint)
-    return response["result"]
+    items = response["result"]
+    return [i["value"] for i in items]
