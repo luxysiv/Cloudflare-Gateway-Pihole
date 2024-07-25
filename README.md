@@ -64,7 +64,7 @@ Adguard = https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
 
 ### Schedule
 ---
-> Due to a limited 2-month commitment from GitHub Actions, you can create and paste this code to run on Cloudflare Workers. Remember, GitHub Tokens generate with no expiration and all permissions.
+> Due to a limited 2-month commitment from GitHub Actions, you can create and paste this code to run on Cloudflare Workers. Notice, GitHub Tokens generate with no expiration and workflow permission.
 
 ```javascript
 addEventListener('scheduled', event => {
