@@ -15,7 +15,7 @@ def create_list(name, domains):
         "items": [{"value": domain} for domain in domains]
     }
     status, response = cloudflare_gateway_request("POST", endpoint, body=json.dumps(data))
-    return response["result"]["id"]
+    return response["result"]
 
 @retry(**retry_config)
 @rate_limited_request
@@ -39,7 +39,7 @@ def create_rule(rule_name, list_ids):
         "enabled": True,
     }
     status, response = cloudflare_gateway_request("POST", endpoint, body=json.dumps(data))
-    return response["result"]["id"]
+    return response["result"]
 
 @retry(**retry_config)
 def update_rule(rule_name, rule_id, list_ids):
@@ -52,7 +52,7 @@ def update_rule(rule_name, rule_id, list_ids):
         "enabled": True,
     }
     status, response = cloudflare_gateway_request("PUT", endpoint, body=json.dumps(data))
-    return response["result"]["id"]
+    return response["result"]
 
 @retry(**retry_config)
 def get_lists(prefix_name):

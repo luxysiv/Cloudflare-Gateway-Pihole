@@ -8,58 +8,56 @@ from src import utils, info, error, silent_error, PREFIX
 
 
 class CloudflareManager:
-    def __init__(self, prefix_name):
-        self.prefix_name = f"[{prefix_name}]"
-        self.rule_name = f"[{prefix_name}] Block Ads"
+    def __init__(self, prefix):
+        self.list_name = f"[{prefix}]"
+        self.rule_name = f"[{prefix}] Block Ads"
 
     def update_resources(self):
         domains_to_block = DomainConverter().process_urls()
         if len(domains_to_block) > 300000:
             error("The domains list exceeds Cloudflare Gateway's free limit of 300,000 domains.")
         
-        current_lists = get_lists(self.prefix_name)
+        current_lists = get_lists(self.list_name)
         current_rules = get_rules(self.rule_name)
 
         chunked_domains = list(utils.split_domain_list(domains_to_block, 1000))
         list_ids = []
 
         for index, chunk in enumerate(chunked_domains, start=1):
-            list_name = f"{self.prefix_name} - {index:03d}"
+            list_name = f"{self.list_name} - {index:03d}"
             
-            existing_list = next((lst for lst in current_lists if lst["name"] == list_name), None)
+            cgp_list = next((lst for lst in current_lists if lst["name"] == list_name), None)
 
-            if existing_list:
-                current_values = get_list_items(existing_list["id"])
+            if cgp_list:
+                current_values = get_list_items(cgp_list["id"])
                 remove_items = set(current_values) - set(chunk)
                 append_items = set(chunk) - set(current_values)
 
                 if not remove_items and not append_items:
-                    silent_error(f"Skipping list update: {list_name}")
+                    silent_error(f"Skipping list update: {cgp_list['name']}")
                 else:
-                    update_list(existing_list["id"], remove_items, append_items)
-                    info(f"Updated list: {list_name}")
-                list_ids.append(existing_list["id"])
+                    update_list(cgp_list["id"], remove_items, append_items)
+                    info(f"Updated list: {cgp_list['name']}")
+                list_ids.append(cgp_list["id"])
             else:
-                list_id = create_list(list_name, chunk)
-                info(f"Created list: {list_name}")
-                list_ids.append(list_id)
+                lst = create_list(list_name, chunk)
+                info(f"Created list: {lst['name']}")
+                list_ids.append(lst["id"])
 
         # Extract existing list IDs from current_rules for comparison
-        existing_rule = next((rule for rule in current_rules if rule["name"] == self.rule_name), None)
-        existing_list_ids = utils.extract_list_ids(existing_rule)
+        cgp_rule = next((rule for rule in current_rules if rule["name"] == self.rule_name), None)
+        cgp_list_ids = utils.extract_list_ids(cgp_rule)
 
-        if set(list_ids) == existing_list_ids:
-            silent_error(f"Skipping rule update as list IDs are unchanged: {self.rule_name}")
-        else:
-            if existing_rule:
-                rule_id = existing_rule["id"]
-                info(f"Rule '{self.rule_name}' already exists. Updating...")
-                update_rule(self.rule_name, rule_id, list_ids)
+        if cgp_rule:
+            if set(list_ids) == cgp_list_ids:
+                silent_error(f"Skipping rule update as list IDs are unchanged: {cgp_rule['name']}")
             else:
-                info(f"Rule '{self.rule_name}' does not exist. Creating...")
-                create_rule(self.rule_name, list_ids)
-
-            info(f"Updated rule: {self.rule_name}")
+                rule_id = cgp_rule["id"]
+                update_rule(self.rule_name, rule_id, list_ids)
+                info(f"Updated rule {cgp_rule['name']}")
+        else:
+            rule = create_rule(self.rule_name, list_ids)
+            info(f"Created rule {rule['name']}")
 
         # Delete excess lists
         excess_lists = [lst for lst in current_lists if lst["id"] not in list_ids]
@@ -68,18 +66,16 @@ class CloudflareManager:
             info(f"Deleted excess list: {lst['name']}")
 
     def delete_resources(self):
-        current_lists = get_lists(self.prefix_name)
+        current_lists = get_lists(self.list_name)
         current_rules = get_rules(self.rule_name)
         current_lists.sort(key=utils.safe_sort_key)
-
-        info(f"Deleting rule '{self.rule_name}' and associated lists.")
 
         # Delete rules with the name rule_name
         for rule in current_rules:
             delete_rule(rule["id"])
             info(f"Deleted rule: {rule['name']}")
 
-        # Delete lists with names that include prefix_name
+        # Delete lists with names that include prefix
         for lst in current_lists:
             delete_list(lst["id"])
             info(f"Deleted list: {lst['name']}")
