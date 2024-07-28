@@ -52,8 +52,7 @@ class CloudflareManager:
             if set(list_ids) == cgp_list_ids:
                 silent_error(f"Skipping rule update as list IDs are unchanged: {cgp_rule['name']}")
             else:
-                rule_id = cgp_rule["id"]
-                update_rule(self.rule_name, rule_id, list_ids)
+                update_rule(self.rule_name, cgp_rule["id"], list_ids)
                 info(f"Updated rule {cgp_rule['name']}")
         else:
             rule = create_rule(self.rule_name, list_ids)
