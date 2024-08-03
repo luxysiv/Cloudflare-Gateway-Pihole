@@ -40,6 +40,7 @@ class CloudflareManager:
                 remove_items = current_values - set(domains_to_block)
                 chunk = current_values - remove_items
 
+                new_items = []
                 if len(chunk) < 1000:
                     needed_items = 1000 - len(chunk)
                     new_items = list(remaining_domains)[:needed_items]
