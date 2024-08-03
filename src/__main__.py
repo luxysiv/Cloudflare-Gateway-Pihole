@@ -25,7 +25,8 @@ class CloudflareManager:
         return sorted(all_indexes - set(existing_indexes))
 
     def _process_current_list(self, list_name, list_id, current_values, domains_to_block, remaining_domains):
-        remove_items = current_values - domains_to_block
+        domains_to_block_set = set(domains_to_block)
+        remove_items = current_values - domains_to_block_set
         chunk = current_values - remove_items
         if len(chunk) < 1000:
             needed_items = 1000 - len(chunk)
