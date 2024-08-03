@@ -11,66 +11,60 @@ class CloudflareManager:
         self.list_name = f"[{prefix}]"
         self.rule_name = f"[{prefix}] Block Ads"
 
-    def _get_existing_mappings(self, current_lists):
-        list_id_to_domains = {}
-        for lst in current_lists:
-            items = get_list_items(lst["id"])
-            list_id_to_domains[lst["id"]] = set(items)
-        domain_to_list_id = {domain: lst_id for lst_id, domains in list_id_to_domains.items() for domain in domains}
-        return list_id_to_domains, domain_to_list_id
-
-    def _calculate_needed_indexes(self, remaining_domains, existing_indexes):
-        num_groups = (len(remaining_domains) + 999) // 1000
-        all_indexes = set(range(1, max(existing_indexes + [num_groups]) + 1))
-        return sorted(all_indexes - set(existing_indexes))
-
-    def _process_current_list(self, list_name, list_id, current_values, domains_to_block, remaining_domains):
-        domains_to_block_set = set(domains_to_block)
-        remove_items = current_values - domains_to_block_set
-        chunk = current_values - remove_items
-        if len(chunk) < 1000:
-            needed_items = 1000 - len(chunk)
-            new_items = list(remaining_domains)[:needed_items]
-            chunk.update(new_items)
-            remaining_domains.difference_update(new_items)
-            update_list(list_id, remove_items, new_items)
-            info(f"Updated list: {list_name}")
-        return list_id
-
     def update_resources(self):
         domains_to_block = DomainConverter().process_urls()
         if len(domains_to_block) > 300000:
             error("The domains list exceeds Cloudflare Gateway's free limit of 300,000 domains.")
-            return
-
+        
         current_lists = get_lists(self.list_name)
         current_rules = get_rules(self.rule_name)
 
-        list_id_to_domains, domain_to_list_id = self._get_existing_mappings(current_lists)
+        list_id_to_domains = {lst["id"]: set(get_list_items(lst["id"])) for lst in current_lists}
+        domain_to_list_id = {domain: lst_id for lst_id, domains in list_id_to_domains.items() for domain in domains}
+
+        new_list_ids = []
         remaining_domains = set(domains_to_block) - set(domain_to_list_id.keys())
 
         list_name_to_id = {lst["name"]: lst["id"] for lst in current_lists}
-        existing_indexes = sorted(int(name.split('-')[-1]) for name in list_name_to_id.keys())
-        missing_indexes = self._calculate_needed_indexes(remaining_domains, existing_indexes)
+        existing_indexes = sorted([int(name.split('-')[-1]) for name in list_name_to_id.keys()])
+        num_groups = (len(remaining_domains) + 999) // 1000
 
-        new_list_ids = []
+        all_indexes = set(range(1, max(existing_indexes + [num_groups]) + 1))
+        missing_indexes = sorted(all_indexes - set(existing_indexes))
+
         for i in existing_indexes + missing_indexes:
             list_name = f"{self.list_name} - {i:03d}"
             if list_name in list_name_to_id:
                 list_id = list_name_to_id[list_name]
                 current_values = list_id_to_domains[list_id]
-                new_list_ids.append(self._process_current_list(list_name, list_id, current_values, domains_to_block, remaining_domains))
-            elif remaining_domains:
-                needed_items = min(1000, len(remaining_domains))
-                new_items = list(remaining_domains)[:needed_items]
-                remaining_domains.difference_update(new_items)
-                lst = create_list(list_name, new_items)
-                info(f"Created list: {lst['name']}")
-                new_list_ids.append(lst["id"])
+                remove_items = current_values - set(domains_to_block)
+                chunk = current_values - remove_items
+
+                new_items = []
+                if len(chunk) < 1000:
+                    needed_items = 1000 - len(chunk)
+                    new_items = list(remaining_domains)[:needed_items]
+                    chunk.update(new_items)
+                    remaining_domains.difference_update(new_items)
+
+                if remove_items or new_items:
+                    update_list(list_id, remove_items, new_items)
+                    info(f"Updated list: {list_name}")
+                
+                new_list_ids.append(list_id)
+            else:
+                if remaining_domains:
+                    needed_items = min(1000, len(remaining_domains))
+                    new_items = list(remaining_domains)[:needed_items]
+                    remaining_domains.difference_update(new_items)
+                    lst = create_list(list_name, new_items)
+                    info(f"Created list: {lst['name']}")
+                    new_list_ids.append(lst["id"])
 
         cgp_rule = next((rule for rule in current_rules if rule["name"] == self.rule_name), None)
+        cgp_list_ids = utils.extract_list_ids(cgp_rule)
+
         if cgp_rule:
-            cgp_list_ids = utils.extract_list_ids(cgp_rule)
             if set(new_list_ids) != cgp_list_ids:
                 update_rule(self.rule_name, cgp_rule["id"], new_list_ids)
                 info(f"Updated rule {cgp_rule['name']}")
