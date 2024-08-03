@@ -83,5 +83,5 @@ def delete_rule(rule_id):
 def get_list_items(list_id):
     endpoint = f"/lists/{list_id}/items?limit=1000"
     status, response = cloudflare_gateway_request("GET", endpoint)
-    items = response["result"]
+    items = response["result"] or []
     return [i["value"] for i in items]
