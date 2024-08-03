@@ -4,7 +4,7 @@ from src.cloudflare import (
     get_lists, get_rules, create_list, update_list, create_rule, 
     update_rule, delete_list, delete_rule, get_list_items
 )
-from src import utils, info, error, silent_error, PREFIX
+from src import utils, info, error, PREFIX
 
 class CloudflareManager:
     def __init__(self, prefix):
@@ -28,8 +28,7 @@ class CloudflareManager:
         # Mapping domain to its current list_id
         domain_to_list_id = {domain: lst_id for lst_id, domains in list_id_to_domains.items() for domain in domains}
 
-        new_list_ids = []
-
+        # Calculate remaining domains 
         remaining_domains = set(domains_to_block) - set(domain_to_list_id.keys())
 
         # Create a dictionary for list names to keep track of missing indexes
@@ -44,6 +43,7 @@ class CloudflareManager:
         missing_indexes = sorted(all_indexes - set(existing_indexes))
 
         # Process current lists and fill them with remaining domains
+        new_list_ids = []
         for i in existing_indexes + missing_indexes:
             list_name = f"{self.list_name} - {i:03d}"
             if list_name in list_name_to_id:
