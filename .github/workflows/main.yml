@@ -7,6 +7,7 @@ jobs:
     name: Cloudflare Gateway
     permissions: write-all
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
       CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
       CF_IDENTIFIER: ${{ secrets.CF_IDENTIFIER }}
@@ -27,7 +28,7 @@ jobs:
           python-version: 3.11
         
       - name: Cloudflare Gateway Zero Trust 
-        run: python -m src run 
+        run: python -m src run
           
       - name: Delete workflow runs
         uses: Mattraks/delete-workflow-runs@v2
