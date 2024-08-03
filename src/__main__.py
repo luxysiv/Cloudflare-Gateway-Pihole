@@ -12,9 +12,6 @@ class CloudflareManager:
         self.list_name = f"[{prefix}]"
         self.rule_name = f"[{prefix}] Block Ads"
 
-    def fetch_list_items(self, lst_id):
-        return lst_id, set(get_list_items(lst_id))
-
     def update_resources(self):
         domains_to_block = DomainConverter().process_urls()
         if len(domains_to_block) > 300000:
@@ -26,10 +23,11 @@ class CloudflareManager:
         # Mapping list_id to current domains in that list
         list_id_to_domains = {}
         with ThreadPoolExecutor() as executor:
-            futures = {executor.submit(self.fetch_list_items, lst["id"]): lst["id"] for lst in current_lists}
+            futures = {executor.submit(get_list_items, lst["id"]): lst["id"] for lst in current_lists}
             for future in futures:
-                lst_id, items = future.result()
-                list_id_to_domains[lst_id] = items
+                lst_id = futures[future]
+                items = future.result()
+                list_id_to_domains[lst_id] = set(items)
 
         # Mapping domain to its current list_id
         domain_to_list_id = {domain: lst_id for lst_id, domains in list_id_to_domains.items() for domain in domains}
