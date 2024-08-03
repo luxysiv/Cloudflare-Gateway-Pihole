@@ -4,7 +4,7 @@ from src.cloudflare import (
     get_lists, get_rules, create_list, update_list, create_rule, 
     update_rule, delete_list, delete_rule, get_list_items
 )
-from src import utils, info, error, silent_error, PREFIX
+from src import utils, info, error, PREFIX
 
 class CloudflareManager:
     def __init__(self, prefix):
@@ -19,31 +19,19 @@ class CloudflareManager:
         current_lists = get_lists(self.list_name)
         current_rules = get_rules(self.rule_name)
 
-        # Mapping list_id to current domains in that list
-        list_id_to_domains = {}
-        for lst in current_lists:
-            items = get_list_items(lst["id"])
-            list_id_to_domains[lst["id"]] = set(items)
-
-        # Mapping domain to its current list_id
+        list_id_to_domains = {lst["id"]: set(get_list_items(lst["id"])) for lst in current_lists}
         domain_to_list_id = {domain: lst_id for lst_id, domains in list_id_to_domains.items() for domain in domains}
 
         new_list_ids = []
-
         remaining_domains = set(domains_to_block) - set(domain_to_list_id.keys())
 
-        # Create a dictionary for list names to keep track of missing indexes
         list_name_to_id = {lst["name"]: lst["id"] for lst in current_lists}
         existing_indexes = sorted([int(name.split('-')[-1]) for name in list_name_to_id.keys()])
+        num_groups = (len(remaining_domains) + 999) // 1000
 
-        # Calculate the number of groups needed for remaining domains
-        num_groups = (len(remaining_domains) + 999) // 1000  # Round up to ensure full coverage
-
-        # Determine the missing indexes
         all_indexes = set(range(1, max(existing_indexes + [num_groups]) + 1))
         missing_indexes = sorted(all_indexes - set(existing_indexes))
 
-        # Process current lists and fill them with remaining domains
         for i in existing_indexes + missing_indexes:
             list_name = f"{self.list_name} - {i:03d}"
             if list_name in list_name_to_id:
@@ -52,7 +40,6 @@ class CloudflareManager:
                 remove_items = current_values - set(domains_to_block)
                 chunk = current_values - remove_items
 
-                new_items = []
                 if len(chunk) < 1000:
                     needed_items = 1000 - len(chunk)
                     new_items = list(remaining_domains)[:needed_items]
@@ -65,7 +52,6 @@ class CloudflareManager:
                 
                 new_list_ids.append(list_id)
             else:
-                # Create new lists for remaining domains
                 if remaining_domains:
                     needed_items = min(1000, len(remaining_domains))
                     new_items = list(remaining_domains)[:needed_items]
@@ -74,7 +60,6 @@ class CloudflareManager:
                     info(f"Created list: {lst['name']}")
                     new_list_ids.append(lst["id"])
 
-        # Update the rule with the new list IDs
         cgp_rule = next((rule for rule in current_rules if rule["name"] == self.rule_name), None)
         cgp_list_ids = utils.extract_list_ids(cgp_rule)
 
@@ -86,7 +71,6 @@ class CloudflareManager:
             rule = create_rule(self.rule_name, new_list_ids)
             info(f"Created rule {rule['name']}")
 
-        # Delete excess lists that are no longer needed
         excess_lists = [lst for lst in current_lists if lst["id"] not in new_list_ids]
         for lst in excess_lists:
             delete_list(lst["id"])
@@ -97,12 +81,10 @@ class CloudflareManager:
         current_rules = get_rules(self.rule_name)
         current_lists.sort(key=utils.safe_sort_key)
 
-        # Delete rules with the name rule_name
         for rule in current_rules:
             delete_rule(rule["id"])
             info(f"Deleted rule: {rule['name']}")
 
-        # Delete lists with names that include prefix
         for lst in current_lists:
             delete_list(lst["id"])
             info(f"Deleted list: {lst['name']}")
@@ -110,7 +92,8 @@ class CloudflareManager:
 def main():
     parser = argparse.ArgumentParser(description="Cloudflare Manager Script")
     parser.add_argument("action", choices=["run", "leave"], help="Choose action: run or leave")
-    args = parser.parse_args()    
+    args = parser.parse_args()
+    
     cloudflare_manager = CloudflareManager(PREFIX)
     
     if args.action == "run":
