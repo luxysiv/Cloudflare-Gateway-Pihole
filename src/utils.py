@@ -1,5 +1,5 @@
 import re
-from src import ids_pattern, info, error
+from src import ids_pattern, info, error, silent_error
 from concurrent.futures import ThreadPoolExecutor
 from src.domains import DomainConverter
 from src.cloudflare import (
@@ -32,6 +32,11 @@ class CloudflareManager:
         # Mapping domain to its current list_id
         domain_to_list_id = {domain: lst_id for lst_id, domains in list_id_to_domains.items() for domain in domains}
 
+        # Exit if no change 
+        if set(domains_to_block) == set(domain_to_list_id.keys()):
+            silent_error(f"Nothing to change")
+            return
+        
         # Calculate remaining domains 
         remaining_domains = set(domains_to_block) - set(domain_to_list_id.keys())
 
