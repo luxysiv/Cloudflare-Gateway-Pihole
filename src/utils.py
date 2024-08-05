@@ -1,13 +1,11 @@
 import re
-from src import ids_pattern
-import argparse
+from src import ids_pattern, info, error
 from concurrent.futures import ThreadPoolExecutor
 from src.domains import DomainConverter
 from src.cloudflare import (
     get_lists, get_rules, create_list, update_list, create_rule, 
     update_rule, delete_list, delete_rule, get_list_items
 )
-from src import info, error, PREFIX
 
 class CloudflareManager:
     def __init__(self, prefix):
@@ -88,13 +86,7 @@ class CloudflareManager:
         else:
             rule = create_rule(self.rule_name, new_list_ids)
             info(f"Created rule {rule['name']}")
-
-        # Delete excess lists that are no longer needed
-        excess_lists = [lst for lst in current_lists if lst["id"] not in new_list_ids]
-        for lst in excess_lists:
-            delete_list(lst["id"])
-            info(f"Deleted excess list: {lst['name']}")
-        
+            
 
 def split_domain_list(domains, chunk_size):
     for i in range(0, len(domains), chunk_size):
