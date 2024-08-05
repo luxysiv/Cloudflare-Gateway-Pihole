@@ -1,6 +1,5 @@
 import os
 import argparse
-from concurrent.futures import ThreadPoolExecutor
 from src.domains import DomainConverter
 from src.cloudflare import (
     get_lists, get_rules, create_list, update_list, create_rule, 
