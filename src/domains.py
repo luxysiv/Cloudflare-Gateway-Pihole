@@ -1,7 +1,6 @@
 import os
 import http.client
-from urllib.parse import urlparse, urljoin
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from urllib.parse import urlparse
 from configparser import ConfigParser
 from src import info, convert, silent_error
 
@@ -90,24 +89,10 @@ class DomainConverter:
     def process_urls(self):
         block_content = ""
         white_content = ""
-
-        with ThreadPoolExecutor() as executor:
-            futures = {executor.submit(self.download_file, url): url for url in self.adlist_urls}
-            for future in as_completed(futures):
-                url = futures[future]
-                try:
-                    block_content += future.result()
-                except Exception as e:
-                    silent_error(f"Error downloading {url}: {str(e)}")
-                    
-        with ThreadPoolExecutor() as executor:
-            futures = {executor.submit(self.download_file, url): url for url in self.whitelist_urls}
-            for future in as_completed(futures):
-                url = futures[future]
-                try:
-                    white_content += future.result()
-                except Exception as e:
-                    silent_error(f"Error downloading {url}: {str(e)}")
+        for url in self.adlist_urls:
+            block_content += self.download_file(url)
+        for url in self.whitelist_urls:
+            white_content += self.download_file(url)
         
         dynamic_blacklist = os.getenv("DYNAMIC_BLACKLIST", "")
         dynamic_whitelist = os.getenv("DYNAMIC_WHITELIST", "")
