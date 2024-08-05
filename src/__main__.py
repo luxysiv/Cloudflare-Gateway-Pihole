@@ -39,16 +39,13 @@ class CloudflareManager:
         list_name_to_id = {lst["name"]: lst["id"] for lst in current_lists}
         existing_indexes = sorted([int(name.split('-')[-1]) for name in list_name_to_id.keys()])
 
-        # Calculate the number of groups needed for remaining domains
-        num_groups = (len(remaining_domains) + 999) // 1000  # Round up to ensure full coverage
-
         # Determine the missing indexes
-        all_indexes = set(range(1, max(existing_indexes + [num_groups]) + 1))
+        all_indexes = set(range(1, max(existing_indexes + [(len(domains_to_block) + 999) // 1000]) + 1))
         missing_indexes = sorted(all_indexes - set(existing_indexes))
 
         # Process current lists and fill them with remaining domains
         new_list_ids = []
-        for i in existing_indexes + missing_indexes:
+        for i in sorted(existing_indexes + missing_indexes):
             list_name = f"{self.list_name} - {i:03d}"
             if list_name in list_name_to_id:
                 list_id = list_name_to_id[list_name]
