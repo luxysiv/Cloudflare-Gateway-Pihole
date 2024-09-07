@@ -44,7 +44,7 @@ def cloudflare_gateway_request(method: str, endpoint: str, body: Optional[str] =
 
         if status >= 400:
             error_message = f"Request failed: {status} {response.reason}, Body: {data.decode('utf-8', errors='ignore')} for url: {full_url}"
-            if status in [400, 404]:
+            if status in [400, 403, 404]:
                 error(error_message)
             else:
                 silent_error(error_message)
