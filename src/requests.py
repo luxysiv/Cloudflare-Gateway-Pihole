@@ -14,12 +14,23 @@ from src import info, silent_error, error, RATE_LIMIT_INTERVAL, CF_IDENTIFIER, C
 class HTTPException(Exception):
     pass
 
-def decompress_data(data, content_encoding):
-    if content_encoding == 'gzip':
-        return gzip.GzipFile(fileobj=BytesIO(data)).read()
-    if content_encoding == 'deflate':
-        return zlib.decompress(data)
-    return data
+def decompress_data(data: bytes, content_encoding: Optional[str]) -> bytes:
+    try:
+        if content_encoding == 'gzip':
+            return gzip.GzipFile(fileobj=BytesIO(data)).read()
+        elif content_encoding == 'deflate':
+            try:
+                return zlib.decompress(data, -zlib.MAX_WBITS)
+            except zlib.error:
+                return zlib.decompress(data)
+        elif content_encoding in (None, 'identity'):
+            return data
+        else:
+            error(f"Unsupported Content-Encoding: {content_encoding}")
+            raise HTTPException(f"Unsupported Content-Encoding: {content_encoding}")
+    except (OSError, zlib.error) as e:
+        error(f"Error during decompression: {e}")
+        raise HTTPException(f"Error during decompression: {e}")
 
 def cloudflare_gateway_request(method: str, endpoint: str, body: Optional[str] = None, timeout: int = 10) -> Tuple[int, dict]:
     context = ssl.create_default_context()
@@ -91,7 +102,6 @@ class RateLimiter:
         sleep_time = max(0, self.interval - (time.time() - self.timestamp))
         if sleep_time > 0: time.sleep(sleep_time)
         self.timestamp = time.time()
-
 rate_limiter = RateLimiter(RATE_LIMIT_INTERVAL)
 
 def rate_limited_request(func):
