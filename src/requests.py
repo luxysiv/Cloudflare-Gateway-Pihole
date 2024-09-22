@@ -9,7 +9,7 @@ import http.client
 from io import BytesIO
 from functools import wraps
 from typing import Optional, Tuple
-from src import info, silent_error, error, RATE_LIMIT_INTERVAL, CF_IDENTIFIER, CF_API_TOKEN
+from src import info, silent_error, error,MAX_REQUESTS, TIME_INTERVAL, CF_IDENTIFIER, CF_API_TOKEN
 
 class HTTPException(Exception):
     pass
@@ -94,15 +94,26 @@ retry_config = {
 }
 
 class RateLimiter:
-    def __init__(self, interval):
+    def __init__(self, max_requests, interval):
+        self.max_requests = max_requests
         self.interval = interval
-        self.timestamp = time.time()
+        self.start_time = time.time()
+        self.request_count = 0
 
     def wait_for_next_request(self):
-        sleep_time = max(0, self.interval - (time.time() - self.timestamp))
-        if sleep_time > 0: time.sleep(sleep_time)
-        self.timestamp = time.time()
-rate_limiter = RateLimiter(RATE_LIMIT_INTERVAL)
+        current_time = time.time()
+        if self.request_count >= self.max_requests:
+            elapsed_time = current_time - self.start_time
+            if elapsed_time < self.interval:
+                sleep_time = self.interval - elapsed_time
+                time.sleep(sleep_time)
+
+            self.start_time += self.interval
+            self.request_count = 0
+
+        self.request_count += 1
+
+rate_limiter = RateLimiter(MAX_REQUESTS, TIME_INTERVAL)
 
 def rate_limited_request(func):
     @wraps(func)
