@@ -4,8 +4,7 @@ from sys import exit
 from src.colorlog import logger
 
 # Constants
-MAX_REQUESTS = 1
-TIME_INTERVAL = 1
+RATE_LIMIT_INTERVAL = 1.0
 PREFIX = "AdBlock-DNS-Filters"
 
 # Read .env variables 
