@@ -93,20 +93,19 @@ retry_config = {
     'before_sleep': lambda state: info(f"Sleeping before next retry ({state['attempt_number']})")
 }
 
-class RateLimiter:
-    def __init__(self, interval):
-        self.interval = interval
-        self.timestamp = time.time()
-
-    def wait_for_next_request(self):
-        sleep_time = max(0, self.interval - (time.time() - self.timestamp))
-        if sleep_time > 0: time.sleep(sleep_time)
-        self.timestamp = time.time()
-rate_limiter = RateLimiter(RATE_LIMIT_INTERVAL)
-
 def rate_limited_request(func):
+    last_call_time = [0]
+
     @wraps(func)
     def wrapper(*args, **kwargs):
-        rate_limiter.wait_for_next_request()
+        current_time = time.time()
+        elapsed_time = current_time - last_call_time[0]
+        wait_time = 1 - elapsed_time
+        
+        if wait_time > 0:
+            time.sleep(wait_time)
+        
+        last_call_time[0] = time.time()
         return func(*args, **kwargs)
+
     return wrapper
