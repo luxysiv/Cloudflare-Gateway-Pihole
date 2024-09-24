@@ -9,7 +9,7 @@ import http.client
 from io import BytesIO
 from functools import wraps
 from typing import Optional, Tuple
-from src import info, silent_error, error, RATE_LIMIT_INTERVAL, CF_IDENTIFIER, CF_API_TOKEN
+from src import info, silent_error, error, CF_IDENTIFIER, CF_API_TOKEN
 
 class HTTPException(Exception):
     pass
