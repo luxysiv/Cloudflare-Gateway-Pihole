@@ -4,11 +4,13 @@ import json
 import time
 import random
 import socket
+import zlib
 import http.client
 from io import BytesIO
 from functools import wraps
 from typing import Optional, Tuple
 from src import info, silent_error, error, CF_IDENTIFIER, CF_API_TOKEN
+
 
 
 def cloudflare_gateway_request(
@@ -39,19 +41,34 @@ def cloudflare_gateway_request(
     headers = {
         "Authorization": f"Bearer {CF_API_TOKEN}",
         "Content-Type": "application/json",
-        "Accept-Encoding": "gzip"
+        "Accept-Encoding": "gzip, deflate"
     }
 
     try:
         conn.request(method, url, body, headers)
         response = conn.getresponse()
         data = response.read()
+        content_encoding = response.getheader('Content-Encoding')
 
+        # Inline function to handle content encoding
         try:
-            # Decompress GZIP response data
-            data = gzip.GzipFile(fileobj=BytesIO(data)).read()
-        except OSError as e:
-            raise RuntimeError(f"Error during gzip decompression: {e}")
+            if content_encoding == 'gzip':
+                data = gzip.GzipFile(fileobj=BytesIO(data)).read()
+            elif content_encoding == 'deflate':
+                try:
+                    # Try to decompress with raw deflate
+                    data = zlib.decompress(data, -zlib.MAX_WBITS)
+                except zlib.error:
+                    # Fallback to standard deflate
+                    data = zlib.decompress(data)
+            elif content_encoding in (None, 'identity'):
+                # No compression or identity, return data as is
+                pass
+            else:
+                # Unsupported encoding
+                raise RuntimeError(f"Unsupported Content-Encoding: {content_encoding}")
+        except (OSError, zlib.error) as e:
+            raise RuntimeError(f"Error during decompression: {e}")
 
         if response.status >= 400:
             error_message = (
