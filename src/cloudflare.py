@@ -1,8 +1,9 @@
 import json
 from src.requests import *
 
-@retry
+
 @rate_limited_request
+@retry
 def create_list(name, domains):
     """
     Creates a list of domains in Cloudflare.
@@ -21,11 +22,12 @@ def create_list(name, domains):
         "type": "DOMAIN",
         "items": [{"value": domain} for domain in domains]
     }
-    status, response = cloudflare_gateway_request("POST", endpoint, body=json.dumps(data))
+    status, resp@rate_limited_requestonse = cloudflare_gateway_request("POST", endpoint, body=json.dumps(data))
     return response["result"]
 
-@retry
+
 @rate_limited_request
+@retry
 def update_list(list_id, remove_items, append_items):
     """
     Updates an existing list by removing and appending items.
@@ -45,6 +47,7 @@ def update_list(list_id, remove_items, append_items):
     }    
     status, response = cloudflare_gateway_request("PATCH", endpoint, body=json.dumps(data))
     return response["result"]
+
 
 @retry
 def create_rule(rule_name, list_ids):
@@ -68,6 +71,7 @@ def create_rule(rule_name, list_ids):
     }
     status, response = cloudflare_gateway_request("POST", endpoint, body=json.dumps(data))
     return response["result"]
+
 
 @retry
 def update_rule(rule_name, rule_id, list_ids):
@@ -93,6 +97,7 @@ def update_rule(rule_name, rule_id, list_ids):
     status, response = cloudflare_gateway_request("PUT", endpoint, body=json.dumps(data))
     return response["result"]
 
+
 @retry
 def get_lists(prefix_name):
     """
@@ -107,6 +112,7 @@ def get_lists(prefix_name):
     status, response = cloudflare_gateway_request("GET", "/lists")
     lists = response["result"] or []
     return [l for l in lists if l["name"].startswith(prefix_name)]
+
 
 @retry
 def get_rules(rule_name_prefix):
@@ -123,8 +129,9 @@ def get_rules(rule_name_prefix):
     rules = response["result"] or []
     return [r for r in rules if r["name"].startswith(rule_name_prefix)]
 
-@retry
+
 @rate_limited_request
+@retry
 def delete_list(list_id):
     """
     Deletes a list by its ID.
@@ -138,6 +145,7 @@ def delete_list(list_id):
     endpoint = f"/lists/{list_id}"
     status, response = cloudflare_gateway_request("DELETE", endpoint)
     return response["result"]
+
 
 @retry
 def delete_rule(rule_id):
@@ -153,6 +161,7 @@ def delete_rule(rule_id):
     endpoint = f"/rules/{rule_id}"
     status, response = cloudflare_gateway_request("DELETE", endpoint)
     return response["result"]
+
 
 @retry
 def get_list_items(list_id):
