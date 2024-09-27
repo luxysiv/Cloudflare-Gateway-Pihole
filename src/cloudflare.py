@@ -22,7 +22,7 @@ def create_list(name, domains):
         "type": "DOMAIN",
         "items": [{"value": domain} for domain in domains]
     }
-    status, resp@rate_limited_requestonse = cloudflare_gateway_request("POST", endpoint, body=json.dumps(data))
+    status, response = cloudflare_gateway_request("POST", endpoint, body=json.dumps(data))
     return response["result"]
 
 
