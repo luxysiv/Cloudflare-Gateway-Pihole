@@ -1,5 +1,6 @@
 import os
 import http.client
+from src.requests import retry
 from urllib.parse import urlparse, urljoin
 from configparser import ConfigParser
 from src import info, convert, silent_error
@@ -73,6 +74,7 @@ class DomainConverter:
         urls += self.read_urls_from_env(env_var)
         return urls
 
+    @retry
     def download_file(self, url: str) -> str:
         """
         Downloads the content of the given URL.
