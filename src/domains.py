@@ -95,6 +95,11 @@ class DomainConverter:
         conn.request("GET", parsed_url.path, headers=headers)
         response = conn.getresponse()
     
+        # Check if the URL returns 404 and handle it without retrying
+        if response.status == 404:
+            silent_error(f"URL {url} returned 404. Skipping...")
+            return "" 
+        
         # Handle HTTP redirects
         while response.status in (301, 302, 303, 307, 308):
             location = response.getheader('Location')
