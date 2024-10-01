@@ -92,13 +92,14 @@ def cloudflare_gateway_request(
 def retry(func):
     """
     Decorator that retries the wrapped function up to 5 times with exponential backoff
-    in case of an exception.
-    
+    for non-429 errors. If a 429 error (Too Many Requests) is encountered, it will retry
+    indefinitely until successful, with increasing wait times.
+
     Args:
         func: Function to wrap.
-    
+
     Returns:
-        The result of the wrapped function or raises the exception if all attempts fail.
+        The result of the wrapped function or raises the exception if all attempts fail for non-429 errors.
     """
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -108,13 +109,20 @@ def retry(func):
             try:
                 return func(*args, **kwargs)
             except Exception as e:
-                silent_error(f"Attempt {attempt_number} failed with {e}. Retrying...")
+                # Check for specific 429 Too Many Requests error
+                if "429" in str(e):
+                    silent_error(f"Attempt {attempt_number} failed with 429 Too Many Requests. Retrying indefinitely...")
+                    # Increase the wait time exponentially with a cap at 30 seconds
+                    wait_time = min(2 ** (attempt_number - 1), 30)
+                else:
+                    silent_error(f"Attempt {attempt_number} failed with {e}. Retrying...")
 
-                if attempt_number >= 5:
-                    raise
+                    if attempt_number >= 5:
+                        raise
 
-                # Exponential backoff with randomness
-                wait_time = min(1 * (2 ** random.uniform(0, attempt_number - 1)), 10)
+                    # Exponential backoff with randomness for non-429 errors (maximum of 10 seconds)
+                    wait_time = min(2 ** (attempt_number - 1), 10) + random.uniform(0, 1)
+
                 silent_error(f"Sleeping for {wait_time:.2f} seconds before retrying...")
                 time.sleep(wait_time)
 
