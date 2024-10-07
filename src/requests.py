@@ -80,20 +80,16 @@ def cloudflare_gateway_request(method: str, endpoint: str, body: Optional[str] =
         conn.close()
 
 # Retry conditions and strategies
-def stop_after_5_attempts(attempt_number):
-    """Stop retrying after 5 attempts."""
+def stop_after_custom_attempts(attempt_number):
     return attempt_number >= 5
 
 def stop_never(attempt_number):
-    """Continue retrying indefinitely."""
     return False
 
 def wait_random_exponential(attempt_number, multiplier=1, max_wait=10):
-    """Calculate exponential backoff with randomness, up to a max wait time."""
     return min(multiplier * (2 ** random.uniform(0, attempt_number - 1)), max_wait)
 
 def retry_if_exception_type(exceptions):
-    """Define the condition to retry based on exception types."""
     return lambda e: isinstance(e, exceptions)
 
 def retry(stop=None, wait=None, retry=None, after=None, before_sleep=None):
@@ -125,7 +121,7 @@ def retry(stop=None, wait=None, retry=None, after=None, before_sleep=None):
 def custom_stop_condition(exception, attempt_number):
     if isinstance(exception, RateLimitException):
         return False
-    return stop_after_5_attempts(attempt_number)
+    return stop_after_custom_attempts(attempt_number)
 
 # Retry configuration:
 retry_config = {
