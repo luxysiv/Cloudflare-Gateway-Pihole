@@ -3,6 +3,7 @@ import http.client
 from urllib.parse import urlparse
 from configparser import ConfigParser
 from src import info, convert, silent_error
+from src.requests import retry, retry_config
 
 class DomainConverter:
     def __init__(self):
@@ -43,6 +44,7 @@ class DomainConverter:
         urls += self.read_urls_from_env(env_var)
         return urls
 
+    @retry(**retry_config)
     def download_file(self, url):
         parsed_url = urlparse(url)
         if parsed_url.scheme == "https":
