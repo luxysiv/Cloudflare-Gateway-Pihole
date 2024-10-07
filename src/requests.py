@@ -3,154 +3,159 @@ import gzip
 import json
 import time
 import random
+import http.client
 import socket
 import zlib
-import http.client
 from io import BytesIO
 from functools import wraps
 from typing import Optional, Tuple
 from src import info, silent_error, error, CF_IDENTIFIER, CF_API_TOKEN
 
 
+class HTTPException(Exception):
+    pass
 
-def cloudflare_gateway_request(
-    method: str, 
-    endpoint: str, 
-    body: Optional[str] = None, 
-    timeout: int = 10
-) -> Tuple[int, dict]:
-    """
-    Makes a request to the Cloudflare gateway API and returns the status and response data.
-    
-    Args:
-        method: HTTP method (GET, POST, etc.).
-        endpoint: API endpoint.
-        body: Request payload as a JSON string.
-        timeout: Timeout for the request.
-    
-    Returns:
-        Tuple containing response status code and JSON-decoded response data.
-    
-    Raises:
-        RuntimeError: On failure to complete the request or process the response.
-    """
-    
+class RateLimitException(HTTPException):
+    pass
+
+def cloudflare_gateway_request(method: str, endpoint: str, body: Optional[str] = None, timeout: int = 10) -> Tuple[int, dict]:
     context = ssl.create_default_context()
     conn = http.client.HTTPSConnection("api.cloudflare.com", context=context, timeout=timeout)
-    url = f"/client/v4/accounts/{CF_IDENTIFIER}/gateway{endpoint}"
+
     headers = {
         "Authorization": f"Bearer {CF_API_TOKEN}",
         "Content-Type": "application/json",
         "Accept-Encoding": "gzip, deflate"
     }
 
+    url = f"/client/v4/accounts/{CF_IDENTIFIER}/gateway{endpoint}"
+    
     try:
+        # Make the HTTPS request to the specified Cloudflare endpoint
         conn.request(method, url, body, headers)
         response = conn.getresponse()
         data = response.read()
+        status = response.status
+
+        # Handle different content encoding types
         content_encoding = response.getheader('Content-Encoding')
+        if data is None or content_encoding in [None, 'identity']:
+            pass
+        elif content_encoding == 'gzip':
+            buf = BytesIO(data)
+            with gzip.GzipFile(fileobj=buf) as f:
+                data = f.read()
+        elif content_encoding == 'deflate':
+            data = zlib.decompress(data)
 
-        # Inline function to handle content encoding
-        try:
-            if content_encoding == 'gzip':
-                data = gzip.GzipFile(fileobj=BytesIO(data)).read()
-            elif content_encoding == 'deflate':
-                try:
-                    # Try to decompress with raw deflate
-                    data = zlib.decompress(data, -zlib.MAX_WBITS)
-                except zlib.error:
-                    # Fallback to standard deflate
-                    data = zlib.decompress(data)
-            elif content_encoding in (None, 'identity'):
-                # No compression or identity, return data as is
-                pass
-            else:
-                # Unsupported encoding
-                raise RuntimeError(f"Unsupported Content-Encoding: {content_encoding}")
-        except (OSError, zlib.error) as e:
-            raise RuntimeError(f"Error during decompression: {e}")
-
-        if response.status >= 400:
+        # Handle HTTP error status codes
+        if status >= 400:
             error_message = (
-                f"Request failed: {response.status} {response.reason}, "
+                f"Request failed: {status} {response.reason}, "
                 f"Body: {data.decode('utf-8', errors='ignore')} "
                 f"for URL: https://api.cloudflare.com{url}"
             )
-            raise RuntimeError(error_message)
+            if status == 429:
+                silent_error(error_message)
+                raise RateLimitException(error_message)
+            elif status in [400, 403, 404]:
+                error(error_message)
+            else:
+                silent_error(error_message)
+            raise HTTPException(error_message)
 
-        # Return status and parsed JSON data
-        return response.status, json.loads(data.decode('utf-8'))
+        return status, json.loads(data.decode('utf-8'))
 
     except (http.client.HTTPException, ssl.SSLError, socket.timeout, OSError) as e:
-        raise RuntimeError(f"Network error occurred: {e}")
+        # Log and raise a generic HTTP exception for network-related errors
+        error_message = f"Network error occurred: {e}"
+        info(error_message)
+        raise HTTPException(error_message)
     except json.JSONDecodeError:
-        raise RuntimeError("Failed to decode JSON response")
+        # Log and raise an exception if JSON decoding fails
+        error_message = "Failed to decode JSON response"
+        info(error_message)
+        raise HTTPException(error_message)
     finally:
         conn.close()
 
+# Retry conditions and strategies
+def stop_after_5_attempts(attempt_number):
+    """Stop retrying after 5 attempts."""
+    return attempt_number >= 5
 
-def retry(func):
-    """
-    Decorator that retries the wrapped function up to 5 times with exponential backoff
-    for non-429 errors. If a 429 error (Too Many Requests) is encountered, it will retry
-    indefinitely until successful, with increasing wait times.
+def stop_never(attempt_number):
+    """Continue retrying indefinitely."""
+    return False
 
-    Args:
-        func: Function to wrap.
+def wait_random_exponential(attempt_number, multiplier=1, max_wait=10):
+    """Calculate exponential backoff with randomness, up to a max wait time."""
+    return min(multiplier * (2 ** random.uniform(0, attempt_number - 1)), max_wait)
 
-    Returns:
-        The result of the wrapped function or raises the exception if all attempts fail for non-429 errors.
-    """
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        attempt_number = 0
-        while True:
-            attempt_number += 1
-            try:
-                return func(*args, **kwargs)
-            except Exception as e:
-                # Check for specific 429 Too Many Requests error
-                if "429" in str(e):
-                    silent_error(f"Attempt {attempt_number} failed with 429 Too Many Requests. Retrying indefinitely...")
-                    # Increase the wait time exponentially with a cap at 30 seconds
-                    wait_time = min(2 ** (attempt_number - 1), 30)
-                else:
-                    silent_error(f"Attempt {attempt_number} failed with {e}. Retrying...")
+def retry_if_exception_type(exceptions):
+    """Define the condition to retry based on exception types."""
+    return lambda e: isinstance(e, exceptions)
 
-                    if attempt_number >= 5:
+def retry(stop=None, wait=None, retry=None, after=None, before_sleep=None):
+    """Retry decorator with custom stop, wait, and retry conditions."""
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            attempt_number = 0
+            while True:
+                try:
+                    attempt_number += 1
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    if retry and not retry(e):
                         raise
+                    if after:
+                        after({'attempt_number': attempt_number, 'outcome': e})
+                    # Apply different stop conditions based on exception type
+                    if stop and stop(e, attempt_number):
+                        raise
+                    if before_sleep:
+                        before_sleep({'attempt_number': attempt_number})
+                    wait_time = wait(attempt_number) if wait else 1
+                    time.sleep(wait_time)
+        return wrapper
+    return decorator
 
-                    # Exponential backoff with randomness for non-429 errors (maximum of 10 seconds)
-                    wait_time = min(2 ** (attempt_number - 1), 10) + random.uniform(0, 1)
+# Custom stop condition that handles RateLimitException and other exceptions separately
+def custom_stop_condition(exception, attempt_number):
+    if isinstance(exception, RateLimitException):
+        return False
+    return stop_after_5_attempts(attempt_number)
 
-                silent_error(f"Sleeping for {wait_time:.2f} seconds before retrying...")
-                time.sleep(wait_time)
+# Retry configuration:
+retry_config = {
+    'stop': custom_stop_condition,
+    'wait': lambda attempt_number: wait_random_exponential(
+        attempt_number, multiplier=1, max_wait=10
+    ),
+    'retry': retry_if_exception_type((HTTPException,)),
+    'before_sleep': lambda retry_state: info(
+        f"Sleeping before next retry ({retry_state['attempt_number']})"
+    )
+}
 
-    return wrapper
+class RateLimiter:
+    def __init__(self, interval: float = 1):
+        self.interval = interval
+        self.timestamp = time.time()
 
+    def wait_for_next_request(self):
+        now = time.time()
+        elapsed = now - self.timestamp
+        sleep_time = max(0, self.interval - elapsed)
+        if sleep_time > 0:
+            time.sleep(sleep_time)
+        self.timestamp = time.time()
 
 def rate_limited_request(func):
-    """
-    Decorator that ensures the wrapped function is called no more than once per second.
-    
-    Args:
-        func: Function to wrap.
-    
-    Returns:
-        The result of the wrapped function after enforcing rate limits.
-    """
-    last_call_time = [0]
-
     @wraps(func)
     def wrapper(*args, **kwargs):
-        current_time = time.time()
-        elapsed_time = current_time - last_call_time[0]
-        wait_time = 1 - elapsed_time
-        
-        if wait_time > 0:
-            time.sleep(wait_time)
-        
-        last_call_time[0] = time.time()
+        rate_limiter = RateLimiter()
+        rate_limiter.wait_for_next_request()
         return func(*args, **kwargs)
-
     return wrapper

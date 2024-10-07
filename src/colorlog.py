@@ -3,11 +3,6 @@ from datetime import datetime
 import os
 
 class ColoredLevelFormatter(logging.Formatter):
-    """
-    A custom logging formatter that adds colors to log levels and formats the output.
-    """
-
-    # Color codes for log levels
     COLOR_CODE = {
         'DEBUG':    "\x1b[36m",
         'INFO':     "\x1b[0m",
@@ -20,25 +15,14 @@ class ColoredLevelFormatter(logging.Formatter):
     }
 
     def format(self, record):
-        """
-        Formats the log record.
-
-        Args:
-            record (logging.LogRecord): The record to format.
-
-        Returns:
-            str: The formatted log record.
-        """
         levelname = record.levelname
         levelname_color = self.COLOR_CODE.get(levelname, "")
         reset_color = self.COLOR_CODE['RESET']
         date_color = self.COLOR_CODE['DATE']
         caller_color = self.COLOR_CODE['CALLER']
 
-        # Get the current time
         current_time = datetime.fromtimestamp(record.created).strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
 
-        # Get caller information
         if os.path.basename(record.pathname) == "__init__.py":
             caller_info = f"{os.path.basename(os.path.dirname(record.pathname))}:{record.funcName}:{record.lineno}"
         else:
@@ -46,7 +30,6 @@ class ColoredLevelFormatter(logging.Formatter):
 
         original_message = record.getMessage()
 
-        # Create the formatted log message
         formatted_message = (
             f"{date_color}{current_time}{reset_color} | "
             f"{levelname_color}{levelname:<8}{reset_color} | "
@@ -58,9 +41,8 @@ class ColoredLevelFormatter(logging.Formatter):
         formatted_record = super().format(record)
 
         return formatted_record
+        
 
-
-# Configure logger
 logging.getLogger().setLevel(logging.INFO)
 formatter = ColoredLevelFormatter()
 console = logging.StreamHandler()
