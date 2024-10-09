@@ -73,12 +73,12 @@ def cloudflare_gateway_request(
     except (http.client.HTTPException, ssl.SSLError, socket.timeout, OSError) as e:
         # Log and raise a generic HTTP exception for network-related errors
         error_message = f"Network error occurred: {e}"
-        info(error_message)
+        silent_error(error_message)
         raise HTTPException(error_message)
     except json.JSONDecodeError:
         # Log and raise an exception if JSON decoding fails
         error_message = "Failed to decode JSON response"
-        info(error_message)
+        silent_error(error_message)
         raise HTTPException(error_message)
     finally:
         conn.close()
@@ -97,7 +97,6 @@ def retry_if_exception_type(exceptions):
     return lambda e: isinstance(e, exceptions)
 
 def retry(stop=None, wait=None, retry=None, after=None, before_sleep=None):
-    """Retry decorator with custom stop, wait, and retry conditions."""
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
