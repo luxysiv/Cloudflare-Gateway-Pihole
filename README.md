@@ -62,38 +62,6 @@ Adguard = https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
    1. Set **Cloudflare Account ID** to `CF_IDENTIFIER`.
    2. Set **API Token** to `CF_API_TOKEN`.
 
-### Schedule
----
-> Due to a limited 2-month commitment from GitHub Actions, you can create and paste this code to run on Cloudflare Workers. Notice, GitHub Tokens generate with no expiration and workflow permission.
-
-```javascript
-addEventListener('scheduled', event => {
-  event.waitUntil(handleScheduledEvent());
-});
-
-async function handleScheduledEvent() {
-  const GITHUB_TOKEN = 'YOUR_GITHUB_TOKEN_HERE';
-  try {
-    const dispatchResponse = await fetch('https://api.github.com/repos/YOUR_USER_NAME/YOUR_REPO_NAME/actions/workflows/main.yml/dispatches', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${GITHUB_TOKEN}`,
-        'Content-Type': 'application/json',
-        'User-Agent': 'Mozilla/5.0',
-      },
-      body: JSON.stringify({
-        ref: 'main'
-      }),
-    });
-
-    if (!dispatchResponse.ok) throw new Error('Failed to dispatch workflow');
-  } catch (error) {
-    console.error('Error handling scheduled event:', error);
-  }
-}
-```
->> Remember to set up Cloudflare Workers triggers.
-
 ### How to set up using Termux?
 ---
 
