@@ -1,16 +1,13 @@
 name: Add Rules to Cloudflare Gateway
 on:
   push:
-  #schedule:
-  #  - cron: "0 * * * *"
+  schedule:
+    - cron: "0 0 * * *"
   workflow_dispatch:
-
 jobs:
   run:
     name: Cloudflare Gateway
-    permissions: 
-      actions: write
-      contents: write
+    permissions: write-all
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -27,47 +24,20 @@ jobs:
         uses: actions/checkout@main
         with:
           fetch-depth: 0
-
+          
       - name: Install Python
         uses: actions/setup-python@main
         with:
           python-version: 3.11
-
-      - name: Check Previous Workflow Run Status
-        id: check_run
-        uses: actions/github-script@main
-        with:
-          script: |
-            const runs = await github.rest.actions.listWorkflowRunsForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              per_page: 5,
-              status: 'completed'
-            });
-            const previousRun = runs.data.workflow_runs.find(run => run.id !== context.runId);
-            if (previousRun && previousRun.conclusion === "success") {
-              core.setOutput("run_status", "success");
-            } else {
-              core.setOutput("run_status", "failure");
-            }
-
+        
       - name: Cache Data
-        id: cache-cloudflare-data
+        id: cache-cloudflare
         uses: actions/cache@main
         with:
           path: cloudflare_cache.json
-          key: ${{ runner.os }}-cloudflare-data-${{ github.run_id }}
+          key: ${{ runner.os }}-cloudflare-cache-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-cloudflare-data-
-        if: steps.check_run.outputs.run_status == 'success'
-
+            ${{ runner.os }}-cloudflare-cache-
+      
       - name: Cloudflare Gateway Zero Trust 
         run: python -m src run
-
-      - name: Delete workflow runs
-        uses: Mattraks/delete-workflow-runs@v2
-        with:
-          token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          retain_days: 0
-          keep_minimum_runs: 1
