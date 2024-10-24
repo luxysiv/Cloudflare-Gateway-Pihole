@@ -24,37 +24,6 @@ hoặc có thể thêm vào **[.env](../.env)** ( **không khuyến khích** )
 Tạo `CF_API_TOKEN` giống như sau:
 ![CF_API_TOKEN](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/a5b90438-26cc-49ae-9a55-5409a90b683f)
 
-### Cài thời gian script tự động chạy 
----
-> Sử dụng Cloudflare Workers để chạy Github Action. Không lo sau 2 tháng Github tắt Action.Tạo Github Token không hết hạn với quyền truy cập workflow là đủ.
-```javascript
-addEventListener('scheduled', event => {
-  event.waitUntil(handleScheduledEvent());
-});
-
-async function handleScheduledEvent() {
-  const GITHUB_TOKEN = 'YOUR_GITHUB_TOKEN_HERE';
-  try {
-    const dispatchResponse = await fetch('https://api.github.com/repos/YOUR_USER_NAME/YOUR_REPO_NAME/actions/workflows/main.yml/dispatches', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${GITHUB_TOKEN}`,
-        'Content-Type': 'application/json',
-        'User-Agent': 'Mozilla/5.0',
-      },
-      body: JSON.stringify({
-        ref: 'main'
-      }),
-    });
-
-    if (!dispatchResponse.ok) throw new Error('Failed to dispatch workflow');
-  } catch (error) {
-    console.error('Error handling scheduled event:', error);
-  }
-}
-```
-Nhớ cài cron trigger cho Cloudflare Workers 
-
 ### Chú ý  
 ---
 * `Giới hạn` của `Cloudflare Gateway Zero Trust free` là `300k domains` nên các bạn nhớ chú ý log, `nếu quá script sẽ stop`
