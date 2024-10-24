@@ -99,9 +99,6 @@ class CloudflareManager:
             self.cache["rules"] = []
             utils.save_cache(self.cache)
 
-def is_running_in_github_actions():
-    return os.getenv('GITHUB_ACTIONS') == 'true'
-
 def main():
     parser = argparse.ArgumentParser(description="Cloudflare Manager Script")
     parser.add_argument("action", choices=["run", "leave"], help="Choose action: run or leave")
@@ -110,7 +107,7 @@ def main():
     
     if args.action == "run":
         cloudflare_manager.update_resources()
-        if is_running_in_github_actions():
+        if utils.is_running_in_github_actions():
             utils.delete_cache()
     elif args.action == "leave":
         cloudflare_manager.delete_resources()
