@@ -1,4 +1,3 @@
-import os
 import argparse
 from src.domains import DomainConverter
 from src.cloudflare import (
