@@ -62,7 +62,7 @@ Adguard = https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
    1. 設定 **Cloudflare Account ID** 到 `CF_IDENTIFIER`.
    2. 設定 **API Token** 到 `CF_API_TOKEN`.
 ---
-* 免費的「Cloudflare Gateway Zero Trust」的 (*限制* 是 "300k Domains")，因此 請記得 注意 workflow logs。 如果超過，腳本將停止。
+* 免費的「Cloudflare Gateway Zero Trust」的 (*限制* 是 "300000 個網域")，因此 請記得 注意 workflow logs。 如果超過，腳本將停止。
 
 * 如果您使用其他腳本上傳了列表，則應使用上傳腳本的刪除功能刪除它們或手動刪除它們。
 
@@ -74,8 +74,8 @@ Adguard = https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
 ```
 
 註釋來自 [@minlaxz](https://github.com/minlaxz):
-1. Domain list style: 我個人更喜歡黑名單風格的第二種，它更具可讀性和簡潔性。
-2. Dynamic domain list: 您也可以使用更新動態（流動）白名單和黑名單 [dynamic_blacklist.txt](./lists/dynamic_blacklist.txt) 和 [dynamic_whitelist.txt](./lists/dynamic_whitelist.txt).
+1. 網域清單樣式: 我個人更喜歡黑名單風格的第二種，它更具可讀性和簡潔性。
+2. 動態域名列表: 您也可以使用更新動態（流動）白名單和黑名單 [dynamic_blacklist.txt](./lists/dynamic_blacklist.txt) 和 [dynamic_whitelist.txt](./lists/dynamic_whitelist.txt).
 3. 已放棄用使用 `.env`: 在公共儲存庫中設定敏感資訊被認為太危險，因為任何不受歡迎的人都可以輕鬆地從中竊取您的 Cloudflare 憑證 '.env' 檔案.
 
 🥂🥂 乾杯! 🍻🍻
