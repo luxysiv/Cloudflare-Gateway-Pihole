@@ -1,81 +1,82 @@
 ![CF_logo_stacked_whitetype](https://github.com/luxysiv/Cloudflare-Gateway-Pihole/assets/46205571/b8b7b12b-2fd8-4978-8e3c-2472a4167acb)
 
 
-# Pihole styled, but using Cloudflare Gateway
-`For Devs, Ops, and everyone who hates Ads.`
+# Pihole 風格，但使用 Cloudflare Gateway
+`適合開發人員、營運人員以及所有討厭廣告的人。`
 
-Create your ad blocklist using Cloudflare Gateway.
+使用 Cloudflare Gateway 建立廣告封鎖清單。
 
-### Credit goes there
+### 信用就在那裡
 ---
 
-> Thanks a lot to [@nhubaotruong](https://github.com/nhubaotruong) for his contributions.
+> 非常感謝 [@nhubaotruong](https://github.com/nhubaotruong) 感謝他的貢獻.
 
-> Readme by [@minlaxz](https://github.com/minlaxz).
+> 自述文件作者: [@minlaxz](https://github.com/minlaxz).
 
->> Added dynamic domain filter (whitelist and blacklist) idea (please check `ini` files, as you may also need to modify those).
->>> Added dynamic domain filter (whitelist and blacklist) to Actions variables (please check [dynamic_blacklist.txt](./lists/dynamic_blacklist.txt) and [dynamic_whitelist.txt](./lists/dynamic_whitelist.txt). to know examples to add `Value*`).Use `DYNAMIC_BLACKLIST` and `DYNAMIC_WHITELIST` for `Name*` in Actions variables 
+>> 新增了動態網域篩選（白名單和黑名單）的想法（請檢查「ini」文件，因為您可能還需要修改這些文件）.
 
-### Supported styles
+>>> 將動態網域篩選器（白名單和黑名單）新增至Actions variables（請檢查 [dynamic_blacklist.txt](./lists/dynamic_blacklist.txt) 和 [dynamic_whitelist.txt](./lists/dynamic_whitelist.txt). 了解新增 "Value*" 的範例).使用 `DYNAMIC_BLACKLIST` 和 `DYNAMIC_WHITELIST` 新增 `Name*` 到 Actions variables 
+
+### 支援的樣式
 ---
-* Two kinds of lists in ini files: white list [whitelist.ini](./lists/whitelist.ini) and block list [adlist.ini](./lists/adlist.ini).
+* ini 文件中 有兩種清單：白名單 [whitelist.ini](./lists/whitelist.ini) 和 黑名單 [adlist.ini](./lists/adlist.ini).
 
 ```ini
 https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
 ```
-or
+或
 ```ini
 [Ad-Urls]
 Adguard = https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
 ```
 
-### Custom URLs
+### 自訂 URLs
 ---
-* Add to file:
-  > White list [whitelist.ini](./lists/whitelist.ini) and block list [adlist.ini](./lists/adlist.ini).
+* 新增到文件:
+  > 白名單 [whitelist.ini](./lists/whitelist.ini) 和 黑名單 [adlist.ini](./lists/adlist.ini).
 
-* Add to GitHub Action variables:
+* 新增 到 GitHub Action variables:
   > `Name*`
   >> `ADLIST_URLS` or `WHITELIST_URLS`.
 
   > `Value*` `URLs list`
-  >> Example:
+  >> 範例:
   ```text
   https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
   https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt
   ```
 
-* You should add your ad list and whitelist to Action variables. If you update your fork, your custom list will not be lost.
+*您應該將廣告清單和白名單加入Action variables。如果您更新您的分叉，您的自訂清單將不會遺失。
 
-### How to set this up?
+### 如何設定這個？
 ---
-1. Fork this repository to your account.
-2. Grab your **Cloudflare Account ID** (found after `https://dash.cloudflare.com/`) from ➞ https://dash.cloudflare.com/?to=/:account/workers.
-3. Create your **API Token** from ➞ https://dash.cloudflare.com/profile/api-tokens with 3 permissions:
+1. Fork 這 repository 到您的帳戶。
+2. 擷取 **Cloudflare Account ID** (之後發現 `https://dash.cloudflare.com/`) 在 ➞ https://dash.cloudflare.com/?to=/:account/workers.
+3. 創建您的 **API Token** 在 ➞ https://dash.cloudflare.com/profile/api-tokens 需要3個權限:
    1. `Account.Zero Trust : Edit`
    2. `Account.Account Firewall Access Rules : Edit`
    3. `Account.Access: Apps and Policies : Edit`
 
-4. Add **Repository Secrets** to your forked repository:
+4. 新增 **Repository Secrets** 到你的 forked repository:
 `➞ https://github.com/<username>/<forked-repository>/settings/secrets/actions`
-   1. Set **Cloudflare Account ID** to `CF_IDENTIFIER`.
-   2. Set **API Token** to `CF_API_TOKEN`.
+   1. 設定 **Cloudflare Account ID** 到 `CF_IDENTIFIER`.
+   2. 設定 **API Token** 到 `CF_API_TOKEN`.
 ---
-* The **limit** of `Cloudflare Gateway Zero Trust` free is **300k domains**, so remember to pay attention to the workflow logs. If it is exceeded, the script will stop.
+* 免費的「Cloudflare Gateway Zero Trust」的 (*限制* 是 "300k Domains")，因此 請記得 注意 workflow logs。 如果超過，腳本將停止。
 
-* If you have uploaded lists using another script, you should delete them using the delete feature of the uploaded script or delete them manually.
+* 如果您使用其他腳本上傳了列表，則應使用上傳腳本的刪除功能刪除它們或手動刪除它們。
 
-* I have updated the feature to delete lists when you no longer need to use the script. Go to [main.yml](.github/workflows/main.yml) as follows:
+* 我更新了當您不再需要使用腳本時刪除清單的功能。 前往 [main.yml](.github/workflows/main.yml) 如下:
 
 ```yml
       - name: Cloudflare Gateway Zero Trust 
         run: python -m src leave
 ```
 
-Note from [@minlaxz](https://github.com/minlaxz):
-1. Domain list style: I personally preferred the second one in blacklist styles, which is more readable and concise.
-2. Dynamic domain list: You can also update your dynamic (fluid) whitelist and blacklist using [dynamic_blacklist.txt](./lists/dynamic_blacklist.txt) and [dynamic_whitelist.txt](./lists/dynamic_whitelist.txt).
-3. Deprecated using `.env`: Setting sensitive information inside a public repository is considered too dangerous, since any unwanted person could easily steal your Cloudflare credentials from that `.env` file.
+註釋來自 [@minlaxz](https://github.com/minlaxz):
+1. Domain list style: 我個人更喜歡黑名單風格的第二種，它更具可讀性和簡潔性。
+2. Dynamic domain list: 您也可以使用更新動態（流動）白名單和黑名單 [dynamic_blacklist.txt](./lists/dynamic_blacklist.txt) 和 [dynamic_whitelist.txt](./lists/dynamic_whitelist.txt).
+3. 已放棄用使用 `.env`: 在公共儲存庫中設定敏感資訊被認為太危險，因為任何不受歡迎的人都可以輕鬆地從中竊取您的 Cloudflare 憑證 '.env' 檔案.
 
-🥂🥂 Cheers! 🍻🍻
+🥂🥂 乾杯! 🍻🍻
 ===
