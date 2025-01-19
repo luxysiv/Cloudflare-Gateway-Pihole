@@ -11,7 +11,7 @@ class GithubAPI:
     HEADERS = {
         "Authorization": f"Bearer {os.getenv('GITHUB_TOKEN')}",
         "Accept": "application/vnd.github.v3+json",
-        "User-Agent": "Python http.client"
+        "User-Agent": "Mozilla/5.0"
     }
 
     @staticmethod
