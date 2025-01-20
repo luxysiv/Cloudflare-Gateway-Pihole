@@ -1,10 +1,12 @@
+import os
 import argparse
 from src.domains import DomainConverter
+from src import utils, info, error, PREFIX
 from src.cloudflare import (
     create_list, update_list, create_rule, 
     update_rule, delete_list, delete_rule
 )
-from src import utils, info, error, silent_error, PREFIX
+
 
 class CloudflareManager:
     def __init__(self, prefix):
@@ -20,63 +22,77 @@ class CloudflareManager:
         current_lists = utils.get_current_lists(self.cache, self.list_name)
         current_rules = utils.get_current_rules(self.cache, self.rule_name)
 
-        chunked_domains = list(utils.split_domain_list(domains_to_block, 1000))
-        list_ids = []
+        # Mapping list_id to current domains in that list
+        list_id_to_domains = {}
+        for lst in current_lists:
+            items = utils.get_list_items_cached(self.cache, lst["id"])
+            list_id_to_domains[lst["id"]] = set(items)
 
-        for index, chunk in enumerate(chunked_domains, start=1):
-            list_name = f"{self.list_name} - {index:03d}"
-            
-            cgp_list = next((lst for lst in current_lists if lst["name"] == list_name), None)
+        # Mapping domain to its current list_id
+        domain_to_list_id = {domain: lst_id for lst_id, domains in list_id_to_domains.items() for domain in domains}
 
-            if cgp_list:
-                current_values = utils.get_list_items_cached(self.cache, cgp_list["id"])
-                remove_items = set(current_values) - set(chunk)
-                append_items = set(chunk) - set(current_values)
+        # Calculate remaining domains 
+        remaining_domains = set(domains_to_block) - set(domain_to_list_id.keys())
 
-                if not remove_items and not append_items:
-                    silent_error(f"Skipping list update: {cgp_list['name']}")
-                else:
-                    update_list(cgp_list["id"], remove_items, append_items)
-                    info(f"Updated list: {cgp_list['name']}")
-                list_ids.append(cgp_list["id"])
-            
-                self.cache["mapping"][cgp_list["id"]] = chunk
+        # Create a dictionary for list names to keep track of missing indexes
+        list_name_to_id = {lst["name"]: lst["id"] for lst in current_lists}
+        existing_indexes = sorted([int(name.split('-')[-1]) for name in list_name_to_id.keys()])
+
+        # Determine the needed indexes
+        all_indexes = set(range(1, max(existing_indexes + [(len(domains_to_block) + 999) // 1000]) + 1))
+        
+        # Process current lists and fill them with remaining domains
+        new_list_ids = []
+        for i in all_indexes:
+            list_name = f"{self.list_name} - {i:03d}"
+            if list_name in list_name_to_id:
+                list_id = list_name_to_id[list_name]
+                current_values = list_id_to_domains[list_id]
+                remove_items = current_values - set(domains_to_block)
+                chunk = current_values - remove_items
+
+                new_items = []
+                if len(chunk) < 1000:
+                    needed_items = 1000 - len(chunk)
+                    new_items = list(remaining_domains)[:needed_items]
+                    chunk.update(new_items)
+                    remaining_domains.difference_update(new_items)
+
+                if remove_items or new_items:
+                    update_list(list_id, remove_items, new_items)
+                    info(f"Updated list: {list_name}")
+                    self.cache["mapping"][list_id] = list(chunk)
+                
+                new_list_ids.append(list_id)
             else:
-                lst = create_list(list_name, chunk)
-                info(f"Created list: {lst['name']}")
-                list_ids.append(lst["id"])
+                # Create new lists for remaining domains
+                if remaining_domains:
+                    needed_items = min(1000, len(remaining_domains))
+                    new_items = list(remaining_domains)[:needed_items]
+                    remaining_domains.difference_update(new_items)
+                    lst = create_list(list_name, new_items)
+                    info(f"Created list: {lst['name']}")
+                    self.cache["lists"].append(lst)
+                    self.cache["mapping"][lst["id"]] = new_items
+                    new_list_ids.append(lst["id"])
 
-                self.cache["lists"].append(lst)
-                self.cache["mapping"][lst["id"]] = chunk
-
-        utils.save_cache(self.cache)
-
-        # Extract existing list IDs from current_rules for comparison
+        # Update the rule with the new list IDs
         cgp_rule = next((rule for rule in current_rules if rule["name"] == self.rule_name), None)
         cgp_list_ids = utils.extract_list_ids(cgp_rule)
 
         if cgp_rule:
-            if set(list_ids) == cgp_list_ids:
-                silent_error(f"Skipping rule update as list IDs are unchanged: {cgp_rule['name']}")
-            else:
-                rule = update_rule(self.rule_name, cgp_rule["id"], list_ids)
-                info(f"Updated rule {cgp_rule['name']}")
-                self.cache["rules"] = [rule]
+            if set(new_list_ids) != cgp_list_ids:
+                updated_rule = update_rule(self.rule_name, cgp_rule["id"], new_list_ids)
+                info(f"Updated rule {updated_rule['name']}")
+                self.cache["rules"] = [updated_rule]
+
         else:
-            rule = create_rule(self.rule_name, list_ids)
+            rule = create_rule(self.rule_name, new_list_ids)
             info(f"Created rule {rule['name']}")
             self.cache["rules"].append(rule)
-
-        # Delete excess lists
-        excess_lists = [lst for lst in current_lists if lst["id"] not in list_ids]
-        for lst in excess_lists:
-            delete_list(lst["id"])
-            info(f"Deleted excess list: {lst['name']}")
-            self.cache["lists"] = [item for item in self.cache["lists"] if item["id"] != lst["id"]]
-            if lst["id"] in self.cache["mapping"]:
-                del self.cache["mapping"][lst["id"]]
-
+        
         utils.save_cache(self.cache)
+
 
     def delete_resources(self):
         current_lists = utils.get_current_lists(self.cache, self.list_name)
@@ -88,15 +104,25 @@ class CloudflareManager:
             delete_rule(rule["id"])
             info(f"Deleted rule: {rule['name']}")
 
+            # Clear the rules cache after deletion
+            self.cache["rules"] = []
+            utils.save_cache(self.cache)
+
         # Delete lists with names that include prefix
         for lst in current_lists:
             delete_list(lst["id"])
             info(f"Deleted list: {lst['name']}")
+
+            # Remove the deleted list from the cache
             self.cache["lists"] = [item for item in self.cache["lists"] if item["id"] != lst["id"]]
+
+            # Remove the mapping for the deleted list from the cache
             if lst["id"] in self.cache["mapping"]:
                 del self.cache["mapping"][lst["id"]]
-            self.cache["rules"] = []
+
+            # Save updated cache
             utils.save_cache(self.cache)
+
 
 def main():
     parser = argparse.ArgumentParser(description="Cloudflare Manager Script")
@@ -112,6 +138,7 @@ def main():
         cloudflare_manager.delete_resources()
     else:
         error("Invalid action. Please choose either 'run' or 'leave'.")
+
 
 if __name__ == "__main__":
     main()
