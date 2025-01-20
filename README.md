@@ -2,6 +2,16 @@
 
 **[English](README.md)** | **[Việt Nam](docs/vi.md)**
 
+# New update 
+
+* Major update, you can run cron every hour, no need to worry about losing blocking effect, no damage to Cloudflare Gateway server 
+
+* You must delete the lists of other scripts.
+
+* Don't worry about the number of listings on Cloudflare Gateway, for example there are 132k domains but the number of listings can be 140
+
+* Maybe I will make another separate script to create white list
+
 # Pihole styled, but using Cloudflare Gateway
 `For Devs, Ops, and everyone who hates Ads.`
 
