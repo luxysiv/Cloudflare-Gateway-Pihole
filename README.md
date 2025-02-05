@@ -10,7 +10,7 @@
 
 * Don't worry about the number of listings on Cloudflare Gateway, for example there are 132k domains but the number of listings can be 140
 
-* Maybe I will make another separate script to create white list
+* To add a separate white list inviting visit [Cloudflare-Gateway-Allow](https://github.com/luxysiv/Cloudflare-Gateway-Allow)
 
 # Pihole styled, but using Cloudflare Gateway
 `For Devs, Ops, and everyone who hates Ads.`
