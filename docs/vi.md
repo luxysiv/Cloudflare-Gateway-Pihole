@@ -8,7 +8,7 @@
 
 * Đừng quan tâm đến số danh sách được tạo ra bởi script.
 
-* Có thể mình sẽ tạo script khác để cập nhật danh sách trắng...
+* Thêm danh sách trắng riêng ở [Cloudflare-Gateway-Allow](https://github.com/luxysiv/Cloudflare-Gateway-Allow)...
 
 ### Dành cho các bạn Việt Nam
 ---
