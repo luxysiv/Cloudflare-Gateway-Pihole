@@ -2,6 +2,8 @@
 
 ### Cập nhật mới
 
+* Nếu nhận được e-mail kêu bị dừng Github Action, đừng lo lắng, Github Action sẽ tiếp tục chạy mãi mãi.
+
 * Logic mới, sẽ cập nhật chính xác tên miền thay đổi, không gây thiệt hại lên máy chủ Cloudflare, có thể chạy cron hàng giờ
 
 * Các bạn phải xoá các danh sách được tải lên bởi script khác để tạo số danh sách trống
