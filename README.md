@@ -4,6 +4,8 @@
 
 # New update 
 
+* If you receive an e-mail that says GitHub Action will be stop, don't worry, GitHub Action will continue to run forever. 
+
 * Major update, you can run cron every hour, no need to worry about losing blocking effect, no damage to Cloudflare Gateway server 
 
 * You must delete the lists of other scripts.
