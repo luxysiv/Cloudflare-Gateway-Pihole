@@ -11,13 +11,14 @@ from functools import wraps
 from typing import Optional, Tuple
 from src import info, silent_error, error, CF_IDENTIFIER, CF_API_TOKEN
 
-
+# Custom Exceptions
 class HTTPException(Exception):
     pass
 
 class RateLimitException(HTTPException):
     pass
 
+# Cloudflare Gateway Request Function
 def cloudflare_gateway_request(
     method: str, endpoint: str,
     body: Optional[str] = None,
@@ -96,21 +97,37 @@ def wait_random_exponential(attempt_number, multiplier=1, max_wait=10):
 def retry_if_exception_type(exceptions):
     return lambda e: isinstance(e, exceptions)
 
+# Retry Decorator
 def retry(stop=None, wait=None, retry=None, after=None, before_sleep=None):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             attempt_number = 0
+            first_rate_limit_encountered = False  # Cờ để theo dõi lần đầu gặp 429
             while True:
                 try:
                     attempt_number += 1
                     return func(*args, **kwargs)
+                except RateLimitException as e:
+                    if not first_rate_limit_encountered:
+                        # First time meeting 429, delay 2 minutes
+                        first_rate_limit_encountered = True
+                        wait_time = 120
+                        info(f"Meet rate limit from Cloudflare. Sleeping for {wait_time} seconds.")
+                        time.sleep(wait_time)
+                    else:
+                        # Subsequent 429 encounters follow the old retry logic
+                        if stop and stop(e, attempt_number):
+                            raise
+                        if before_sleep:
+                            before_sleep({'attempt_number': attempt_number})
+                        wait_time = wait(attempt_number) if wait else 1
+                        time.sleep(wait_time)
                 except Exception as e:
                     if retry and not retry(e):
                         raise
                     if after:
                         after({'attempt_number': attempt_number, 'outcome': e})
-                    # Apply different stop conditions based on exception type
                     if stop and stop(e, attempt_number):
                         raise
                     if before_sleep:
@@ -138,6 +155,7 @@ retry_config = {
     )
 }
 
+# Rate Limiter Class
 class RateLimiter:
     def __init__(self, interval: float = 1):
         self.interval = interval
@@ -151,6 +169,7 @@ class RateLimiter:
             time.sleep(sleep_time)
         self.timestamp = time.time()
 
+# Rate Limited Request Decorator
 def rate_limited_request(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
