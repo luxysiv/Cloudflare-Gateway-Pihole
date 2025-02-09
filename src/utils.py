@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import http.client
 from src import ids_pattern, CACHE_FILE
