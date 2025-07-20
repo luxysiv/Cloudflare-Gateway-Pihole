@@ -4,7 +4,7 @@
 
 # New update 
 
-* If you receive an e-mail that says GitHub Action will be stop, don't worry, GitHub Action will continue to run forever. 
+* If you receive an email saying that the Github Action will be disabled, When it is disabled, you go to the Github Action and turn it on and it will work forever. 
 
 * Major update, you can run cron every hour, no need to worry about losing blocking effect, no damage to Cloudflare Gateway server 
 
