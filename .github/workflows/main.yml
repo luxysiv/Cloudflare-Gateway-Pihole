@@ -28,7 +28,7 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v5
         with:
-          python-version: 
+          python-version: '3.x'
         
       - name: Cache Data
         id: cache-cloudflare
