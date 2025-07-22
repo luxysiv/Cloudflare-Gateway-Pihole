@@ -21,18 +21,18 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@main
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           
       - name: Install Python
-        uses: actions/setup-python@main
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.11
+          python-version: 
         
       - name: Cache Data
         id: cache-cloudflare
-        uses: actions/cache@main
+        uses: actions/cache@v4
         with:
           path: cloudflare_cache.json
           key: ${{ runner.os }}-cloudflare-cache-${{ github.run_id }}
