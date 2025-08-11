@@ -1,4 +1,4 @@
-name: Add Rules to Cloudflare Gateway
+name: Add Rules
 on:
   push:
   schedule:
