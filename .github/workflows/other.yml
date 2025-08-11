@@ -1,6 +1,5 @@
 name: Delete Rules
 on:
-  schedule:
   workflow_dispatch:
 jobs:
   run:
