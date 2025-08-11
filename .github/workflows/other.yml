@@ -1,4 +1,4 @@
-name: Add Rules
+name: Delete Rules
 on:
   push:
   schedule:
