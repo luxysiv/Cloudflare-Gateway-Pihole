@@ -3,13 +3,13 @@ updates:
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
-      interval: "weekly" # 每週檢查一次
+      interval: "daily" # 每週檢查一次
     labels:
       - "dependencies"
       - "python"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
     labels:
       - "github_actions"
