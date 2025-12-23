@@ -3,7 +3,7 @@ updates:
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
-      interval: "daily" # 每週檢查一次
+      interval: "daily"
     labels:
       - "dependencies"
       - "python"
