@@ -143,7 +143,7 @@ def main():
     if args.action == "run":
         cloudflare_manager.update_resources()
         if utils.is_running_in_github_actions():
-            utils.delete_cache()
+            # utils.delete_cache()
     elif args.action == "leave":
         cloudflare_manager.delete_resources()
     else:
