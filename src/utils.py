@@ -97,6 +97,13 @@ def extract_list_ids(rule):
     return set(ids_pattern.findall(rule['traffic']))
 
 
+def delete_completed_workflows(completed_run_ids):
+    if completed_run_ids:
+        for run_id in completed_run_ids:
+            delete_url = f"/repos/{GithubAPI.GITHUB_REPOSITORY}/actions/runs/{run_id}"
+            GithubAPI.delete(delete_url)
+
+
 def get_latest_workflow_status():
     WORKFLOW_RUNS_URL = f"/repos/{GithubAPI.GITHUB_REPOSITORY}/actions/runs?per_page=5"
 
