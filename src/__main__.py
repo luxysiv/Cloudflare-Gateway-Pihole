@@ -140,6 +140,8 @@ def main():
     args = parser.parse_args()    
     cloudflare_manager = CloudflareManager(PREFIX)
     
+    if args.action == "run":
+        cloudflare_manager.update_resources()
     elif args.action == "leave":
         cloudflare_manager.delete_resources()
     else:
