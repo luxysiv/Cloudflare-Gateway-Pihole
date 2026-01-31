@@ -70,21 +70,33 @@ addEventListener('scheduled', event => {
 });
 
 async function handleScheduledEvent() {
+  // --- CONFIGURATION ---
   const GITHUB_TOKEN = 'YOUR_GITHUB_TOKEN_HERE';
+  const GITHUB_USER  = 'YOUR_USER_NAME';
+  const GITHUB_REPO  = 'YOUR_REPO_NAME';
+  const WORKFLOW_ID  = 'main.yml'; 
+  // ---------------------
+
+  const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/actions/workflows/${WORKFLOW_ID}/dispatches`;
+
   try {
-    const dispatchResponse = await fetch('https://api.github.com/repos/YOUR_USER_NAME/YOUR_REPO_NAME/actions/workflows/main.yml/dispatches', {
+    const dispatchResponse = await fetch(url, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${GITHUB_TOKEN}`,
         'Content-Type': 'application/json',
-        'User-Agent': 'Mozilla/5.0',
+        'User-Agent': 'Cloudflare-Worker-Trigger',
       },
       body: JSON.stringify({
         ref: 'main'
       }),
     });
 
-    if (!dispatchResponse.ok) throw new Error('Failed to dispatch workflow');
+    if (!dispatchResponse.ok) {
+      const errorText = await dispatchResponse.text();
+      throw new Error(`Status: ${dispatchResponse.status} - ${errorText}`);
+    }
+    console.log('Successfully dispatched GitHub Action');
   } catch (error) {
     console.error('Error handling scheduled event:', error);
   }
