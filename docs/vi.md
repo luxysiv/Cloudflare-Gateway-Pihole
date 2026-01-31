@@ -2,7 +2,7 @@
 
 ### Cập nhật mới
 
-* Nếu nhận được e-mail kêu bị dừng Github Action, đừng lo lắng, Github Action sẽ tiếp tục chạy mãi mãi hoặc [Cài thời gian script tự động chạy](#Cài thời gian script tự động chạy)
+* Nếu nhận được e-mail kêu bị dừng Github Action, đừng lo lắng, Github Action sẽ tiếp tục chạy mãi mãi hoặc [Cài thời gian script tự động chạy](#cai-thoi-gian-script-tu-dong-chay)
 
 * Logic mới, sẽ cập nhật chính xác tên miền thay đổi, không gây thiệt hại lên máy chủ Cloudflare, có thể chạy cron hàng giờ
 
