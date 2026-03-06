@@ -36,7 +36,9 @@ if not CF_API_TOKEN or not CF_IDENTIFIER or \
 ids_pattern = re.compile(r"\$([a-f0-9-]+)")
 ip_pattern = re.compile(r"^\d{1,3}(\.\d{1,3}){3,4}$")
 replace_pattern = re.compile(r"(^([0-9.]+|[0-9a-fA-F:.]+)\s+|^(\|\||@@\|\||\*\.|\*))")
-domain_pattern = re.compile(r"^(?!-)[a-zA-Z0-9-]{1,63}(?:\.(?!-)[a-zA-Z0-9-]{1,63})*$")
+domain_pattern = re.compile(
+r"^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)(?:\.(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?))*$"
+)
 
 # Logging functions
 def error(message):
