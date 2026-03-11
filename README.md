@@ -2,9 +2,22 @@
 
 **[English](README.md)** | **[Việt Nam](docs/vi.md)**
 
-# New update 
+# Schedule
 
-* If you receive an email saying that the Github Action will be disabled, When it is disabled, you go to the Github Action and turn it on and it will work forever or [Schedule](#Schedule)
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/luxysiv/cloudflare-gateway-pihole-trigger)
+
+| Variable | Description | Example |
+| :--- | :--- | :--- |
+| `GITHUB_TOKEN` | Your GitHub Personal Access Token (Need Workflow permission and no expiration) | `ghp_xxxxxxxxxxxx` |
+| `GITHUB_USER` | Your GitHub username | `luxysiv` |
+| `GITHUB_REPO` | The name of your repository | `Cloudflare-Gateway-Pihole` |
+| `WORKFLOW_ID` | The filename of your workflow | `main.yml` |
+
+* Opt for a private repository when deploying.
+
+* Once deployment is complete, you may remove the cloned repository.
+
+# New update 
 
 * Major update, you can run cron every hour, no need to worry about losing blocking effect, no damage to Cloudflare Gateway server 
 
@@ -59,50 +72,6 @@ Adguard = https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
   ```
 
 * You should add your ad list and whitelist to Action variables. If you update your fork, your custom list will not be lost.
-
-### Schedule
----
-> Due to a limited 2-month commitment from GitHub Actions, you can create and paste this code to run on Cloudflare Workers. Notice, GitHub Tokens generate with no expiration and workflow permission.
-
-```javascript
-addEventListener('scheduled', event => {
-  event.waitUntil(handleScheduledEvent());
-});
-
-async function handleScheduledEvent() {
-  // --- CONFIGURATION ---
-  const GITHUB_TOKEN = 'YOUR_GITHUB_TOKEN_HERE';
-  const GITHUB_USER  = 'YOUR_USER_NAME';
-  const GITHUB_REPO  = 'YOUR_REPO_NAME';
-  const WORKFLOW_ID  = 'main.yml'; 
-  // ---------------------
-
-  const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/actions/workflows/${WORKFLOW_ID}/dispatches`;
-
-  try {
-    const dispatchResponse = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${GITHUB_TOKEN}`,
-        'Content-Type': 'application/json',
-        'User-Agent': 'Cloudflare-Worker-Trigger',
-      },
-      body: JSON.stringify({
-        ref: 'main'
-      }),
-    });
-
-    if (!dispatchResponse.ok) {
-      const errorText = await dispatchResponse.text();
-      throw new Error(`Status: ${dispatchResponse.status} - ${errorText}`);
-    }
-    console.log('Successfully dispatched GitHub Action');
-  } catch (error) {
-    console.error('Error handling scheduled event:', error);
-  }
-}
-```
->> Remember to set up Cloudflare Workers triggers.
 
 
 ### How to set this up?
